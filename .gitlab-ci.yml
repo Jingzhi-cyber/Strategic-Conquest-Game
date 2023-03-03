@@ -23,8 +23,6 @@ test:
   tags:
      - ece651
   stage: test
-  dependencies:
-    - build
   script: scripts/run-tests-in-docker.sh
   artifacts:
     paths:
@@ -47,8 +45,6 @@ deploy:
   tags:
     - ece651
   stage: deploy
-  dependencies:
-    - test
   script: ./scripts/redeploy.sh
 
 test-deployment:
