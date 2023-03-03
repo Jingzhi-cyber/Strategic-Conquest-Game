@@ -12,7 +12,7 @@ do
         echo "Giving up after 20 attempts to connect!"
         exit 1
     fi
-    x=`netcat localhost 1651 < /dev/null`
+    x=`netcat localhost 6651 < /dev/null`
     let count=count+1
 done
 
