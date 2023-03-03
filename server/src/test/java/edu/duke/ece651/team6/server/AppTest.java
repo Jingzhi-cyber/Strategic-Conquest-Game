@@ -7,7 +7,7 @@ class AppTest {
     @Test
     void test_GetMessage() {
       App a = new App();
-      assertEquals("Hello from the server for teamX", a.getMessage());
+      assertEquals("Hello from the server for team6", a.getMessage());
     }
 }
 
