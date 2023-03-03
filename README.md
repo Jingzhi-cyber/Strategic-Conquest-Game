@@ -17,3 +17,7 @@ This project includes CI/CD using Duke's Gitlab and Duke's VM.
 netcat -N -w 1 vcm-30756.vm.duke.edu 6651
 ```
 
+### Some useful tips during development
+```bash
+git push -o ci.skip # not run any CI pipelines on this push
+```
