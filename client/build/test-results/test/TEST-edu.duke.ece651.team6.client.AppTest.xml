@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="edu.duke.ece651.team6.client.AppTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-03-03T02:34:39" hostname="wumians-MacBook-Air.local" time="0.038">
+<testsuite name="edu.duke.ece651.team6.client.AppTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-03-03T20:51:36" hostname="wumians-MacBook-Air.local" time="0.132">
   <properties/>
-  <testcase name="test_GetMessage()" classname="edu.duke.ece651.team6.client.AppTest" time="0.038"/>
+  <testcase name="test_GetMessage()" classname="edu.duke.ece651.team6.client.AppTest" time="0.132"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
