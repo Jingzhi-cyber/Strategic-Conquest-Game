@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1677876895353" clover="4.4.1">
-   <project name="server" timestamp="1677876894761">
+<coverage generated="1677880514941" clover="4.4.1">
+   <project name="server" timestamp="1677880514481">
       <metrics coveredelements="2" complexity="2" loc="17" methods="2" classes="1" statements="3" packages="1" coveredconditionals="0" coveredmethods="1" elements="5" ncloc="11" files="1" conditionals="0" coveredstatements="1"/>
       <package name="edu.duke.ece651.team6.server">
          <metrics coveredelements="2" complexity="2" loc="17" methods="2" classes="1" statements="3" coveredconditionals="0" coveredmethods="1" elements="5" ncloc="11" files="1" conditionals="0" coveredstatements="1"/>
@@ -17,16 +17,16 @@
          </file>
       </package>
    </project>
-   <testproject name="server" timestamp="1677876894761">
+   <testproject name="server" timestamp="1677880514481">
       <metrics coveredelements="3" complexity="1" loc="13" methods="1" classes="1" statements="2" packages="1" coveredconditionals="0" coveredmethods="1" elements="3" ncloc="10" files="1" conditionals="0" coveredstatements="2"/>
       <package name="edu.duke.ece651.team6.server">
          <metrics coveredelements="3" complexity="1" loc="13" methods="1" classes="1" statements="2" coveredconditionals="0" coveredmethods="1" elements="3" ncloc="10" files="1" conditionals="0" coveredstatements="2"/>
          <file path="/Users/wumian/Documents/Spring2023Courses/ECE651SoftwareEngineering/gitlab/ece651-spr23-team6-risc/server/src/test/java/edu/duke/ece651/team6/server/AppTest.java" name="AppTest.java">
             <metrics coveredelements="3" coveredconditionals="0" complexity="1" loc="13" coveredmethods="1" methods="1" elements="3" classes="1" ncloc="10" statements="2" conditionals="0" coveredstatements="2"/>
             <class name="AppTest">
-               <metrics coveredelements="3" complexity="1" methods="1" testruns="1" statements="2" coveredconditionals="0" coveredmethods="1" elements="3" testfailures="0" testduration="0.009" conditionals="0" coveredstatements="2" testpasses="1"/>
+               <metrics coveredelements="3" complexity="1" methods="1" testruns="1" statements="2" coveredconditionals="0" coveredmethods="1" elements="3" testfailures="0" testduration="0.007" conditionals="0" coveredstatements="2" testpasses="1"/>
             </class>
-            <line complexity="1" visibility="package" signature="test_GetMessage() : void" num="7" testsuccess="true" count="1" testduration="0.009" type="method"/>
+            <line complexity="1" visibility="package" signature="test_GetMessage() : void" num="7" testsuccess="true" count="1" testduration="0.007" type="method"/>
             <line num="9" count="1" type="stmt"/>
             <line num="10" count="1" type="stmt"/>
          </file>

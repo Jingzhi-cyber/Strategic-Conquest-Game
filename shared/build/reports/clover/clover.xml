@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1677880518007" clover="4.4.1">
+   <project name="shared" timestamp="1677880517537">
+      <metrics coveredelements="2" complexity="1" loc="7" methods="1" classes="1" statements="1" packages="1" coveredconditionals="0" coveredmethods="1" elements="2" ncloc="6" files="1" conditionals="0" coveredstatements="1"/>
+      <package name="edu.duke.ece651.team6.shared">
+         <metrics coveredelements="2" complexity="1" loc="7" methods="1" classes="1" statements="1" coveredconditionals="0" coveredmethods="1" elements="2" ncloc="6" files="1" conditionals="0" coveredstatements="1"/>
+         <file path="/Users/wumian/Documents/Spring2023Courses/ECE651SoftwareEngineering/gitlab/ece651-spr23-team6-risc/shared/src/main/java/edu/duke/ece651/team6/shared/MyName.java" name="MyName.java">
+            <metrics coveredelements="2" coveredconditionals="0" complexity="1" loc="7" coveredmethods="1" methods="1" elements="2" classes="1" ncloc="6" statements="1" conditionals="0" coveredstatements="1"/>
+            <class name="MyName">
+               <metrics coveredelements="2" coveredconditionals="0" complexity="1" coveredmethods="1" methods="1" elements="2" statements="1" conditionals="0" coveredstatements="1"/>
+            </class>
+            <line complexity="1" visibility="public" signature="getName() : String" num="4" count="1" type="method"/>
+            <line num="5" count="1" type="stmt"/>
+         </file>
+      </package>
+   </project>
+   <testproject name="shared" timestamp="1677880517537">
+      <metrics coveredelements="2" complexity="1" loc="13" methods="1" classes="1" statements="1" packages="1" coveredconditionals="0" coveredmethods="1" elements="2" ncloc="9" files="1" conditionals="0" coveredstatements="1"/>
+      <package name="edu.duke.ece651.team6.shared">
+         <metrics coveredelements="2" complexity="1" loc="13" methods="1" classes="1" statements="1" coveredconditionals="0" coveredmethods="1" elements="2" ncloc="9" files="1" conditionals="0" coveredstatements="1"/>
+         <file path="/Users/wumian/Documents/Spring2023Courses/ECE651SoftwareEngineering/gitlab/ece651-spr23-team6-risc/shared/src/test/java/edu/duke/ece651/team6/shared/MyNameTest.java" name="MyNameTest.java">
+            <metrics coveredelements="2" coveredconditionals="0" complexity="1" loc="13" coveredmethods="1" methods="1" elements="2" classes="1" ncloc="9" statements="1" conditionals="0" coveredstatements="1"/>
+            <class name="MyNameTest">
+               <metrics coveredelements="2" complexity="1" methods="1" testruns="1" statements="1" coveredconditionals="0" coveredmethods="1" elements="2" testfailures="0" testduration="0.017" conditionals="0" coveredstatements="1" testpasses="1"/>
+            </class>
+            <line complexity="1" visibility="public" signature="test_getName() : void" num="8" testsuccess="true" count="1" testduration="0.017" type="method"/>
+            <line num="10" count="1" type="stmt"/>
+         </file>
+      </package>
+   </testproject>
+</coverage>

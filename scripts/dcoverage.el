@@ -49,7 +49,7 @@
   :type 'color)
 
 
-(defcustom dcoverage-run-clover-function (lambda() (gradle-run "cloverGenerateReport"))
+(defcustom dcoverage-run-clover-function (lambda() (gradle-run "clean cloverGenerateReport"))
   "The elisp function to execute in order to run clover to generate test coverage results."
   :tag "dcoverage clover execution function"
   :group 'dcoverage
@@ -74,8 +74,8 @@
   :type 'string)
 
 (defun dcoverage-find-project-root ()
-  "Find the project root, by looking for gradelw file."
-  (let ((dir (locate-dominating-file default-directory "gradlew")))
+  "Find the project root, by looking for build.gradle file."
+  (let ((dir (locate-dominating-file default-directory "build.gradle")))
     (if dir dir default-directory)))
 
 (defun dcoverage-default-find-cov-file ()
@@ -432,4 +432,7 @@
 
 (provide 'dcoverage)
 ;;; dcoverage.el ends here
+
+
+
 
