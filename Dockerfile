@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-MAINTAINER Mian Wu "mian.wu515@duke.edu"
+MAINTAINER Drew Hilton "adhilton@ee.duke.edu"
 
 USER root
 
