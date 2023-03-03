@@ -5,6 +5,8 @@ The code in this project is for a web service - RISC board game
 
 This project includes CI/CD using Duke's Gitlab and Duke's VM.
 
+Maintainer: ece651-spr23-team6
+
 ![pipeline](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/badges/master/pipeline.svg)
 ![coverage](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/badges/master/coverage.svg?job=test)
 
