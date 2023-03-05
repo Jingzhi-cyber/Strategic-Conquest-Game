@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="edu.duke.ece651.team6.server.AppTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-03-03T23:40:24" hostname="wumians-MacBook-Air.local" time="0.112">
-  <properties/>
-  <testcase name="test_GetMessage()" classname="edu.duke.ece651.team6.server.AppTest" time="0.112"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
