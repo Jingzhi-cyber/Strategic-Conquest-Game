@@ -27,3 +27,5 @@ replay_pid*
 .vscode/
 */build/
 build/
+*/.project
+*/.settings
