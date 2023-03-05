@@ -13,6 +13,7 @@ do
         exit 1
     fi
     x=`netcat localhost 1651 < /dev/null`
+    sleep 5
     let count=count+1
 done
 
