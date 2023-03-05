@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="edu.duke.ece651.team6.server.RiscMasterTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-03-05T00:43:07" hostname="vcm-30760.vm.duke.edu" time="0.002">
-  <properties/>
-  <testcase name="testCreatePlayerMapInfo()" classname="edu.duke.ece651.team6.server.RiscMasterTest" time="0.002"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
