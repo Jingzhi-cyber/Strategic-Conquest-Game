@@ -7,8 +7,9 @@ This project includes CI/CD using Duke's Gitlab and Duke's VM.
 
 Maintainer: ece651-spr23-team6
 
-![pipeline](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/badges/master/pipeline.svg)
-![coverage](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/badges/master/coverage.svg?job=test)
+[![pipeline status](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/badges/main/pipeline.svg)](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/-/commits/main)
+
+[![coverage report](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/badges/main/coverage.svg)](https://gitlab.oit.duke.edu/mw515/ece651-spr23-team6-risc/-/commits/main)
 
 [Detailed coverage](https://mw515.pages.oit.duke.edu/ece651-spr23-team6-risc/dashboard.html)
 
