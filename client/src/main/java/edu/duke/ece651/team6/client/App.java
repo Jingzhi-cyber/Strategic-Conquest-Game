@@ -3,15 +3,47 @@
  */
 package edu.duke.ece651.team6.client;
 
-import edu.duke.ece651.team6.shared.MyName;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
+import edu.duke.ece651.team6.shared.MyName;
+import edu.duke.ece651.team6.shared.TestMap;
 
 public class App {
+
+  // Takes an Inputstream and transfer its bytes into a string, then return the
+  // string
+  // private String getStringFromIS(InputStream is) throws IOException {
+  // byte[] bytes = new byte[0];
+  // bytes = new byte[is.available()];
+  // is.read(bytes);
+  // return new String(bytes);
+  // }
+
   public String getMessage() {
-    return "Hello from the client for "+ MyName.getName();
+    return "Hello from the client for " + MyName.getName();
   }
-  public static void main(String[] args) {
+
+  public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
     App a = new App();
     System.out.println(a.getMessage());
+
+    Client client = new Client("localhost", 4444); // create a client obejct and connect it to the server
+
+    String sendMessage = "Hi! I want to play the game!";
+
+    client.sendObject(sendMessage); // send a string object to server
+
+    String recvMessage = (String) client.recvObject(); // receive an object from server and cast it to a string
+    System.out.println("From server: " + recvMessage);
+
+    TestMap recvMap = (TestMap) client.recvObject(); // receive an object from server and cast it to a mao
+    System.out.println(recvMap.getName());
+
+    TestMap sendMap = new TestMap("From player: hello server, this is the updated map");
+
+    client.sendObject(sendMap); // send a map object to server
+
+    client.closeSocket();
   }
 }
