@@ -3,15 +3,53 @@
  */
 package edu.duke.ece651.team6.server;
 
-import edu.duke.ece651.team6.shared.MyName;
+import java.io.IOException;
+import java.net.Socket;
 
+import edu.duke.ece651.team6.shared.MyName;
+import edu.duke.ece651.team6.shared.TestMap;
 
 public class App {
+
+  // Takes an Inputstream and transfer its bytes into a string, then return the
+  // string
+  // private String getStringFromIS(InputStream is) throws IOException {
+  // byte[] bytes = new byte[0];
+  // bytes = new byte[is.available()];
+  // is.read(bytes);
+  // return new String(bytes);
+  // }
+
   public String getMessage() {
-    return "Hello from the server for "+ MyName.getName();
+    return "Hello from the server for " + MyName.getName();
   }
-  public static void main(String[] args) {
+
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     App a = new App();
     System.out.println(a.getMessage());
+
+    Server myServer = new Server(4444); // Create server object, bind it to listen to port 4444
+
+    System.out.println("Waiting for one player...");
+    Socket connectedPlayerOne = myServer.accept(); // Wait for player 1 to connect
+
+    String recvMessage = (String) myServer.recvObject(connectedPlayerOne); // receive an object from player and cast it
+                                                                           // to a string
+    System.out.println("From player: " + recvMessage);
+
+    String sendMessage = "Welcome to play this game, player!";
+
+    myServer.sendObject(connectedPlayerOne, sendMessage); // send the message string to player
+
+    TestMap toSend = new TestMap("From server: this is your map!");
+    myServer.sendObject(connectedPlayerOne, toSend); // send a map object to player
+
+    TestMap recvMap = (TestMap) myServer.recvObject(connectedPlayerOne); // receive an object from player and cast it to
+                                                                         // a map
+    System.out.println(recvMap.getName());
+
+    myServer.closeClientSocket(connectedPlayerOne);
+
+    myServer.closeServerSocket();
   }
 }
