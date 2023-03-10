@@ -13,7 +13,7 @@ plugins {
 
 application {
     // Define the main class for the application.
-    mainClassName = 'edu.duke.ece651.team6.client.App'
+    mainClassName = 'edu.duke.ece651.team6.client.HumanPlayer'
     // mainClassName = 'edu.duke.ece651.team6.client.HumanPlayer'
 
 }
