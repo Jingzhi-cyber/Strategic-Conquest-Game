@@ -9,12 +9,12 @@ public class TerritoryTest {
         Territory t1 = new Territory();
         assertEquals("Default Territory", t1.getName());
         assertEquals(null, t1.getOwner());
-        assertEquals(0, t1.getUnits());
+        assertEquals(0, t1.getNumUnits());
 
         Territory t2 = new Territory("Hogwarts", "Player1", 5);
         assertEquals("Hogwarts", t2.getName());
         assertEquals("Player1", t2.getOwner());
-        assertEquals(5, t2.getUnits());
+        assertEquals(5, t2.getNumUnits());
 
         assertThrows(IllegalArgumentException.class, () -> new Territory("illegal", "player", -1));
 
@@ -28,5 +28,35 @@ public class TerritoryTest {
         assertNotEquals(t2.hashCode(), t4.hashCode());
 
         assertEquals("(name: Hogwarts, owner: Player1, units: 5)", t2.toString());
+    }
+
+    @Test
+    void testMoveTo() {
+        Territory t1 = new Territory("1", "1", 5);
+        Territory t2 = new Territory("2", "2", 5);
+        assertThrows(IllegalArgumentException.class, () -> t1.moveTo(t2, 2));
+        Territory t3 = new Territory("3", "1", 5);
+        assertThrows(IllegalArgumentException.class, () -> t1.moveTo(t3, 6));
+        t1.moveTo(t3, 3);
+        t3.update();
+        assertEquals(2, t1.getNumUnits());
+        assertEquals(8, t3.getNumUnits());
+    }
+
+    @Test
+    void testAttack() {
+        Territory t1 = new Territory("1", "1", 100);
+        assertThrows(IllegalArgumentException.class, () -> t1.attack(t1, 5));
+        Territory t2 = new Territory("2", "2", 1);
+        assertThrows(IllegalArgumentException.class, () -> t1.attack(t2, 0));
+        t1.attack(t2, 80);
+        Territory t3 = new Territory("3", "3", 10);
+        t3.attack(t2, 1);
+        t2.update();
+        assertEquals("1", t2.getOwner());
+        Territory t4 = new Territory("4", "4", 0);
+        t1.attack(t4, 5);
+        t4.update();
+        assertEquals("1", t4.getOwner());
     }
 }

@@ -22,7 +22,7 @@ public class MapTextView extends MapView {
         StringBuilder ans = new StringBuilder("-------------\n");
         Set<Territory> territories = playerMapInfo.getTerritories();
         for (Territory t : territories) {
-            ans.append(t.getUnits() + " units in " + t.getName() + " ");
+            ans.append(t.getNumUnits() + " units in " + t.getName() + " ");
             HashSet<String> neighbors = playerMapInfo.getTerritoryNeighbors(t);
             ans.append("(next to: ");
             for (String neighbor : neighbors) {
