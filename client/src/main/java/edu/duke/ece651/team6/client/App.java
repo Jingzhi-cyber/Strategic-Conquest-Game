@@ -25,25 +25,25 @@ public class App {
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
-    App a = new App();
-    System.out.println(a.getMessage());
+    // App a = new App();
+    // System.out.println(a.getMessage());
 
-    Client client = new Client("localhost", 4444); // create a client obejct and connect it to the server
+    // Client client = new Client("localhost", 4444); // create a client obejct and connect it to the server
 
-    String sendMessage = "Hi! I want to play the game!";
+    // String sendMessage = "Hi! I want to play the game!";
 
-    client.sendObject(sendMessage); // send a string object to server
+    // client.sendObject(sendMessage); // send a string object to server
 
-    String recvMessage = (String) client.recvObject(); // receive an object from server and cast it to a string
-    System.out.println("From server: " + recvMessage);
+    // String recvMessage = (String) client.recvObject(); // receive an object from server and cast it to a string
+    // System.out.println("From server: " + recvMessage);
 
-    TestMap recvMap = (TestMap) client.recvObject(); // receive an object from server and cast it to a mao
-    System.out.println(recvMap.getName());
+    // TestMap recvMap = (TestMap) client.recvObject(); // receive an object from server and cast it to a mao
+    // System.out.println(recvMap.getName());
 
-    TestMap sendMap = new TestMap("From player: hello server, this is the updated map");
+    // TestMap sendMap = new TestMap("From player: hello server, this is the updated map");
 
-    client.sendObject(sendMap); // send a map object to server
+    // client.sendObject(sendMap); // send a map object to server
 
-    client.closeSocket();
+    // client.closeSocket();
   }
 }
