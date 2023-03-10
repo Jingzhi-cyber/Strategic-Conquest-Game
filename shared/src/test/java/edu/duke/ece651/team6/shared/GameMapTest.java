@@ -7,8 +7,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import edu.duke.ece651.team6.shared.GameMap;
-import edu.duke.ece651.team6.shared.Territory;
 
 public class GameMapTest {
     @Test
