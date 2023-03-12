@@ -4,14 +4,25 @@ import java.util.Set;
 import java.util.HashMap;
 
 public class PlayerMapInfo implements java.io.Serializable {
-    private final HashMap<Territory, HashSet<String>> playerMapInfo;
+    private final int playerId;
+    private final HashMap<Territory, HashSet<String>> playerMap;
 
     /**
-     * Construct a PlayerMapInfo with HashMap<Territory, HashSet<String>>
-     * @param playerMapInfo
+     * Construct a PlayerMapInfo with the player's id and territories owned by the player, and their neighbors
+     * @param playerId
+     * @param playerMap HashMap - Key: territory Value: the name of its neighbors
      */
-    public PlayerMapInfo(HashMap<Territory, HashSet<String>> playerMapInfo) {
-        this.playerMapInfo = playerMapInfo;
+    public PlayerMapInfo(int playerId, HashMap<Territory, HashSet<String>> playerMap) {
+        this.playerId = playerId;
+        this.playerMap = playerMap;
+    }
+
+    /**
+     * Get player name
+     * @return playerName
+     */
+    public int getPlayerId() {
+        return playerId;
     }
 
     /**
@@ -19,7 +30,7 @@ public class PlayerMapInfo implements java.io.Serializable {
      * @return Set of the Territories 
      */
     public Set<Territory> getTerritories() {
-        return playerMapInfo.keySet();
+        return playerMap.keySet();
     }
 
     /**
@@ -28,6 +39,6 @@ public class PlayerMapInfo implements java.io.Serializable {
      * @return HashSet of Strings that represents the neighbors' name
      */
     public HashSet<String> getTerritoryNeighbors(Territory t) {
-        return playerMapInfo.get(t);
+        return playerMap.get(t);
     }
 }

@@ -2,7 +2,7 @@ package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
+import edu.duke.ece651.team6.shared.GlobalMapInfo;
 
 public class HumanPlayer implements Player {
     private final Client client;
@@ -13,27 +13,18 @@ public class HumanPlayer implements Player {
     @Override
     public boolean init() throws IOException, ClassNotFoundException {
         Object o = client.recvObject();
-        PlayerMapInfo playerMapInfo = (PlayerMapInfo)o;
-        MapTextView mtv = new MapTextView(playerMapInfo);
+        GlobalMapInfo globalMapInfo = (GlobalMapInfo)o;
+        MapTextView mtv = new MapTextView(globalMapInfo);
         System.out.println(mtv.display());
         return true;
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'init'");
     }
 
     @Override
     public void placeUnit() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'placeUnit'");
     }
 
     @Override
     public void playOneTurn() {
-        // PlayerMapInfo playerMapInfo = client.recv();
-        // MapView mapView = new MapTextView(playerMapInfo);
-        // mapView.display();
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'playOneTurn'");
     }
     
     public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {

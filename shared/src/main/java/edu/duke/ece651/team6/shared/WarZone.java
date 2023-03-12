@@ -18,7 +18,7 @@ public abstract class WarZone {
      */
     public void add(Army army) {
         for (Army a : armies) {
-            if (a.getOwner().equals(army.getOwner())) {
+            if (a.getOwnerId() == army.getOwnerId()) {
                 a.mergeArmy(army);
                 return;
             }

@@ -4,12 +4,12 @@ package edu.duke.ece651.team6.shared;
  * This class represents a unit that can move or attack. It consists of a group of Units, and belongs to a Player.
  */
 public class Army {
-    private final String owner;
+    private final int ownerId;
     //private final List<Unit> list;
     private int numUnits;
 
-    public Army(String owner, int numUnits) {
-        this.owner = owner;
+    public Army(int ownerId, int numUnits) {
+        this.ownerId = ownerId;
         if (numUnits <= 0) {
             throw new IllegalArgumentException("Number of units in an army must be greater than 0!");
         }
@@ -55,6 +55,6 @@ public class Army {
         return temp;
     }
 
-    public String getOwner() { return owner; }
+    public int getOwnerId() { return ownerId; }
 
 }

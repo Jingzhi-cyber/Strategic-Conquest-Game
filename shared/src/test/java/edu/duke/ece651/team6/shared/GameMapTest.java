@@ -12,9 +12,9 @@ public class GameMapTest {
     @Test
     public void testBasicFunc() {
         HashMap<Territory, HashSet<Territory>> adjList = new HashMap<Territory, HashSet<Territory>>();
-        Territory t1 = new Territory("Hogwarts", "Player1", 5);
-        Territory t2 = new Territory("Narnia", "Player2", 3);
-        Territory t3 = new Territory("Midkemia", "Player3", 1);
+        Territory t1 = new Territory("Hogwarts", 1, 5);
+        Territory t2 = new Territory("Narnia", 2, 3);
+        Territory t3 = new Territory("Midkemia", 3, 1);
         HashSet<Territory> n1 = new HashSet<Territory>();
         n1.add(t2);
         n1.add(t3);
@@ -32,11 +32,11 @@ public class GameMapTest {
         assertEquals(true, territories.contains(t2));
         assertEquals(true, territories.contains(t3));
 
-        HashSet<Territory> neighbor1 = gm.getNeighborSet("Hogwarts");
+        HashSet<Territory> neighbor1 = gm.getNeighborSet(t1);
         assertEquals(true, neighbor1.contains(t2));
         assertEquals(true, neighbor1.contains(t3));
 
-        HashSet<Territory> emptyNeighbor = gm.getNeighborSet("nonExist");
+        HashSet<Territory> emptyNeighbor = gm.getNeighborSet(new Territory("not exist", 3, 1));
         assertEquals(true, emptyNeighbor.isEmpty());
     }
 }

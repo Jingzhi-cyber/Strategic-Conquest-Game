@@ -1,15 +1,16 @@
 package edu.duke.ece651.team6.client;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
+import edu.duke.ece651.team6.shared.GlobalMapInfo;
+
 
 public abstract class MapView {
-    protected PlayerMapInfo playerMapInfo;
+    protected final GlobalMapInfo globalMapInfo;
 
     /**
      * Construct MapView with a PlayerMapInfo
-     * @param playerMapInfo
+     * @param globalMapInfo
      */
-    public MapView(PlayerMapInfo playerMapInfo) {
-        this.playerMapInfo = playerMapInfo;
+    public MapView(GlobalMapInfo globalMapInfo) {
+        this.globalMapInfo = globalMapInfo;
     }
 
     /**

@@ -29,12 +29,12 @@ public class GameMap {
 
     /**
      * Get the neighbors of a Territory
-     * @param territoryName the name of territory
+     * @param territory a territory
      * @return the Set of all the neighbors of the territory
      */
-    public HashSet<Territory> getNeighborSet(String territoryName) {
+    public HashSet<Territory> getNeighborSet(Territory territory) {
         for (Territory t : adjList.keySet()) {
-            if (t.getName().equals(territoryName)) {
+            if (t.equals(territory)) {
                 return adjList.get(t);
             }
         }

@@ -3,8 +3,7 @@ package edu.duke.ece651.team6.shared;
 
 public class Territory implements java.io.Serializable {
     private final String name;
-    // FIXME: owner should be a Player class
-    private String owner;
+    private int ownerId;
     private int numUnits;
     private WarZone warZone;
     private boolean underWar;
@@ -14,7 +13,7 @@ public class Territory implements java.io.Serializable {
      */
     public Territory() {
         this.name = "Default Territory";
-        this.owner = null;
+        this.ownerId = -1;
         this.numUnits = 0;
         warZone = null;
         underWar = false;
@@ -26,12 +25,12 @@ public class Territory implements java.io.Serializable {
      * @param owner the owner of territory
      * @param units the number of units on the territory
      */
-    public Territory(String name, String owner, int units) {
+    public Territory(String name, int ownerId, int units) {
         this.name = name;
         if (units < 0) {
             throw new IllegalArgumentException("Territory's unit must be non-negative but is " + units);
         }
-        this.owner = owner;
+        this.ownerId = ownerId;
         this.numUnits = units;
         warZone = null;
         underWar = false;
@@ -49,8 +48,8 @@ public class Territory implements java.io.Serializable {
      * Get the territory's owner
      * @return the owner
      */
-    public String getOwner() {
-        return this.owner;
+    public int getOwnerId() {
+        return this.ownerId;
     }
 
     /**
@@ -70,7 +69,7 @@ public class Territory implements java.io.Serializable {
         if (numUnits > this.numUnits) {
             throw new IllegalArgumentException("Cannot dispatch required number of units!");
         }
-        Army army = new Army(owner, numUnits);
+        Army army = new Army(ownerId, numUnits);
         this.numUnits -= numUnits;
         return army;
     }
@@ -84,7 +83,7 @@ public class Territory implements java.io.Serializable {
      */
     protected void absorbArmy(Army army) {
         if (numUnits == 0) {
-            owner = army.getOwner();
+            ownerId = army.getOwnerId();
             numUnits = army.getAllUnits();
         } else {
             numUnits += army.getAllUnits();
@@ -114,7 +113,7 @@ public class Territory implements java.io.Serializable {
      * @param numUnits
      */
     public void moveTo(Territory dest, int numUnits) {
-        if (!owner.equals(dest.getOwner())) {
+        if (ownerId != dest.getOwnerId()) {
             throw new IllegalArgumentException("Cannot move to a different player's territory!");
         }
         dest.absorbArmy(dispatchArmy(numUnits));
@@ -128,7 +127,7 @@ public class Territory implements java.io.Serializable {
      * @param numUnits number of Units of this attack.
      */
     public void attack(Territory target, int numUnits) {
-        if (owner.equals(target.getOwner())) {
+        if (ownerId == target.getOwnerId()) {
             throw new IllegalArgumentException("Player cannot attack her own territory!");
         }
         if (numUnits <= 0) {
@@ -166,7 +165,7 @@ public class Territory implements java.io.Serializable {
      */
     @Override
     public String toString() {
-        return "(name: " + name + ", owner: " + owner.toString() + ", units: " + numUnits + ")";
+        return "(name: " + name + ", ownerId: " + ownerId + ", units: " + numUnits + ")";
     }
 
     /**
