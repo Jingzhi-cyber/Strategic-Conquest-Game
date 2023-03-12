@@ -3,6 +3,9 @@ package edu.duke.ece651.team6.shared;
 import java.util.Deque;
 import java.util.LinkedList;
 
+/**
+ * An abstract class that can represent a war happens on a territory.
+ */
 public abstract class WarZone {
     protected final Territory territory;
     protected Deque<Army> armies;
@@ -26,6 +29,9 @@ public abstract class WarZone {
         armies.add(army);
     }
 
+    /**
+     * Start the war, according to different rules.
+     */
     public abstract void startWar();
     
 }

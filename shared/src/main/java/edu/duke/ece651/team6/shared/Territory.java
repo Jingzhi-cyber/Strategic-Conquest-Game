@@ -8,11 +8,15 @@ public class Territory implements java.io.Serializable {
     private WarZone warZone;
     private boolean underWar;
 
-    /**
-     * Constructs a territory with default name, that does not have owner and any units
-     */
     public Territory() {
-        this.name = "Default Territory";
+        this("Default Territory");
+    }
+
+    /**
+     * Constructs a territory with a name, that does not have owner and any units
+     */
+    public Territory(String name) {
+        this.name = name;
         this.ownerId = -1;
         this.numUnits = 0;
         warZone = null;
