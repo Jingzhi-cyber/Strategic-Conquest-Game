@@ -13,29 +13,28 @@ import org.junit.jupiter.api.Test;
 public class ArmyTest {
     @Test
     void testArmy() {
-        assertThrows(IllegalArgumentException.class, () -> new Army("0", 0));
-        assertThrows(IllegalArgumentException.class, () -> new Army("0", -1));
-        String owner = "hello";
-        Army army = new Army(owner, 5);
-        assertSame(owner, army.getOwner());
+        assertThrows(IllegalArgumentException.class, () -> new Army(0, 0));
+        assertThrows(IllegalArgumentException.class, () -> new Army(0, -1));
+        Army army = new Army(0, 5);
+        assertSame(0, army.getOwnerId());
     }
 
     @Test
     void testGetAllUnits() {
-        Army army = new Army("0", 2);
+        Army army = new Army(0, 2);
         assertEquals(2, army.getAllUnits());
         assertTrue(army.hasLost());
     }
 
     @Test
     void testGetPlayerID() {
-        Army army = new Army("0", 1);
-        assertEquals("0", army.getOwner());
+        Army army = new Army(0, 1);
+        assertEquals(0, army.getOwnerId());
     }
 
     @Test
     void testHasLost() {
-        Army army = new Army("0", 1);
+        Army army = new Army(0, 1);
         assertFalse(army.hasLost());
         army.loseOneTurn();
         assertTrue(army.hasLost());
@@ -43,15 +42,15 @@ public class ArmyTest {
 
     @Test
     void testLoss() {
-        Army army = new Army("0", 1);
+        Army army = new Army(0, 1);
         assertDoesNotThrow(() -> army.loseOneTurn());
         assertThrows(RuntimeException.class, () -> army.loseOneTurn());
     }
 
     @Test
     void testMergeArmy() {
-        Army army1 = new Army("1", 1);
-        Army army2 = new Army("2", 1);
+        Army army1 = new Army(0, 1);
+        Army army2 = new Army(0, 1);
         army1.loseOneTurn();
         assertTrue(army1.hasLost());
         army1.mergeArmy(army2);

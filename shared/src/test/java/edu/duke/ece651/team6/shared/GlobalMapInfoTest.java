@@ -1,13 +1,13 @@
-package edu.duke.ece651.team6.client;
+package edu.duke.ece651.team6.shared;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.*;
-import edu.duke.ece651.team6.shared.Territory;
-import edu.duke.ece651.team6.shared.GlobalMapInfo;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
-
-public class MapTextViewTest {
+public class GlobalMapInfoTest {
     @Test
     public void testBasicFunc() {
         HashMap<Territory, HashSet<Territory>> adjList = new HashMap<Territory, HashSet<Territory>>();
@@ -37,13 +37,15 @@ public class MapTextViewTest {
             }
         }
         PlayerMapInfo playerMapInfo = new PlayerMapInfo(1, info);
-        PlayerMapInfo emptyPlayerMapInfo = new PlayerMapInfo(5, new HashMap<Territory, HashSet<String>>());
+
         GlobalMapInfo globalMapInfo = new GlobalMapInfo();
         globalMapInfo.addPlayerMapInfo(playerMapInfo);
-        globalMapInfo.addPlayerMapInfo(emptyPlayerMapInfo);
-        String expected = "Player1:\n-------------\n5 units in Hogwarts (next to: Narnia Midkemia)\n\n";
-        expected += "Player5:\n-------------\nThis player does not own any territory\n\n";
-        MapTextView mtv = new MapTextView(globalMapInfo);
-        assertEquals(expected, mtv.display());
+        assertEquals(true, globalMapInfo.getPlayers().contains(1));
+        PlayerMapInfo newInfo = globalMapInfo.getPlayerMapInfo(1);
+        for (Territory t : newInfo.getTerritories()) {
+            assertEquals("Hogwarts", t.getName());
+            assertEquals(true, playerMapInfo.getTerritoryNeighbors(t).contains("Narnia"));
+            assertEquals(true, playerMapInfo.getTerritoryNeighbors(t).contains("Midkemia"));
+        }
     }
 }

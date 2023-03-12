@@ -24,9 +24,9 @@ public class RoundFight extends WarZone {
             } else if (d2 > d1) {
                 army1.loseOneTurn();
             } else {
-                if (army1.getOwner().equals(territory.getOwner())) {
+                if (army1.getOwnerId() == territory.getOwnerId()) {
                     army2.loseOneTurn();
-                } else if (army2.getOwner().equals(territory.getOwner())) {
+                } else if (army2.getOwnerId() == territory.getOwnerId()) {
                     army1.loseOneTurn();
                 }
             }

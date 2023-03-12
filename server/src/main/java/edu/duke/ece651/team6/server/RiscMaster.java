@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.duke.ece651.team6.shared.GameMap;
+import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.Territory;
 
@@ -23,8 +24,6 @@ public class RiscMaster implements Master {
     public void setGameMap(GameMap gm) {
         this.gameMap = gm;
     }
-
-    // TODO: player should be a Player class
     // TODO: this should be private
     /**
      * Create GameMap info according to a specific player
@@ -32,19 +31,19 @@ public class RiscMaster implements Master {
      * @return player's territory1 - territory1's neighbors' names
      *         player's territory2 - territory2's neighbors' names
      */
-    public PlayerMapInfo createPlayerMapInfo(String player) {
+    public PlayerMapInfo createPlayerMapInfo(int playerId) {
         HashMap<Territory, HashSet<String>> info = new HashMap<Territory, HashSet<String>>();
         Set<Territory> territories = gameMap.getTerritorySet();
         for (Territory t : territories) {
-            if (t.getOwner().equals(player)) {
+            if (t.getOwnerId() == playerId) {
                 HashSet<String> neighbor = new HashSet<String>();
-                for (Territory n : gameMap.getNeighborSet(t.getName())) {
+                for (Territory n : gameMap.getNeighborSet(t)) {
                     neighbor.add(n.getName());
                 }
                 info.put(t, neighbor);
             }
         }
-        PlayerMapInfo playerMapInfo = new PlayerMapInfo(info);
+        PlayerMapInfo playerMapInfo = new PlayerMapInfo(playerId, info);
         return playerMapInfo;
     }
 
@@ -63,15 +62,17 @@ public class RiscMaster implements Master {
      */
     @Override
     public void playOneTurn() throws IOException {
-        server.sendObject(clientSocket, createPlayerMapInfo("Player1"));
-        // throw new UnsupportedOperationException("Unimplemented method 'playOneTurn'");
+        GlobalMapInfo globalMapInfo = new GlobalMapInfo();
+        globalMapInfo.addPlayerMapInfo(createPlayerMapInfo(1));
+        globalMapInfo.addPlayerMapInfo(createPlayerMapInfo(99));
+        server.sendObject(clientSocket, globalMapInfo);
     }
     
     public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
         HashMap<Territory, HashSet<Territory>> adjList = new HashMap<Territory, HashSet<Territory>>();
-        Territory t1 = new Territory("Hogwarts", "Player1", 8);
-        Territory t2 = new Territory("Narnia", "Player2", 3);
-        Territory t3 = new Territory("Midkemia", "Player3", 1);
+        Territory t1 = new Territory("Hogwarts", 1, 8);
+        Territory t2 = new Territory("Narnia", 2, 3);
+        Territory t3 = new Territory("Midkemia", 3, 1);
         HashSet<Territory> n1 = new HashSet<Territory>();
         n1.add(t2);
         n1.add(t3);
