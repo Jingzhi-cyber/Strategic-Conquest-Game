@@ -2,6 +2,9 @@ package edu.duke.ece651.team6.shared;
 
 import java.util.Random;
 
+/**
+ * A subclass of WarZone, in version 1, this is how game works that each attacker fight a round until one army left.
+ */
 public class RoundFight extends WarZone {
 
     public RoundFight(Territory territory) {
