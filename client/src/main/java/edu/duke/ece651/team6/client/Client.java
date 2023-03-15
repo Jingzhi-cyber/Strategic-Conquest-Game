@@ -70,9 +70,14 @@ public class Client {
    *                                  specified range of valid port values, which
    *                                  is between 0 and 65535, inclusive.
    * @throws NullPointerException     if address is null.
+   * @throws ClassNotFoundException   if the class of a serialized object cannot
+   *                                  be
+   *                                  found.
+   * 
    */
-  public Client(InetAddress address, int port) throws IOException {
+  public Client(InetAddress address, int port) throws IOException, ClassNotFoundException {
     this.socket = new Socket(address, port);
+    System.out.println((String) recvObject());
   }
 
   /**
