@@ -7,19 +7,25 @@ import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.Territory;
 
+/**
+ * Display the map in the text format
+ */
 public class MapTextView extends MapView {
 
   /**
-   * {@inheritDoc}
+   * Constructs {@link MapTextView} with 1 param
    * 
-   * @param globalMapInfo
+   * @param globalMapInfo contains all global information that is necessary to
+   *                      know on the client side
    */
   public MapTextView(GlobalMapInfo globalMapInfo) {
     super(globalMapInfo);
   }
 
   /**
-   * {@inheritDoc}
+   * Display the map by returning the text format of map in a string
+   * 
+   * @return {@link String}
    */
   public String display() {
     Set<Integer> playerIds = globalMapInfo.getPlayers();

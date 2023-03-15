@@ -1,8 +1,16 @@
 package edu.duke.ece651.team6.shared;
 
+/**
+ * An abstract rule checker class to check validity of orders
+ */
 public abstract class OrderRuleChecker {
   private final OrderRuleChecker next;
 
+  /**
+   * Construct an OrderRuleChecker object with 1 param
+   * 
+   * @param next is the next rule in the rule chain
+   */
   public OrderRuleChecker(OrderRuleChecker next) {
     this.next = next;
   }
@@ -32,11 +40,12 @@ public abstract class OrderRuleChecker {
 
   /**
    * This method checks current rule.
-   * 
-   * @param src    is a src territory
-   * @param dest   is the dest territory
-   * @param units  is the number of units to move
-   * @param theMap is the game map that has adjacency information
+   *
+   * @param move           is a simple move object that can be moveOrder or
+   *                       attackOrder
+   * @param remainingUnits is the number of remaining units allowed to perform
+   *                       actions
+   * @param theMap         is the game map that has adjacency information
    * @return a string telling if it obeys my own rule, null if so, a message
    *         string if otherwise.
    */

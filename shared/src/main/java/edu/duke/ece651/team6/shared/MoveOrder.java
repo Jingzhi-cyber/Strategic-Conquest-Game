@@ -6,7 +6,11 @@ public class MoveOrder extends SimpleMove {
     super(src, dest, numUnits);
   }
 
-  // Modify the gameMap on the game master side
+  /**
+   * Take move action and modify the gameMap on the game master side
+   * 
+   * @param gameMap is the map where actions happen
+   */
   @Override
   public void takeAction(GameMap gameMap) {
     // TODO: modify Territories on gameMap

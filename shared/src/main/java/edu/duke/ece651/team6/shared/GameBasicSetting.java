@@ -4,17 +4,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 // Contains all information for displaying to each player at the biginning so that they can do setting based on the information
+// Will update units initialization information and send it back to server
 public class GameBasicSetting {
-  /* 1. Initialized by the server. */
+  /* Initialized by the server. */
   final int playerId;
   final int numPlayers;
 
   final HashSet<Territory> assignedTerritories; // assigned by the game master
   int remainingNumUnits;
 
-  /* 2. Initialized by the client. */
+  /* Units initialization by the client. */
   HashMap<Territory, Integer> unitPlacement;
 
+  /**
+   * Constructs a GameBasicSetting with 4 params
+   *
+   * @param playerId
+   * @param numPlayers     in the game
+   * @param territories    is a group of territories assigned to the player
+   * @param availableUnits is the total number of units can be used on the board
+   */
   public GameBasicSetting(int playerId, int numPlayers, HashSet<Territory> territories, int availableUnits) {
     this.playerId = playerId;
     this.numPlayers = numPlayers;
@@ -23,28 +32,30 @@ public class GameBasicSetting {
     this.unitPlacement = new HashMap<>();
   }
 
-  /* Get methods */
+  /* Get playerId */
   public int getPlayerId() {
     return playerId;
   }
 
+  /* Get number of players */
   public int getNumPlayers() {
     return numPlayers;
   }
 
+  /* Get assigned territories */
   public HashSet<Territory> getAssignedTerritories() {
     return assignedTerritories;
   }
 
+  /* Get remaining number of units */
   public int getRemainingNumUnits() {
     return remainingNumUnits;
   }
 
-  /*
-   * Decrease units by some amount
+  /**
+   * Decrease units by some amount during units initialization from client side
    * 
    * @param amount
-   * 
    * @throws IllegalArgumentException
    */
   public void decreaseUnitsBy(int amount) {
@@ -76,10 +87,22 @@ public class GameBasicSetting {
    * }
    */
 
+  /**
+   * Unit initialization phase
+   * 
+   * @param map : Territory -> numUnits
+   */
   public void initializeUnitPlacement(HashMap<Territory, Integer> map) {
     this.unitPlacement = map;
   }
 
+  /* */
+
+  /**
+   * Used by server side to initialize (game map)
+   * 
+   * @return a HashMap from territory to number of units
+   */
   public HashMap<Territory, Integer> getUnitPlacement() {
     return this.unitPlacement;
   }

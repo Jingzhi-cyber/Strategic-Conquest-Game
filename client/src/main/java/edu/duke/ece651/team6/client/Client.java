@@ -188,10 +188,23 @@ public class Client {
     sendObject(setting);
   }
 
+  /**
+   * Send commit to server
+   * 
+   * @param commit
+   * @throws IOException, {@link ClassNotFoundException}
+   */
   public void sendCommit(Commit commit) throws IOException, ClassNotFoundException {
     sendObject(commit);
   }
 
+  /**
+   * A generic method to receive a specified object from server through socket
+   * 
+   * @param expectedType
+   * @return T
+   * @throws InvalidObjectException if the received object is of a wrong type
+   */
   public <T> T receiveSpecifiedObject(Class<T> expectedType) throws IOException, ClassNotFoundException {
     Object obj = recvObject();
     if (expectedType.isInstance(obj)) {
@@ -201,15 +214,35 @@ public class Client {
     }
   }
 
+  /**
+   * Receive game basic setting for initialization phase
+   * 
+   * @param message
+   * @return {@link GameBasicSetting}
+   * @throws IOException, {@link ClassNotFoundException}
+   */
   public GameBasicSetting recvGameBasicSetting(String message) throws IOException, ClassNotFoundException {
-    sendObject(message);
+    sendObject(message); // TODO: remove?
     return receiveSpecifiedObject(GameBasicSetting.class);
   }
 
+  /**
+   * Receive a {@link GlobalMapInfo} object from server side
+   * 
+   * @return {@link GlobalMapInfo}
+   * @throws IOException, {@link ClassNotFoundException}
+   */
   public GlobalMapInfo recvGlobalMapInfo() throws IOException, ClassNotFoundException {
     return receiveSpecifiedObject(GlobalMapInfo.class);
   }
 
+  /**
+   * Receive a {@link GlobalMapInfo} object from server side
+   * 
+   * @return {@link GlobalMapInfo}
+   * @throws IOException, {@link ClassNotFoundException}
+   */
+  // TODO : rm later. this information will be included in the globalMapInfo
   public GameMap recvGameMap() throws IOException, ClassNotFoundException {
     return receiveSpecifiedObject(GameMap.class);
   }

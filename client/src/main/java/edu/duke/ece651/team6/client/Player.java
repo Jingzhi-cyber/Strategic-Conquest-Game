@@ -2,6 +2,9 @@ package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
 
+/**
+ * An interface representing a player in the risc game
+ */
 public interface Player {
 
   /**
@@ -25,5 +28,11 @@ public interface Player {
    */
   public void playOneTurn() throws IOException, ClassNotFoundException;
 
+  /**
+   * Receive updated map information
+   * and display it to player
+   * 
+   * @throws IOException, {@link ClassNotFoundException}
+   */
   public void updateAndDisplayMapInfo() throws IOException, ClassNotFoundException;
 }
