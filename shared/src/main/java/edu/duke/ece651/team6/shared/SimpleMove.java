@@ -4,7 +4,7 @@ package edu.duke.ece651.team6.shared;
  * Represents a simple move order
  * It contains src and dest territory information and number of units to move
  */
-public abstract class SimpleMove {
+public abstract class SimpleMove implements java.io.Serializable {
   final Territory src;
   final Territory dest;
   final int numUnits;

@@ -72,7 +72,7 @@ public class TextPlayer implements Player {
     setting.initializeUnitPlacement(map);
     // send back the GameBasicSetting object with the updated unit placement info.
     client.sendUpdatedGameBasicSetting(setting);
-
+    printLine((String)client.recvObject());
     // recvAndDisplayTextMap();
   }
 
@@ -288,14 +288,16 @@ public class TextPlayer implements Player {
   @Override
   public void playOneTurn() throws IOException, ClassNotFoundException {
     /* -------- 1. Display the map --------- */
-    updateAndDisplayMapInfo();
+    GlobalMapInfo mapInfo = updateAndDisplayMapInfo();
 
     /*
      * -------- 2. Repeatedly display commands (Move, Attack, Done) until Done,
      * allowing 0-N orders in each turn ---------
      */
     HashMap<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
-    for (Territory t : setting.getAssignedTerritories()) {
+    Set<Territory> myTerritories = mapInfo.getPlayerMapInfo(setting.getPlayerId()).getTerritories();
+    this.gameMap = mapInfo.getGameMap();
+    for (Territory t : myTerritories) {
       remainingUnits.put(t, t.getNumUnits());
     }
     Commit commit = new Commit(setting.getPlayerId(), new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
@@ -324,6 +326,9 @@ public class TextPlayer implements Player {
     this.client.sendCommit(commit);
 
     // TODO: listen to server to see if orders are valid?
+
+    // TODO: receive result and take corresponding actions
+    this.client.recvObject(); // this receives a Result object
   }
 
   private void printLine(String str) {
@@ -375,6 +380,7 @@ public class TextPlayer implements Player {
         numUnits = readAnInteger(prompt);
         setting.decreaseUnitsBy(numUnits);
       } catch (IllegalArgumentException e) {
+        printLine(e.getMessage());
         printLine(prompt);
         continue;
       }
@@ -387,10 +393,11 @@ public class TextPlayer implements Player {
    * @throws InvalidObjectException
    */
   @Override
-  public void updateAndDisplayMapInfo() throws IOException, ClassNotFoundException {
+  public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException {
     GlobalMapInfo mapInfo = this.client.recvGlobalMapInfo();
     this.mapTextView = new MapTextView(mapInfo);
-    this.gameMap = this.client.recvGameMap();
+    this.gameMap = mapInfo.getGameMap();
     printLine(this.mapTextView.display());
+    return mapInfo;
   }
 }

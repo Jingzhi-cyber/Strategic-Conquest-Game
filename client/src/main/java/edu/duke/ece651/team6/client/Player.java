@@ -2,6 +2,8 @@ package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
 
+import edu.duke.ece651.team6.shared.GlobalMapInfo;
+
 /**
  * An interface representing a player in the risc game
  */
@@ -31,8 +33,8 @@ public interface Player {
   /**
    * Receive updated map information
    * and display it to player
-   * 
+   * @return received GlobalMapInfo
    * @throws IOException, {@link ClassNotFoundException}
    */
-  public void updateAndDisplayMapInfo() throws IOException, ClassNotFoundException;
+  public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException;
 }

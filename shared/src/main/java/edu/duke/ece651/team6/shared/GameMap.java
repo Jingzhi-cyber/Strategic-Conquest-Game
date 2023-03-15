@@ -3,25 +3,37 @@ package edu.duke.ece651.team6.shared;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
+import java.util.Queue;
 
-public class GameMap {
-  /**
-   * Use adjacent list to store the graph structure
-   * Key - Territory(use Territory.name as hashkey), Value - Set of neighbors of
-   * that Territory
-   */
-  private final HashMap<Territory, HashSet<Territory>> adjList;
+public class GameMap implements java.io.Serializable {
+    /**
+     * Use adjacent list to store the graph structure
+     * Key - Territory(use Territory.name as hashkey), Value - Set of neighbors of that Territory
+     */
+    private final HashMap<Territory, HashSet<Territory>> adjList;
+    private final HashMap<String, Territory> nameToTerritory;
 
-  /**
-   * Construct a GameMap by injecting a adjacent list
-   * 
-   * @param adjList defines the graph structure
-   */
-  public GameMap(HashMap<Territory, HashSet<Territory>> adjList) {
-    this.adjList = adjList;
-  }
+    /**
+     * Construct a GameMap by injecting a adjacent list
+     * @param adjList defines the graph structure
+     */
+    public GameMap(HashMap<Territory, HashSet<Territory>> adjList) {
+        this.adjList = adjList;
+        this.nameToTerritory = new HashMap<String, Territory>();
+        for (Territory t : adjList.keySet()) {
+            nameToTerritory.put(t.getName(), t);
+        }
+    }
+
+    /**
+     * Get corresponding Territory to a name
+     * @param name
+     * @return a Territory
+     */
+    public Territory getTerritoryByName(String name) {
+        return nameToTerritory.get(name);
+    }
 
   /**
    * Get all the territories
@@ -48,44 +60,32 @@ public class GameMap {
   }
 
   /**
-   * Check if 2 territories are connected through a path along which all
-   * territories belong to the player who owns the src territory.
+   * Check if there is a path consists of Territories that owned by the same owner
+   * of territoryFrom and territoryTo
+   * Apply BFS to search the path
    * 
-   * @param src
-   * @param dest
-   * @return boolean
+   * @param territoryFrom
+   * @param territoryTo
+   * @return true if the path exists
    */
-  public boolean hasSamePlayerPath(Territory src, Territory dest) {
-    // Use a set to keep track of visited territories
-    HashSet<Territory> visited = new HashSet<>();
-    visited.add(src);
-
-    // Use a queue for breadth-first search
-    Queue<Territory> queue = new LinkedList<>();
-    queue.add(src);
-
-    // Use a flag to indicate whether all territories along the path have the same
-    // player id
-    int playerId = src.getOwnerId();
-
-    // Breadth-first search
-    while (!queue.isEmpty()) {
-      Territory curr = queue.poll();
+  public boolean hasPath(Territory territoryFrom, Territory territoryTo) {
+    int ownerId = territoryFrom.getOwnerId();
+    HashSet<Territory> visited = new HashSet<Territory>();
+    Queue<Territory> q = new LinkedList<Territory>();
+    q.add(territoryFrom);
+    while (!q.isEmpty()) {
+      Territory curr = q.poll();
+      visited.add(curr);
+      if (curr.equals(territoryTo)) {
+        return true;
+      }
       for (Territory neighbor : adjList.get(curr)) {
-        if (neighbor.equals(dest)) {
-          return true;
+        if (visited.contains(neighbor) || neighbor.getOwnerId() != ownerId) {
+          continue;
         }
-        if (!visited.contains(neighbor)) {
-          visited.add(neighbor);
-          if (neighbor.getOwnerId() == playerId) {
-            queue.add(neighbor);
-          }
-        }
+        q.add(neighbor);
       }
     }
-
-    // If dest is not reached, there is no path
     return false;
   }
-
 }

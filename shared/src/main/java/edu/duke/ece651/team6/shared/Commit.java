@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.ListIterator;
 
 /* A structure contains all orders from one player, which will be sent back to server for */
-public class Commit {
+public class Commit implements java.io.Serializable {
   int playerId;
   List<MoveOrder> moves;
   List<AttackOrder> attacks;
-  ListIterator<MoveOrder> moveIterator;
-  ListIterator<AttackOrder> attackIterator;
+  transient ListIterator<MoveOrder> moveIterator;
+  transient ListIterator<AttackOrder> attackIterator;
 
-  MoveOrderRuleChecker moveChecker;
-  AttackOrderRuleChecker attackChecker;
+  transient MoveOrderRuleChecker moveChecker;
+  transient AttackOrderRuleChecker attackChecker;
   HashMap<Territory, Integer> remainingUnits;
 
   /**
@@ -98,8 +98,8 @@ public class Commit {
    * @param gameMap is the map where orders are performed on
    */
   public void performMoves(GameMap gameMap) {
-    while (moveIterator.hasNext()) {
-      moveIterator.next().takeAction(gameMap);
+    for (MoveOrder move : moves) {
+      move.takeAction(gameMap);
     }
   }
 
@@ -109,8 +109,8 @@ public class Commit {
    * @param gameMap is the map where orders are performed on
    */
   public void performAttacks(GameMap gameMap) {
-    while (attackIterator.hasNext()) {
-      attackIterator.next().takeAction(gameMap);
+    for (AttackOrder attack : attacks) {
+      attack.takeAction(gameMap);
     }
   }
 

@@ -38,5 +38,28 @@ public class GameMapTest {
 
         HashSet<Territory> emptyNeighbor = gm.getNeighborSet(new Territory("not exist", 3, 1));
         assertEquals(true, emptyNeighbor.isEmpty());
+
+        Territory hogwarts = gm.getTerritoryByName("Hogwarts");
+        assertEquals(t1, hogwarts);
+    }
+
+    @Test
+    public void testHasPath() {
+        SampleMap sampleMap = new SampleMap();
+        GameMap gm = new GameMap(sampleMap.getAdjList());
+
+        Territory Narnia = new Territory("Narnia", 0, 10);
+        Territory Midkemia = new Territory("Midkemia", 0, 12);
+        Territory Oz = new Territory("Oz", 0, 8);
+        Territory Elantris = new Territory("Elantris", 1, 6);
+        Territory Scadrial = new Territory("Scadrial", 1, 5);
+        Territory Roshar = new Territory("Scadrial", 1, 3);
+        Territory Gondor = new Territory("Gondor", 2, 13);
+        Territory Mordor = new Territory("Mordor", 2, 14);
+        Territory Hogwarts = new Territory("Hogwarts", 2, 3);
+
+        assertEquals(true, gm.hasPath(Narnia, Oz));
+        assertEquals(false, gm.hasPath(Narnia, Hogwarts));
+        assertEquals(false, gm.hasPath(Elantris, Gondor));
     }
 }

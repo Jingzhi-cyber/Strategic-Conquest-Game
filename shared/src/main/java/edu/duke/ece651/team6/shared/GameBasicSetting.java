@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 // Contains all information for displaying to each player at the biginning so that they can do setting based on the information
-// Will update units initialization information and send it back to server
-public class GameBasicSetting {
-  /* Initialized by the server. */
+public class GameBasicSetting implements java.io.Serializable {
+  /* 1. Initialized by the server. */
   final int playerId;
   final int numPlayers;
 

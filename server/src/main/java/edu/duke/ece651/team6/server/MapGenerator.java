@@ -119,8 +119,8 @@ public class MapGenerator {
      * Get the adjacent list of the map.
      * @return
      */
-    public Map<Territory, Set<Territory>> getTheMap() {
-        Map<Territory, Set<Territory>> map = new HashMap<>();
+    public HashMap<Territory, HashSet<Territory>> getTheMap() {
+        HashMap<Territory, HashSet<Territory>> map = new HashMap<>();
         List<Territory> list = new ArrayList<>();
         Iterator<String> it = names.iterator();
         char c = 'A';

@@ -222,7 +222,7 @@ public class Client {
    * @throws IOException, {@link ClassNotFoundException}
    */
   public GameBasicSetting recvGameBasicSetting(String message) throws IOException, ClassNotFoundException {
-    sendObject(message); // TODO: remove?
+    // sendObject(message); // TODO: remove?
     return receiveSpecifiedObject(GameBasicSetting.class);
   }
 
