@@ -380,4 +380,12 @@ public class Server {
   public InetAddress getInetAddress() {
     return this.serverSocket.getInetAddress();
   }
+
+  /**
+   * Get clientSockets that contains all client sockets
+   * @return this.clientSockets
+   */
+  public ArrayList<Socket> getClientSockets() {
+    return this.clientSockets;
+  }
 }

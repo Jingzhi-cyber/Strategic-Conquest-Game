@@ -3,7 +3,16 @@ package edu.duke.ece651.team6.shared;
 import java.util.*;
 
 public class GlobalMapInfo implements java.io.Serializable {
-  private HashMap<Integer, PlayerMapInfo> globalMap;
+    private HashMap<Integer, PlayerMapInfo> globalMap;
+    private GameMap gameMap;
+    
+    /**
+     * Construct GlobalMapInfo with empty globalMap
+     */
+    public GlobalMapInfo(GameMap gameMap) {
+        this.globalMap = new HashMap<Integer, PlayerMapInfo>();
+        this.gameMap = gameMap;
+    }
 
   /**
    * Construct GlobalMapInfo with empty globalMap
@@ -51,6 +60,14 @@ public class GlobalMapInfo implements java.io.Serializable {
   }
 
   public HashMap<Integer, PlayerMapInfo> getGlobalMap() {
-    return globalMap;
+    return this.globalMap;
   }
+
+    /**
+     * Get GameMap
+     * @return GameMap
+     */
+    public GameMap getGameMap() {
+        return this.gameMap;
+    }
 }

@@ -3,8 +3,8 @@ package edu.duke.ece651.team6.server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ public class MapGeneratorTest {
     void testGetTheMap() {
         MapGenerator m = new MapGenerator(15, "Hello", "Nihao", "Hi", "yeah");
         int a = 0, b = 0, c = 0, d = 0;
-        Map<Territory, Set<Territory>> map = m.getTheMap();
+        HashMap<Territory, HashSet<Territory>> map = m.getTheMap();
         for (Territory t : map.keySet()) {
             if (t.getName().equals("Hello")) {
                 a = 1;

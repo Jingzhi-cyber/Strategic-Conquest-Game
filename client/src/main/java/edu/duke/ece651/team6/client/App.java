@@ -49,6 +49,7 @@ public class App {
     try {
       // create a client obejct and connect it to the server
       client = new Client("127.0.0.1", 12345);
+      System.out.println((String)client.recvObject());
       setting = client.recvGameBasicSetting("game setting");
       input = new BufferedReader(new InputStreamReader(System.in));
     } catch (UnknownHostException e) {
@@ -78,9 +79,9 @@ public class App {
         player.playOneTurn(); // TODO: check win (can use return value)
       } catch (IllegalArgumentException e) {
         System.out.println(e.getMessage());
-        continue;
+        // continue;
       }
-      break;
+      // break;
     }
 
     // TODO: if lose can choose to exit or keep the game display
@@ -89,11 +90,11 @@ public class App {
     // receive the message?
 
     /* 4. Close Phase */
-    try {
-      input.close();
-      client.closeSocket();
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
+    // try {
+    //   input.close();
+    //   client.closeSocket();
+    // } catch (IOException e) {
+    //   System.out.println(e.getMessage());
+    // }
   }
 }

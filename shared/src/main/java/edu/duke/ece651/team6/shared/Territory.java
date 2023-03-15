@@ -67,6 +67,14 @@ public class Territory implements java.io.Serializable {
   }
 
   /**
+   * Set the territory's ownerId
+   * @param ownerId
+   */
+  public void setOwnerId(int ownerId) {
+    this.ownerId = ownerId;
+  }
+
+  /**
    * Get the territory's units
    * 
    * @return the number of units

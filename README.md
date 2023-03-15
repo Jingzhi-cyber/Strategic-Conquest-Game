@@ -13,10 +13,15 @@ Maintainer: ece651-spr23-team6
 
 [Detailed coverage](https://mw515.pages.oit.duke.edu/ece651-spr23-team6-risc/dashboard.html)
 
-## Use
+## Usage
 ```bash
-./gradlew run-server
-./gradlew run-client
+# ./gradlew run-server
+# ./gradlew run-client
+./gradlew build
+./gradlew installDist
+
+launch server: ./server/build/install/server/bin/server
+launch client: ./client/build/install/client/bin/client
 ```
 
 
