@@ -3,13 +3,18 @@
  */
 package edu.duke.ece651.team6.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
+import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.MyName;
-import edu.duke.ece651.team6.shared.TestMap;
 
 public class App {
+  Client client;
+
+  TextPlayer player;
 
   // Takes an Inputstream and transfer its bytes into a string, then return the
   // string
@@ -25,25 +30,56 @@ public class App {
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
-    // App a = new App();
-    // System.out.println(a.getMessage());
 
-    // Client client = new Client("localhost", 4444); // create a client obejct and connect it to the server
+    /* 1. Start the app */
+    App a = new App();
+    System.out.println(a.getMessage());
 
-    // String sendMessage = "Hi! I want to play the game!";
+    /* 2. Connection Phase */
+    Client client = null;
+    GameBasicSetting setting = null;
+    BufferedReader input = null;
+    try {
+      // create a client obejct and connect it to the server
+      client = new Client("127.0.0.1", 12345);
+      setting = client.recvGameBasicSetting("game setting");
+      input = new BufferedReader(new InputStreamReader(System.in));
+    } catch (UnknownHostException e) {
+      System.out.println("UnknownHostException " + e.getMessage());
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
 
-    // client.sendObject(sendMessage); // send a string object to server
+    TextPlayer player = new TextPlayer(client, input, System.out, setting);
+    player.displayGameSetting("game setting"); // TODO: custom message?
 
-    // String recvMessage = (String) client.recvObject(); // receive an object from server and cast it to a string
-    // System.out.println("From server: " + recvMessage);
-
-    // TestMap recvMap = (TestMap) client.recvObject(); // receive an object from server and cast it to a mao
+    /* (Only for testing.) */
+    // TestMap recvMap = (TestMap) client.recvObject(); // receive an object from
+    // server and cast it to a mao
     // System.out.println(recvMap.getName());
-
-    // TestMap sendMap = new TestMap("From player: hello server, this is the updated map");
-
+    // TestMap sendMap = new TestMap("From player: hello server, this is the updated
+    // map");
     // client.sendObject(sendMap); // send a map object to server
 
-    // client.closeSocket();
+    /* 3. Initiation Phase */
+    while (true) {
+      try {
+        player.placeUnit("place units");
+      } catch (InternalError e) {
+        System.out.println(e.getMessage());
+        continue;
+      } catch (IllegalArgumentException e) {
+        System.out.println(e.getMessage());
+        continue;
+      }
+      break;
+    }
+
+    try {
+      input.close();
+      client.closeSocket();
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }

@@ -2,12 +2,20 @@ package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.InvalidObjectException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import edu.duke.ece651.team6.shared.Commit;
+import edu.duke.ece651.team6.shared.GameBasicSetting;
+import edu.duke.ece651.team6.shared.GameMap;
+import edu.duke.ece651.team6.shared.GlobalMapInfo;
 
 /**
  * This class is a wrapper class for client side socket that has a Socket object
@@ -17,7 +25,11 @@ import java.net.UnknownHostException;
  */
 public class Client {
 
-  private Socket socket;
+  final Socket socket;
+
+  public Client(Socket socket) {
+    this.socket = socket;
+  }
 
   /**
    * Constructor one. Takes a string for hostname and an int for port number.
@@ -154,4 +166,46 @@ public class Client {
     this.socket.close();
   }
 
+  /**
+   * Send initial messages
+   */
+  // public String sendInitialMessage(String message) throws IOException,
+  // ClassNotFoundException {
+  // sendObject(message);
+  // return (String) recvObject();
+  // }
+
+  /**
+   * Send settings (how many units to put on each territory)
+   */
+  public void sendUpdatedGameBasicSetting(GameBasicSetting setting)
+      throws IOException, ClassNotFoundException {
+    sendObject(setting);
+  }
+
+  public void sendCommit(Commit commit) throws IOException, ClassNotFoundException {
+    sendObject(commit);
+  }
+
+  public <T> T receiveSpecifiedObject(Class<T> expectedType) throws IOException, ClassNotFoundException {
+    Object obj = recvObject();
+    if (expectedType.isInstance(obj)) {
+      return expectedType.cast(obj);
+    } else {
+      throw new InvalidObjectException("Incorrect object type. It should be a " + expectedType.getSimpleName() + ".");
+    }
+  }
+
+  public GameBasicSetting recvGameBasicSetting(String message) throws IOException, ClassNotFoundException {
+    sendObject(message);
+    return receiveSpecifiedObject(GameBasicSetting.class);
+  }
+
+  public GlobalMapInfo recvGlobalMapInfo() throws IOException, ClassNotFoundException {
+    return receiveSpecifiedObject(GlobalMapInfo.class);
+  }
+
+  public GameMap recvGameMap() throws IOException, ClassNotFoundException {
+    return receiveSpecifiedObject(GameMap.class);
+  }
 }
