@@ -16,6 +16,18 @@ public class App {
 
   TextPlayer player;
 
+  /**
+   * Construct an app with 2 params
+   * 
+   * @param client for handling interactions (e.g. connection and communication)
+   *               with server
+   * @param player for handling interaction (e.g. user input for commands,
+   *               initializations, play turns) with players
+   */
+  public App(Client client, TextPlayer player) {
+    this.client = client;
+    this.player = player;
+  }
   // Takes an Inputstream and transfer its bytes into a string, then return the
   // string
   // private String getStringFromIS(InputStream is) throws IOException {
@@ -30,12 +42,7 @@ public class App {
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
-
-    /* 1. Start the app */
-    App a = new App();
-    System.out.println(a.getMessage());
-
-    /* 2. Connection Phase */
+    /* 1. Build connection */
     Client client = null;
     GameBasicSetting setting = null;
     BufferedReader input = null;
@@ -53,6 +60,7 @@ public class App {
     TextPlayer player = new TextPlayer(client, input, System.out, setting);
     player.displayGameSetting("game setting"); // TODO: custom message?
 
+    // App app = new App(client, player);
     /* (Only for testing.) */
     // TestMap recvMap = (TestMap) client.recvObject(); // receive an object from
     // server and cast it to a mao
@@ -61,13 +69,13 @@ public class App {
     // map");
     // client.sendObject(sendMap); // send a map object to server
 
-    /* 3. Initiation Phase */
+    /* 2. Initiation Phase */
+    player.placeUnit("place units");
+
+    /* 3. Play Phase */
     while (true) {
       try {
-        player.placeUnit("place units");
-      } catch (InternalError e) {
-        System.out.println(e.getMessage());
-        continue;
+        player.playOneTurn(); // TODO: check win (can use return value)
       } catch (IllegalArgumentException e) {
         System.out.println(e.getMessage());
         continue;
@@ -75,6 +83,12 @@ public class App {
       break;
     }
 
+    // TODO: if lose can choose to exit or keep the game display
+
+    // TODO: if win, the master will notify every player and end the game. How to
+    // receive the message?
+
+    /* 4. Close Phase */
     try {
       input.close();
       client.closeSocket();
