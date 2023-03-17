@@ -65,8 +65,8 @@ public class GlobalMapInfoTest {
       }
     };
 
-    System.out.println(names);
-    System.out.println(globalMapInfo.getTerritoryNames());
+    // System.out.println(names);
+    // System.out.println(globalMapInfo.getTerritoryNames());
     assertEquals(names, globalMapInfo.getTerritoryNames());
   }
 }

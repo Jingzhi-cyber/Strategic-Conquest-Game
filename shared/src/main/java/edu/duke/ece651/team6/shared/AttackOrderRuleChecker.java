@@ -27,6 +27,6 @@ public abstract class AttackOrderRuleChecker extends OrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  abstract protected String checkMyRule(SimpleMove move, int remainingUnits, GameMap theMap);
+  abstract protected String checkMyRule(SimpleMove move, GameMap theMap);
 
 }

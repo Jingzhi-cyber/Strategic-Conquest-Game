@@ -27,8 +27,8 @@ public class MoveUnitsRuleChecker extends MoveOrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  protected String checkMyRule(SimpleMove move, int remainingUnits, GameMap theMap) {
-    if (move.numUnits < 0 || move.numUnits > remainingUnits) {
+  protected String checkMyRule(SimpleMove move, GameMap theMap) {
+    if (move.numUnits < 0 || move.numUnits > move.src.getNumUnits()) {
       return "Invalid unit number.";
     }
     return null;

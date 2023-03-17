@@ -13,7 +13,6 @@ public class MoveOrder extends SimpleMove {
    */
   @Override
   public void takeAction(GameMap gameMap) {
-    // TODO: modify Territories on gameMap
     Territory from = gameMap.getTerritoryByName(src.getName());
     Territory to = gameMap.getTerritoryByName(dest.getName());
     from.moveTo(to, numUnits);

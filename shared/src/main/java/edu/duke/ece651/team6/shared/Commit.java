@@ -15,7 +15,7 @@ public class Commit implements java.io.Serializable {
 
   transient MoveOrderRuleChecker moveChecker;
   transient AttackOrderRuleChecker attackChecker;
-  HashMap<Territory, Integer> remainingUnits;
+  // HashMap<String, Integer> remainingUnits;
 
   /**
    * Construct a Commit object with 4 params
@@ -24,14 +24,13 @@ public class Commit implements java.io.Serializable {
    * @param moveChecker   represents a chain of rules for move order
    * @param attackChecker represents a chain of rules for attack order
    */
-  public Commit(int playerId, MoveOrderRuleChecker moveChecker, AttackOrderRuleChecker attackChecker,
-      HashMap<Territory, Integer> remainingUnits) {
+  public Commit(int playerId, MoveOrderRuleChecker moveChecker, AttackOrderRuleChecker attackChecker) {
     this.playerId = playerId;
     this.moves = new ArrayList<MoveOrder>();
     this.attacks = new ArrayList<>();
     this.moveChecker = moveChecker;
     this.attackChecker = attackChecker;
-    this.remainingUnits = remainingUnits;
+    // this.remainingUnits = remainingUnits;
 
     this.moveIterator = moves.listIterator();
     this.attackIterator = attacks.listIterator();
@@ -49,11 +48,12 @@ public class Commit implements java.io.Serializable {
    * @throws IllegalArgumentException when violating any rules
    */
   private void checkRules(OrderRuleChecker checker, SimpleMove simpleMove, GameMap gameMap) {
-    String result = checker.checkMyRule(simpleMove, remainingUnits.get(simpleMove.src), gameMap);
+    String result = checker.checkMyRule(simpleMove, gameMap);
     if (result != null) {
       throw new IllegalArgumentException(result);
     }
-    remainingUnits.put(simpleMove.src, remainingUnits.get(simpleMove.src) - simpleMove.numUnits);
+    // remainingUnits.put(simpleMove.src.getName(),
+    // remainingUnits.get(simpleMove.src.getName()) - simpleMove.numUnits);
   }
 
   /**
@@ -89,6 +89,37 @@ public class Commit implements java.io.Serializable {
    * }
    * }
    */
+
+  private String constructPrompt(String orderName, SimpleMove move, int remainingUnits) {
+    return orderName + " order: move " + move.numUnits + " units from " + move.src.getName() + " to "
+        + move.dest.getName() + " cannot be performed, with " + remainingUnits + " remaining units";
+  }
+
+  public void checkUsableUnitsBeforeSendingToServer() {
+    // only check remaining units (not check > 0 here, check it with rule checker)
+    HashMap<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
+    for (MoveOrder move : moves) {
+      if (!remainingUnits.containsKey(move.src)) {
+        remainingUnits.put(move.src, move.src.getNumUnits());
+      }
+
+      if (remainingUnits.get(move.src) < move.numUnits) {
+        throw new IllegalArgumentException(constructPrompt("Move", move, remainingUnits.get(move.src)));
+      }
+      remainingUnits.put(move.src, remainingUnits.get(move.src) - move.numUnits);
+    }
+
+    for (AttackOrder attack : attacks) {
+      if (!remainingUnits.containsKey(attack.src)) {
+        remainingUnits.put(attack.src, attack.src.getNumUnits());
+      }
+
+      if (remainingUnits.get(attack.src) < attack.numUnits) {
+        throw new IllegalArgumentException(constructPrompt("Attack", attack, remainingUnits.get(attack.src)));
+      }
+      remainingUnits.put(attack.src, remainingUnits.get(attack.src) - attack.numUnits);
+    }
+  }
 
   /* ---------------- For server side usage ----------------- */
 

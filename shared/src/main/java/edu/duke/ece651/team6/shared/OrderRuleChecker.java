@@ -23,15 +23,15 @@ public abstract class OrderRuleChecker {
    * @return a string telling if it obeys my own rule, null if all of the rules on
    *         the chain pass, or a message string if any of the rules failed
    */
-  public String checkOrder(SimpleMove move, int remainingUnits, GameMap theMap) {
+  public String checkOrder(SimpleMove move, GameMap theMap) {
     // if we fail our own rule: stop the placement is not legal
-    String myRule = checkMyRule(move, remainingUnits, theMap);
+    String myRule = checkMyRule(move, theMap);
     if (myRule != null)
       return myRule;
 
     // other wise, ask the rest of the chain.
     if (next != null) {
-      return next.checkOrder(move, remainingUnits, theMap);
+      return next.checkOrder(move, theMap);
     }
 
     // if there are no more rules, then the placement is legal
@@ -49,5 +49,5 @@ public abstract class OrderRuleChecker {
    * @return a string telling if it obeys my own rule, null if so, a message
    *         string if otherwise.
    */
-  protected abstract String checkMyRule(SimpleMove move, int remainingUnits, GameMap theMap);
+  protected abstract String checkMyRule(SimpleMove move, GameMap theMap);
 }

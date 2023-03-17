@@ -32,7 +32,7 @@ public class TextPlayer implements Player {
   final PrintStream out;
   private final GameBasicSetting setting;
   MapTextView mapTextView;
-  GameMap gameMap;
+  // GameMap gameMap;
 
   /**
    * Constructs TextPlayer with 4 params
@@ -49,18 +49,16 @@ public class TextPlayer implements Player {
     this.out = out;
     this.setting = setting;
     this.mapTextView = null; // initiate when receiving a global map info
-    this.gameMap = null; // TODO: may delete later if it's included in global map info
   }
 
   /**
    * Place units and send the updated game setting to the server.
    * 
-   * @param prompt
    * @throws IOException, ClassNotFoundException
    */
   @Override
-  public void placeUnit(String prompt) throws IOException, ClassNotFoundException {
-    printLine("From client: Requesting to " + prompt);
+  public void placeUnit() throws IOException, ClassNotFoundException {
+    // printLine("From client: Requesting to " + prompt);
     HashMap<Territory, Integer> map = new HashMap<Territory, Integer>();
     HashSet<Territory> territories = setting.getAssignedTerritories();
     for (Territory t : territories) {
@@ -72,18 +70,8 @@ public class TextPlayer implements Player {
     setting.initializeUnitPlacement(map);
     // send back the GameBasicSetting object with the updated unit placement info.
     client.sendUpdatedGameBasicSetting(setting);
-    printLine((String)client.recvObject());
+    printLine((String) client.recvObject());
     // recvAndDisplayTextMap();
-  }
-
-  /**
-   * Read a territory from user input
-   * 
-   * @param prompt is for displaying
-   * @return Territory is the constructed Territory
-   */
-  protected Territory readTerritory(String prompt) throws IOException {
-    return new Territory(readInputLine(prompt));
   }
 
   /**
@@ -170,11 +158,11 @@ public class TextPlayer implements Player {
    * @return HashMap<Integer, Territory> a map from the serial number to a
    *         territory
    */
-  private HashMap<Integer, Territory> displayConnectedOrderedTerritoriesEnemies(Territory src) {
+  private HashMap<Integer, Territory> displayConnectedOrderedTerritoriesEnemies(Territory src, GameMap gameMap) {
     HashSet<Territory> enemyTerritories = findEnemyTerritories();
     int i = 1;
     HashMap<Integer, Territory> result = new HashMap<>();
-    HashSet<Territory> neighs = this.gameMap.getNeighborSet(src);
+    HashSet<Territory> neighs = gameMap.getNeighborSet(src);
     for (Territory t : neighs) {
       if (enemyTerritories.contains(t)) {
         printLine(i + ". " + t.getName());
@@ -193,11 +181,11 @@ public class TextPlayer implements Player {
    * @return HashMap<Integer, Territory> is a mapping from serial number to a
    *         territory
    */
-  private HashMap<Integer, Territory> displayOrderedTerritories(Territory src) {
+  private HashMap<Integer, Territory> displayOrderedTerritories(Territory src, GameMap gameMap) {
     if (src == null) {
       return displayOrderedTerritoriesSelf();
     } else {
-      return displayConnectedOrderedTerritoriesEnemies(src);
+      return displayConnectedOrderedTerritoriesEnemies(src, gameMap);
     }
   }
 
@@ -213,8 +201,8 @@ public class TextPlayer implements Player {
    *                                  valid territory
    * @propogates {@link IllegalArgumentException} from readAnInteger
    */
-  private Territory findTerritory(Territory src, String message) throws IOException {
-    HashMap<Integer, Territory> map = displayOrderedTerritories(src);
+  private Territory findTerritory(Territory src, String message, GameMap gameMap) throws IOException {
+    HashMap<Integer, Territory> map = displayOrderedTerritories(src, gameMap);
     if (map.size() <= 0) {
       throw new IllegalArgumentException("No suitable territory can be found. Please change an action to perform.");
     }
@@ -233,10 +221,10 @@ public class TextPlayer implements Player {
    * @propogates {@link IllegalArgumentException} from findTerritory and
    *             readAnInteger
    */
-  protected MoveOrder constructMove() throws IOException {
+  protected MoveOrder constructMove(GameMap gameMap) throws IOException {
     String message = "Player" + setting.getPlayerId() + ", which territory do you want to move units ";
-    Territory src = findTerritory(null, message + "from?");
-    Territory dest = findTerritory(null, message + "to?");
+    Territory src = findTerritory(null, message + "from?", gameMap);
+    Territory dest = findTerritory(null, message + "to?", gameMap);
     int units = readAnInteger("Player" + setting.getPlayerId() + ", how many units do you want to move?");
     return new MoveOrder(src, dest, units);
   }
@@ -248,12 +236,36 @@ public class TextPlayer implements Player {
    * @throws IOException
    * @throws {@link      IllegalArgumentException} from readAnInteger
    */
-  protected AttackOrder constructAttack() throws IOException {
+  protected AttackOrder constructAttack(GameMap gameMap) throws IOException {
     String message = "Player" + setting.getPlayerId() + ", which territory do you want to attack ";
-    Territory src = findTerritory(null, message + "from?");
-    Territory dest = findTerritory(src, message + "to?");
+    Territory src = findTerritory(null, message + "from?", gameMap);
+    Territory dest = findTerritory(src, message + "to?", gameMap);
     int units = readAnInteger("Player" + setting.getPlayerId() + ", how many units do you want to attack?");
     return new AttackOrder(src, dest, units);
+  }
+
+  private Commit constructCommit(GameMap gameMap) throws IOException, ClassNotFoundException {
+    Commit commit = new Commit(setting.getPlayerId(), new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
+        new AttackUnitsRuleChecker(null));
+    while (true) {
+      try {
+        Character cmd = readCommand(displayAvailableCommands());
+        if (cmd == Character.valueOf('D')) {
+          // done
+          break;
+        } else if (cmd == Character.valueOf('M')) {
+          /* move */
+          commit.addMove(constructMove(gameMap), gameMap);
+        } else {
+          /* attack */
+          commit.addAttack(constructAttack(gameMap), gameMap);
+        }
+      } catch (IllegalArgumentException e) {
+        printLine(e.getMessage());
+        continue;
+      }
+    }
+    return commit;
   }
 
   /**
@@ -292,34 +304,19 @@ public class TextPlayer implements Player {
 
     /*
      * -------- 2. Repeatedly display commands (Move, Attack, Done) until Done,
-     * allowing 0-N orders in each turn ---------
+     * allowing 0-N orders in each turn. Repeatedly check validity of a Commit until
+     * it's valid ---------
      */
-    HashMap<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
-    Set<Territory> myTerritories = mapInfo.getPlayerMapInfo(setting.getPlayerId()).getTerritories();
-    this.gameMap = mapInfo.getGameMap();
-    for (Territory t : myTerritories) {
-      remainingUnits.put(t, t.getNumUnits());
-    }
-    Commit commit = new Commit(setting.getPlayerId(), new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
-        new AttackUnitsRuleChecker(null), remainingUnits);
+    Commit commit = null;
     while (true) {
-      Character cmd = null;
       try {
-        cmd = readCommand(displayAvailableCommands());
+        commit = constructCommit(mapInfo.getGameMap());
+        commit.checkUsableUnitsBeforeSendingToServer();
       } catch (IllegalArgumentException e) {
         printLine(e.getMessage());
         continue;
       }
-      if (cmd == Character.valueOf('D')) {
-        // done
-        break;
-      } else if (cmd == Character.valueOf('M')) {
-        // move
-        commit.addMove(constructMove(), this.gameMap);
-      } else {
-        // attack
-        commit.addAttack(constructAttack(), this.gameMap);
-      }
+      break;
     }
 
     /* -------- 3. Send commit to server --------- */
@@ -396,7 +393,7 @@ public class TextPlayer implements Player {
   public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException {
     GlobalMapInfo mapInfo = this.client.recvGlobalMapInfo();
     this.mapTextView = new MapTextView(mapInfo);
-    this.gameMap = mapInfo.getGameMap();
+    // this.gameMap = mapInfo.getGameMap();
     printLine(this.mapTextView.display());
     return mapInfo;
   }

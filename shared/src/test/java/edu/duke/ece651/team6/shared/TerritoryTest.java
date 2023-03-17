@@ -28,6 +28,10 @@ public class TerritoryTest {
     assertNotEquals(t2.hashCode(), t4.hashCode());
 
     assertEquals("(name: Hogwarts, ownerId: 0, units: 5)", t2.toString());
+
+    Territory t5 = new Territory("SetOwnerId");
+    t5.setOwnerId(1);
+    assertEquals(1, t5.getOwnerId());
   }
 
   @Test

@@ -20,7 +20,7 @@ public interface Player {
   /**
    * At the beginning of the game, Player needs to place units to the territories
    */
-  public void placeUnit(String prompt) throws IOException, ClassNotFoundException;
+  public void placeUnit() throws IOException, ClassNotFoundException;
 
   /**
    * Player's one turn of game includes:
@@ -33,6 +33,7 @@ public interface Player {
   /**
    * Receive updated map information
    * and display it to player
+   * 
    * @return received GlobalMapInfo
    * @throws IOException, {@link ClassNotFoundException}
    */
