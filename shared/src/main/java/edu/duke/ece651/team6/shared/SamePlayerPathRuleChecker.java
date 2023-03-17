@@ -26,8 +26,8 @@ public class SamePlayerPathRuleChecker extends MoveOrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  protected String checkMyRule(SimpleMove move, int remainingUnits, GameMap theMap) {
-    if (!theMap.hasPath(move.src, move.dest)) {
+  protected String checkMyRule(SimpleMove move, GameMap theMap) {
+    if (!theMap.hasSamePlayerPath(move.src, move.dest)) {
       return "Invalid move action: there isn't a connected path through src to dest where all territories belong to the same player.";
     }
     return null;

@@ -25,11 +25,11 @@ public class AttackUnitsRuleChecker extends AttackOrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  protected String checkMyRule(SimpleMove move, int remainingUnits, GameMap theMap) {
-    if (move.numUnits <= 0 || move.numUnits > remainingUnits) {
-      return "Invalid number of units: " + move.numUnits;
+  protected String checkMyRule(SimpleMove move, GameMap theMap) {
+    if (move.numUnits <= 0 || move.numUnits > move.src.getNumUnits()) {
+      return "Invalid number of units: " + move.numUnits + " with maximum " + move.src.getNumUnits()
+          + " usable units";
     }
     return null;
   }
-
 }

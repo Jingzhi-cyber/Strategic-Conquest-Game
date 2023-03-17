@@ -11,9 +11,10 @@ public abstract class SimpleMove implements java.io.Serializable {
 
   /**
    * Constructs a simple move
-   * @param src represents a src territory on the client side
+   * 
+   * @param src  represents a src territory on the client side
    * @param dest represents a dest territory on the server side
-   * @param num represents number of units to move
+   * @param num  represents number of units to move
    */
   public SimpleMove(Territory src, Territory dest, int num) {
     this.src = src;
@@ -27,4 +28,9 @@ public abstract class SimpleMove implements java.io.Serializable {
    * @param gameMap is the game map to perform actions on
    */
   abstract public void takeAction(GameMap gameMap);
+
+  @Override
+  public String toString() {
+    return "{ from: " + src.toString() + ", to: " + dest.toString() + ", numUnits: " + numUnits + " }";
+  }
 }
