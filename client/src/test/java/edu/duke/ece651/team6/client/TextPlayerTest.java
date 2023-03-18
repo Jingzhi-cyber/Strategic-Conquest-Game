@@ -1,9 +1,7 @@
 package edu.duke.ece651.team6.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +27,7 @@ import edu.duke.ece651.team6.shared.Territory;
 public class TextPlayerTest {
   private final Client client = mock(Client.class);
   private GameBasicSetting setting = null;
-  // private GameMap gameMap = mock(GameMap.class);
+  // private GameMap gameMap = null;
   // private MapTextView mapTextView = null;
 
   private HashSet<Territory> createTerritories_withoutUnitsPlacement() {
@@ -59,8 +57,9 @@ public class TextPlayerTest {
 
     // MapTextView mtv = spy(new MapTextView(expectedMap));
     // set up the expected map data
-    when(client.recvGlobalMapInfo()).thenReturn(createGlobalMapInfo_withUnitsPlaced(createGameMap()));
-
+    // gameMap = createGameMap();
+    // updateAndDisplayMapInfo();
+    when(client.recvGlobalMapInfo()).thenReturn(createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement()));
     // when(client.recvGameMap()).thenReturn(createGameMap());
     // when(gameMap.hasSamePlayerPath(any(), any())).thenReturn(true);
   }
@@ -71,6 +70,7 @@ public class TextPlayerTest {
     PrintStream printStream = new PrintStream(bytes, true); // ps is a PrintStream (looks like System.out) which
                                                             // writes its data into bytes instead of to the screen.
     setting = new GameBasicSetting(1, 2, territories, 10);
+    // gameMap = createGameMap();
     TextPlayer textPlayer = new TextPlayer(client, reader, printStream, setting);
     return textPlayer;
   }
@@ -116,13 +116,6 @@ public class TextPlayerTest {
     return expectedMap;
   }
 
-  private GlobalMapInfo createGlobalMapInfo_withoutAssignedTerritories(GameMap gameMap) {
-    PlayerMapInfo playerMapInfo1 = new PlayerMapInfo(1, new HashMap<Territory, HashSet<String>>());
-    GlobalMapInfo expectedMap = new GlobalMapInfo(gameMap);
-    expectedMap.addPlayerMapInfo(playerMapInfo1);
-    return expectedMap;
-  }
-
   private GameMap createGameMap_withMissingSelfNeighbors() {
     HashMap<Territory, HashSet<Territory>> adjList = new HashMap<>();
     Territory terA = new Territory("A", 1);
@@ -156,12 +149,49 @@ public class TextPlayerTest {
     return new GameMap(adjList);
   }
 
-  private GameMap createGameMap() {
+  private GameMap createGameMap_withoutUnitPlacement() {
     HashMap<Territory, HashSet<Territory>> adjList = new HashMap<>();
     Territory terA = new Territory("A", 1);
     Territory terB = new Territory("B", 2);
     Territory terC = new Territory("C", 2);
     Territory terD = new Territory("D", 2);
+
+    adjList.put(terA, new HashSet<Territory>() {
+      {
+        add(terB);
+        add(terC);
+      }
+    });
+
+    adjList.put(terB, new HashSet<Territory>() {
+      {
+        add(terA);
+        add(terD);
+      }
+    });
+
+    adjList.put(terC, new HashSet<Territory>() {
+      {
+        add(terA);
+        add(terD);
+      }
+    });
+
+    adjList.put(terD, new HashSet<Territory>() {
+      {
+        add(terB);
+        add(terC);
+      }
+    });
+    return new GameMap(adjList);
+  }
+
+  private GameMap createGameMap_withUnitPlacement() {
+    HashMap<Territory, HashSet<Territory>> adjList = new HashMap<>();
+    Territory terA = new Territory("A", 1, 3);
+    Territory terB = new Territory("B", 2, 7);
+    Territory terC = new Territory("C", 2, 6);
+    Territory terD = new Territory("D", 2, 4);
 
     adjList.put(terA, new HashSet<Territory>() {
       {
@@ -276,6 +306,9 @@ public class TextPlayerTest {
 
   @Test
   public void test_playOneTurn_withMove() throws IOException, ClassNotFoundException {
+    GlobalMapInfo mapInfo = createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement());
+    when(client.recvGlobalMapInfo()).thenReturn(mapInfo);
+
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     TextPlayer player = createTextPlayer("M\n1\n2\n1\nD\n", bytes,
         createAssignedTerritories_withUnitsPlaced());
@@ -294,8 +327,9 @@ public class TextPlayerTest {
 
   @Test
   public void test_playOneTurn_withDone() throws IOException, ClassNotFoundException {
-    GlobalMapInfo mapInfo2 = createGlobalMapInfo_withUnitsPlaced(createGameMap());
+    GlobalMapInfo mapInfo2 = createGlobalMapInfo_withUnitsPlaced(createGameMap_withoutUnitPlacement());
     when(client.recvGlobalMapInfo()).thenReturn(mapInfo2);
+
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     TextPlayer player = createTextPlayer("D\n", bytes, createAssignedTerritories_withUnitsPlaced());
     // player.placeUnit("place units");
@@ -328,10 +362,14 @@ public class TextPlayerTest {
 
     // catched exception: Invalid territory.
     bytes.reset();
-    GlobalMapInfo mapInfo2 = createGlobalMapInfo_withoutAssignedTerritories(createGameMap());
+    // GlobalMapInfo mapInfo2 =
+    // createGlobalMapInfo_withoutAssignedTerritories(createGameMap_withoutUnitPlacement());
+    GlobalMapInfo mapInfo2 = createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement());
     when(client.recvGlobalMapInfo()).thenReturn(mapInfo2);
     // when(client.recvGameMap()).thenReturn(createGameMap());
-    TextPlayer player3 = createTextPlayer("M\n3\n2\n1\nD\n", bytes, createAssignedTerritories_withUnitsPlaced());
+
+    TextPlayer player3 = createTextPlayer("M\n3\n2\n1\nM\n2\n2\n1\nD\n", bytes,
+        createAssignedTerritories_withUnitsPlaced());
     player3.playOneTurn();
     // assertThrows(IllegalArgumentException.class, () -> player3.playOneTurn());
 
