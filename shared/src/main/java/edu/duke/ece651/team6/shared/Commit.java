@@ -91,8 +91,7 @@ public class Commit implements java.io.Serializable {
    */
 
   private String constructPrompt(String orderName, SimpleMove move, int remainingUnits) {
-    return orderName + " order: move " + move.numUnits + " units from " + move.src.getName() + " to "
-        + move.dest.getName() + " cannot be performed, with " + remainingUnits + " remaining units";
+    return orderName + move.toString() + " cannot be performed, with " + remainingUnits + " remaining units";
   }
 
   public void checkUsableUnitsBeforeSendingToServer() {
@@ -107,6 +106,7 @@ public class Commit implements java.io.Serializable {
         throw new IllegalArgumentException(constructPrompt("Move", move, remainingUnits.get(move.src)));
       }
       remainingUnits.put(move.src, remainingUnits.get(move.src) - move.numUnits);
+      remainingUnits.put(move.dest, remainingUnits.getOrDefault(move.dest, move.dest.getNumUnits()) + move.numUnits);
     }
 
     for (AttackOrder attack : attacks) {
@@ -118,6 +118,8 @@ public class Commit implements java.io.Serializable {
         throw new IllegalArgumentException(constructPrompt("Attack", attack, remainingUnits.get(attack.src)));
       }
       remainingUnits.put(attack.src, remainingUnits.get(attack.src) - attack.numUnits);
+      remainingUnits.put(attack.dest,
+          remainingUnits.getOrDefault(attack.dest, attack.dest.getNumUnits()) + attack.numUnits);
     }
   }
 
