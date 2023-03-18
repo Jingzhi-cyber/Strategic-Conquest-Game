@@ -114,7 +114,7 @@ public class RiscMaster implements Master {
             }
             GameBasicSetting gameBasicSetting = new GameBasicSetting(ownerId, playerNum, assignedTerritories, availableUnits);
             Socket sock = playerProfiles.get(ownerId).getSocket();
-            System.out.println("Sending GameBasicSetting to playerId: " + ownerId + "...");
+            System.out.println("Sending GameBasicSetting to playerId: " + ownerId + " ...");
             try {
                 server.sendObject(sock, gameBasicSetting);
             }
@@ -207,7 +207,6 @@ public class RiscMaster implements Master {
          */
         Result result = checkResult();
         server.sendObjectToAll(result);
-        // FIXME: If there is a winner, inform all players
         if (!result.getWinners().isEmpty()) {
             for (int winnerId : result.getWinners()) {
                 System.out.println("Winner! PlayerId: " + winnerId);
@@ -215,7 +214,6 @@ public class RiscMaster implements Master {
             return true;
         }
 
-        // FIXME: If there is a loser, inform that player
         if (!result.getLosers().isEmpty()) {
             for (int loserId : result.getLosers()) {
                 System.out.println("Loser! PlayerId: " + loserId);
@@ -223,6 +221,17 @@ public class RiscMaster implements Master {
             }
         }
         return false;
+    }
+
+    /**
+     * Finish the game and close the sockets
+     * @throws IOException
+     */
+    public void finish() throws IOException {
+        for (int playerId : playerProfiles.keySet()) {
+            server.closeClientSocket(playerProfiles.get(playerId).getSocket());
+        }
+        server.closeServerSocket();
     }
 
     /**
