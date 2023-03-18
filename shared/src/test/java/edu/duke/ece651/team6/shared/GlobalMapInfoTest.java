@@ -12,6 +12,11 @@ public class GlobalMapInfoTest {
 
   @Test
   public void testBasicFunc() {
+    SampleMap sampleMap = new SampleMap();
+    GameMap gm = new GameMap(sampleMap.getAdjList());
+    GlobalMapInfo gmi = new GlobalMapInfo(gm);
+    assertEquals(gm, gmi.getGameMap());
+    assertEquals(new HashMap<Integer, PlayerMapInfo>(), gmi.getGlobalMap());
 
     Territory t1 = new Territory("Hogwarts", 1, 5);
     Territory t2 = new Territory("Narnia", 2, 3);

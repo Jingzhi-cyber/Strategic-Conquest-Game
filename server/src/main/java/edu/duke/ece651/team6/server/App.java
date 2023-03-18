@@ -18,5 +18,6 @@ public class App {
         break;
       }
     }
+    riscMaster.finish();
   }
 }

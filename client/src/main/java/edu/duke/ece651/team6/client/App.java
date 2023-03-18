@@ -81,7 +81,7 @@ public class App {
         System.out.println(e.getMessage());
         continue;
       }
-      break;
+      // break;
     }
 
     // TODO: if lose can choose to exit or keep the game display
