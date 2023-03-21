@@ -35,6 +35,7 @@ public class TextPlayer implements Player {
   private final GameBasicSetting setting;
   MapTextView mapTextView;
   GameMap gameMap;
+  private boolean hasLost;
   final Integer playerId;
 
   /**
@@ -52,6 +53,7 @@ public class TextPlayer implements Player {
     this.out = out;
     this.setting = setting;
     this.mapTextView = null; // initiate when receiving a global map info
+    this.hasLost = false;
     this.playerId = Integer.valueOf(setting.getPlayerId());
   }
 
@@ -322,7 +324,15 @@ public class TextPlayer implements Player {
     updateAndDisplayMapInfo(); // will update local variables: mapTextView and gameMap
 
     /*
-     * -------- 2. Repeatedly display commands (Move, Attack, Done) until Done,
+     * ---------2. Skip constructing a commit, and skip sending it to the
+     * server, instead, directly waiting for the game result. ----------
+     */
+    if (this.hasLost) {
+      return receiveGameResult();
+    }
+
+    /*
+     * -------- 3. Repeatedly display commands (Move, Attack, Done) until Done,
      * allowing 0-N orders in each turn. Repeatedly check validity of a Commit until
      * it's valid ---------
      */
@@ -338,11 +348,11 @@ public class TextPlayer implements Player {
       break;
     }
 
-    /* -------- 3. Send commit to server --------- */
+    /* -------- 4. Send commit to server --------- */
     this.client.sendCommit(commit);
 
     /*
-     * -------- 4. Handle game result of this turn --------
+     * -------- 5. Handle game result of this turn --------
      */
     return receiveGameResult();
   }
@@ -362,6 +372,7 @@ public class TextPlayer implements Player {
       return Constants.GAME_OVER;
     }
     if (result.getLosers().contains(this.playerId)) {
+      this.hasLost = true;
       Character cmd = null;
       while (true) {
         try {
