@@ -126,6 +126,26 @@ public class Commit implements java.io.Serializable {
   /* ---------------- For server side usage ----------------- */
 
   /**
+   * Perform all checkings at one time.
+   * - Do not perform any actual action
+   * - Used by the server to ensure validity of commit in case of any possible
+   * change before data arrives at the server end
+   * 
+   * @param gameMap is the map where orders are performed on
+   */
+  public void checkAll(GameMap gameMap) {
+    for (MoveOrder move : moves) {
+      checkRules(moveChecker, move, gameMap);
+    }
+
+    for (AttackOrder attack : attacks) {
+      checkRules(attackChecker, attack, gameMap);
+    }
+
+    checkUsableUnitsBeforeSendingToServer();
+  }
+
+  /**
    * Perform move orders
    * 
    * @param gameMap is the map where orders are performed on
@@ -147,10 +167,4 @@ public class Commit implements java.io.Serializable {
     }
   }
 
-  /*
-   * public void performAll() {
-   * moves.forEach((move) -> move.takeAction());
-   * attacks.forEach((attack) -> attack.takeAction());
-   * }
-   */
 }

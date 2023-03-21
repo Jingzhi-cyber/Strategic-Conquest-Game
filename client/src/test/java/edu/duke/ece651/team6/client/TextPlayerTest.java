@@ -408,6 +408,7 @@ public class TextPlayerTest {
         createAssignedTerritories_withUnitsPlaced());
 
     assertEquals("Game Over", player3.playOneTurn());
+
   }
 
   @Test
