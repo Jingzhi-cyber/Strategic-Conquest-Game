@@ -328,7 +328,8 @@ public class Server {
   }
 
   /**
-   * Closes one socket for client.
+   * Closes one socket for client. And close the corresponding client socket form
+   * ArrayList clientSockets.
    * Any thread currently blocked in an I/O operation upon this socket will throw
    * a SocketException.
    * 
@@ -348,11 +349,13 @@ public class Server {
    *                                   clientSockets.size())
    */
   public void closeClientSocketByID(int playerID) throws IOException {
+    clientSockets.remove(playerID);
     closeClientSocket(this.clientSockets.get(playerID));
   }
 
   /**
-   * Closes one socket for client.
+   * Closes one socket for client. And remove the clientSocket from the ArrayList
+   * clientSockets.
    * Any thread currently blocked in an I/O operation upon this socket will throw
    * a SocketException.
    * 
@@ -368,6 +371,10 @@ public class Server {
    * @throws IOException if an I/O error occurs when closing this socket.
    */
   public void closeClientSocket(Socket clientSocket) throws IOException {
+    if (!clientSockets.remove(clientSocket)) {
+      throw new IllegalArgumentException(
+          "The given clientSocket to remove is not in the clientSockets arraylist in server!");
+    }
     clientSocket.close();
   }
 
@@ -383,6 +390,7 @@ public class Server {
 
   /**
    * Get clientSockets that contains all client sockets
+   * 
    * @return this.clientSockets
    */
   public ArrayList<Socket> getClientSockets() {
