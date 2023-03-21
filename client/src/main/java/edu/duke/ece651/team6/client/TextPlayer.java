@@ -14,12 +14,14 @@ import java.util.Set;
 import edu.duke.ece651.team6.shared.AttackOrder;
 import edu.duke.ece651.team6.shared.AttackUnitsRuleChecker;
 import edu.duke.ece651.team6.shared.Commit;
+import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.MoveOrder;
 import edu.duke.ece651.team6.shared.MoveUnitsRuleChecker;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
+import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.SamePlayerPathRuleChecker;
 import edu.duke.ece651.team6.shared.Territory;
 
@@ -33,6 +35,7 @@ public class TextPlayer implements Player {
   private final GameBasicSetting setting;
   MapTextView mapTextView;
   GameMap gameMap;
+  final Integer playerId;
 
   /**
    * Constructs TextPlayer with 4 params
@@ -49,6 +52,7 @@ public class TextPlayer implements Player {
     this.out = out;
     this.setting = setting;
     this.mapTextView = null; // initiate when receiving a global map info
+    this.playerId = Integer.valueOf(setting.getPlayerId());
   }
 
   /**
@@ -62,7 +66,7 @@ public class TextPlayer implements Player {
     HashMap<Territory, Integer> map = new HashMap<Territory, Integer>();
     HashSet<Territory> territories = setting.getAssignedTerritories();
     for (Territory t : territories) {
-      Integer i = readNumUnits("Player" + setting.getPlayerId() + ", how many units to you want to place on the "
+      Integer i = readNumUnits("Player" + this.playerId + ", how many units to you want to place on the "
           + t.getName() + " territory? (" + setting.getRemainingNumUnits() + " remainings)");
       map.put(t, i);
     }
@@ -78,7 +82,7 @@ public class TextPlayer implements Player {
    * @return a string to display available commands
    */
   private String displayAvailableCommands() {
-    return "You are the Player" + setting.getPlayerId() + ", what would you like to do?\n(M)ove\n(A)ttack\n(D)one\n";
+    return "You are the Player" + this.playerId + ", what would you like to do?\n(M)ove\n(A)ttack\n(D)one\n";
   }
 
   /**
@@ -101,11 +105,11 @@ public class TextPlayer implements Player {
    * 
    * @param prompt
    * @return a Character of the command
-   * @throws IOException
+   * @throws IOException, {@link IllegalArgumentException}
    */
-  private Character readCommand(String prompt) throws IOException {
+  private Character readCommand(String prompt, HashSet<String> availableCommands) throws IOException {
     String s = readInputLine(prompt).toUpperCase();
-    if (s.length() != 1 || !getPossibleCommandChars().contains(s)) {
+    if (s.length() != 1 || !availableCommands.contains(s)) {
       throw new IllegalArgumentException(
           "Command must be one of " + getPossibleCommandChars().toString() + ", but was " + s);
     }
@@ -122,8 +126,7 @@ public class TextPlayer implements Player {
     int i = 1;
     HashMap<Integer, Territory> map = new HashMap<>();
 
-    Integer playerId = Integer.valueOf(setting.getPlayerId());
-    PlayerMapInfo playerMapInfo = mapTextView.globalMapInfo.getPlayerMapInfo(playerId);
+    PlayerMapInfo playerMapInfo = mapTextView.globalMapInfo.getPlayerMapInfo(this.playerId);
 
     for (Territory t : playerMapInfo.getTerritories()) {
       printLine(i + ". " + t.getName());
@@ -141,9 +144,8 @@ public class TextPlayer implements Player {
   private HashSet<Territory> findEnemyTerritories() {
     HashSet<Territory> set = new HashSet<>();
     HashMap<Integer, PlayerMapInfo> globalInfo = mapTextView.globalMapInfo.getGlobalMap();
-    Integer playerId = Integer.valueOf(setting.getPlayerId());
     for (Map.Entry<Integer, PlayerMapInfo> entry : globalInfo.entrySet()) {
-      if (!entry.getKey().equals(playerId)) {
+      if (!entry.getKey().equals(this.playerId)) {
         Set<Territory> territories = entry.getValue().getTerritories();
         for (Territory t : territories) {
           set.add(t);
@@ -226,10 +228,10 @@ public class TextPlayer implements Player {
    *             readAnInteger
    */
   protected MoveOrder constructMove() throws IOException {
-    String message = "Player" + setting.getPlayerId() + ", which territory do you want to move units ";
+    String message = "Player" + this.playerId + ", which territory do you want to move units ";
     Territory src = findTerritory(null, message + "from?");
     Territory dest = findTerritory(null, message + "to?");
-    int units = readAnInteger("Player" + setting.getPlayerId() + ", how many units do you want to move?");
+    int units = readAnInteger("Player" + this.playerId + ", how many units do you want to move?");
     return new MoveOrder(src, dest, units);
   }
 
@@ -241,19 +243,26 @@ public class TextPlayer implements Player {
    * @throws {@link      IllegalArgumentException} from readAnInteger
    */
   protected AttackOrder constructAttack() throws IOException {
-    String message = "Player" + setting.getPlayerId() + ", which territory do you want to attack ";
+    String message = "Player" + this.playerId + ", which territory do you want to attack ";
     Territory src = findTerritory(null, message + "from?");
     Territory dest = findTerritory(src, message + "to?");
-    int units = readAnInteger("Player" + setting.getPlayerId() + ", how many units do you want to attack?");
+    int units = readAnInteger("Player" + this.playerId + ", how many units do you want to attack?");
     return new AttackOrder(src, dest, units);
   }
 
+  /**
+   * Construct a commit
+   * 
+   * @return Commit
+   * @throws IOException, {@link ClassNotFoundException}
+   * @catch {@link IllegalArgumentException}
+   */
   private Commit constructCommit() throws IOException, ClassNotFoundException {
-    Commit commit = new Commit(setting.getPlayerId(), new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
+    Commit commit = new Commit(this.playerId, new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
         new AttackUnitsRuleChecker(null));
     while (true) {
       try {
-        Character cmd = readCommand(displayAvailableCommands());
+        Character cmd = readCommand(displayAvailableCommands(), getPossibleCommandChars());
         if (cmd == Character.valueOf('D')) {
           // done
           break;
@@ -302,8 +311,8 @@ public class TextPlayer implements Player {
    * @throws IOException, {@link ClassNotFoundException}
    */
   @Override
-  public void playOneTurn() throws IOException, ClassNotFoundException {
-    /* -------- 1. Display the map --------- */
+  public String playOneTurn() throws IOException, ClassNotFoundException {
+    /* -------- 1. Receive and display the map --------- */
     updateAndDisplayMapInfo(); // will update local variables: mapTextView and gameMap
 
     /*
@@ -326,12 +335,98 @@ public class TextPlayer implements Player {
     /* -------- 3. Send commit to server --------- */
     this.client.sendCommit(commit);
 
-    // TODO: listen to server to see if orders are valid?
-
-    // TODO: receive result and take corresponding actions
-    this.client.recvObject(); // this receives a Result object
+    /*
+     * -------- 4. Handle game result of this turn --------
+     */
+    return receiveGameResult();
   }
 
+  /**
+   * In each turn, receive game result, decide whether to exit if having lost the
+   * game and return player's choice based on game result
+   * 
+   * @return String is player's choice based on game status
+   * @throws IOException, {@link ClassNotFoundException}
+   * @catch {@link IllegalArgumentException}
+   */
+  private String receiveGameResult() throws IOException, ClassNotFoundException {
+    Result result = this.client.recvGameResult(); // this receives a Result object
+    if (result.getWinners().size() > 0) {
+      printLine("Player " + result.getWinners().toString() + " wins!");
+      return Constants.GAME_OVER;
+    }
+    if (result.getLosers().contains(this.playerId)) {
+      Character cmd = null;
+      while (true) {
+        try {
+          cmd = readCommand(displayExitInfo(), getExitCommands());
+        } catch (IllegalArgumentException e) {
+          printLine(e.getMessage());
+          continue;
+        }
+        break; // get the command
+      }
+      // TODO 1: server receives the exit info: true -> exit
+      // TODO 2: server removed the player from list, and send back ack -> safe to
+      // exit
+      if (cmd == 'E') {
+        client.sendExitInfo(Boolean.valueOf(true));
+        return Constants.EXIT;
+      } else {
+        client.sendExitInfo(Boolean.valueOf(false));
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get a set of exit commands
+   * 
+   * @return HashSet<String> of exit related commands
+   */
+  private HashSet<String> getExitCommands() {
+    return new HashSet<String>() {
+      {
+        add("W");
+        add("E");
+      }
+    };
+  }
+
+  /**
+   * Display exit message
+   * 
+   * @return String
+   */
+  private String displayExitInfo() {
+    // TODO set a time clock, if no response, exit the player by server
+    return "You have lost, do you want to keep (W)atching or (E)xit the game?";
+  }
+
+  /**
+   * Play the game by repeatedly calling playOneTurn, and properly handle result
+   * of each turn
+   * 
+   * @throws exceptions, {@link IOException}, {@link UnknownHostException},
+   *                     {@link ClassNotFoundException}
+   */
+  public void playGame() throws IOException, UnknownHostException, ClassNotFoundException {
+    while (true) {
+      String result = playOneTurn();
+      if (result == null) {
+        continue;
+      }
+      if (result.equals(Constants.EXIT) || result.equals(Constants.GAME_OVER)) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Print a string to the OutputStream of the player
+   * 
+   * @param str the string to print
+   */
   private void printLine(String str) {
     out.println(str);
   }
@@ -348,7 +443,7 @@ public class TextPlayer implements Player {
    */
   public void displayGameSetting(String message) {
     printLine(
-        "From server: Welcome to RISC, you are assigned to be Player " + setting.getPlayerId() + ". \n"
+        "From server: Welcome to RISC, you are assigned to be Player " + this.playerId + ". \n"
             + "There are " + setting.getNumPlayers() + " players in total. These territories are assigned to you: \n"
             + Arrays.toString(setting.getAssignedTerritories().toArray()) + ", and you have "
             + setting.getRemainingNumUnits()
@@ -368,12 +463,24 @@ public class TextPlayer implements Player {
   }
 
   /**
+   * Read an integer
+   * 
+   * @param prompt
+   * @return Integer the read Integer
    * @throws NumberFormatException (can be caught by IllegalArgumentException)
    */
   private Integer readAnInteger(String prompt) throws IOException {
     return Integer.valueOf(Integer.parseInt(readInputLine(prompt)));
   }
 
+  /**
+   * Read units for placement
+   * 
+   * @param prompt
+   * @return Integer
+   * @throws IOException
+   * @catch {@link IllegalArgumentException}
+   */
   private Integer readNumUnits(String prompt) throws IOException {
     Integer numUnits = null;
     while (true) {
@@ -391,6 +498,9 @@ public class TextPlayer implements Player {
   }
 
   /**
+   * Update and display the global map information
+   * 
+   * @return {@link GlobalMapInfo}
    * @throws InvalidObjectException
    */
   @Override

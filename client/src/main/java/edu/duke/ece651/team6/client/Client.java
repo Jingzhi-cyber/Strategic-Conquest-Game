@@ -14,8 +14,8 @@ import java.net.UnknownHostException;
 
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
-import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
+import edu.duke.ece651.team6.shared.Result;
 
 /**
  * This class is a wrapper class for client side socket that has a Socket object
@@ -199,6 +199,20 @@ public class Client {
   }
 
   /**
+   * Send exit info to server
+   * - True: ask for leave
+   * - False: ask for keeping watching
+   * 
+   * @param exit
+   * @throws IOException, {@link ClassNotFoundException}
+   */
+  // TODO: determine the recv object's type
+  public void sendExitInfo(Boolean exit) throws IOException, ClassNotFoundException {
+    sendObject(exit);
+    // return recvObject() != null;
+  }
+
+  /**
    * A generic method to receive a specified object from server through socket
    * 
    * @param expectedType
@@ -237,13 +251,13 @@ public class Client {
   }
 
   /**
-   * Receive a {@link GlobalMapInfo} object from server side
+   * Receive a {@link Result} object from server side
    * 
-   * @return {@link GlobalMapInfo}
+   * @return {@link Result}
    * @throws IOException, {@link ClassNotFoundException}
    */
-  // TODO : rm later. this information will be included in the globalMapInfo
-  public GameMap recvGameMap() throws IOException, ClassNotFoundException {
-    return receiveSpecifiedObject(GameMap.class);
+  public Result recvGameResult() throws IOException, ClassNotFoundException {
+    return receiveSpecifiedObject(Result.class);
   }
+
 }
