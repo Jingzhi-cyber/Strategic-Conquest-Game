@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
+import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.MyName;
 
@@ -59,7 +60,7 @@ public class App {
     }
 
     TextPlayer player = new TextPlayer(client, input, System.out, setting);
-    player.displayGameSetting("game setting"); // TODO: custom message?
+    player.displayGameSetting("game setting");
 
     // App app = new App(client, player);
     /* (Only for testing.) */
@@ -74,27 +75,14 @@ public class App {
     player.placeUnit();
 
     /* 3. Play Phase */
-    while (true) {
-      try {
-        player.playOneTurn(); // TODO: check win (can use return value)
-      } catch (IllegalArgumentException e) {
-        System.out.println(e.getMessage());
-        continue;
-      }
-      // break;
-    }
-
-    // TODO: if lose can choose to exit or keep the game display
-
-    // TODO: if win, the master will notify every player and end the game. How to
-    // receive the message?
+    player.playGame();
 
     /* 4. Close Phase */
-    // try {
-    // input.close();
-    // client.closeSocket();
-    // } catch (IOException e) {
-    // System.out.println(e.getMessage());
-    // }
+    try {
+      input.close();
+      client.closeSocket();
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }

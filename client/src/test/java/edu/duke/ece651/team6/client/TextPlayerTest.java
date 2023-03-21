@@ -22,6 +22,7 @@ import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
+import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.Territory;
 
 public class TextPlayerTest {
@@ -53,15 +54,9 @@ public class TextPlayerTest {
   @BeforeEach
   public void setUp() throws IOException, ClassNotFoundException {
     setting = new GameBasicSetting(1, 2, createTerritories_withoutUnitsPlacement(), 10);
-    // when(client.)
-
-    // MapTextView mtv = spy(new MapTextView(expectedMap));
-    // set up the expected map data
-    // gameMap = createGameMap();
-    // updateAndDisplayMapInfo();
-    when(client.recvGlobalMapInfo()).thenReturn(createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement()));
-    // when(client.recvGameMap()).thenReturn(createGameMap());
-    // when(gameMap.hasSamePlayerPath(any(), any())).thenReturn(true);
+    when(this.client.recvGlobalMapInfo())
+        .thenReturn(createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement()));
+    when(this.client.recvGameResult()).thenReturn(new Result());
   }
 
   private TextPlayer createTextPlayer(String inputData, OutputStream bytes, HashSet<Territory> territories)

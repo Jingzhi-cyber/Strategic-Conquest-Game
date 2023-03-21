@@ -27,8 +27,10 @@ public interface Player {
    * 1. Receive playerinfo from master
    * 2. Make several actions, create a commit
    * 3. Send commit to master, if the master says the commit is invalid, repeat 2
+   * 
+   * @return a String indicating the exit info of the player of the turn
    */
-  public void playOneTurn() throws IOException, ClassNotFoundException;
+  public String playOneTurn() throws IOException, ClassNotFoundException;
 
   /**
    * Receive updated map information
