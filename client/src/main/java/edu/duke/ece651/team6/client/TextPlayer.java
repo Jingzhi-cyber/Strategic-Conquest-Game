@@ -65,7 +65,13 @@ public class TextPlayer implements Player {
     // printLine("From client: Requesting to " + prompt);
     HashMap<Territory, Integer> map = new HashMap<Territory, Integer>();
     HashSet<Territory> territories = setting.getAssignedTerritories();
+    int count = 1;
     for (Territory t : territories) {
+      if (count >= territories.size()) {
+        map.put(t, setting.getRemainingNumUnits());
+        break;
+      }
+      count++;
       Integer i = readNumUnits("Player" + this.playerId + ", how many units to you want to place on the "
           + t.getName() + " territory? (" + setting.getRemainingNumUnits() + " remainings)");
       map.put(t, i);
@@ -412,11 +418,8 @@ public class TextPlayer implements Player {
    */
   public void playGame() throws IOException, UnknownHostException, ClassNotFoundException {
     while (true) {
-      String result = playOneTurn();
-      if (result == null) {
-        continue;
-      }
-      if (result.equals(Constants.EXIT) || result.equals(Constants.GAME_OVER)) {
+      String result = playOneTurn(); // Constants.EXIT or Constants.GAME_OVER
+      if (result != null) {
         break;
       }
     }
