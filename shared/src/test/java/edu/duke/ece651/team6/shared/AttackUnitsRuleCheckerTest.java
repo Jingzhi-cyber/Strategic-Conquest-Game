@@ -26,11 +26,12 @@ public class AttackUnitsRuleCheckerTest {
   @Test
   public void test_checkOrder() {
     AttackUnitsRuleChecker checker = new AttackUnitsRuleChecker(null);
+    AttackUnitsRuleChecker checker2 = new AttackUnitsRuleChecker(null);
 
     assertNotNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 0), map));
-    assertNotNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 4), map));
+    assertNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 4), map));
     assertNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 3), map));
-    assertNotNull(checker.checkOrder(new AttackOrder(territoryC, territoryA, -1), map));
+    assertNotNull(checker2.checkOrder(new AttackOrder(territoryC, territoryA, -1), map));
   }
 
 }

@@ -13,8 +13,8 @@ public class Commit implements java.io.Serializable {
   transient ListIterator<MoveOrder> moveIterator;
   transient ListIterator<AttackOrder> attackIterator;
 
-  transient MoveOrderRuleChecker moveChecker;
-  transient AttackOrderRuleChecker attackChecker;
+  transient OrderRuleChecker moveChecker;
+  transient OrderRuleChecker attackChecker;
   // HashMap<String, Integer> remainingUnits;
 
   /**
@@ -24,16 +24,17 @@ public class Commit implements java.io.Serializable {
    * @param moveChecker   represents a chain of rules for move order
    * @param attackChecker represents a chain of rules for attack order
    */
-  public Commit(int playerId, MoveOrderRuleChecker moveChecker, AttackOrderRuleChecker attackChecker) {
+  public Commit(int playerId) {
     this.playerId = playerId;
     this.moves = new ArrayList<MoveOrder>();
     this.attacks = new ArrayList<>();
-    this.moveChecker = moveChecker;
-    this.attackChecker = attackChecker;
-    // this.remainingUnits = remainingUnits;
+    this.moveChecker = new SrcOwerIdRuleChecker(new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
+        playerId);
+    this.attackChecker = new SrcOwerIdRuleChecker(new AttackUnitsRuleChecker(new EnemyNeighborRuleChecker(null)),
+        playerId);
 
-    this.moveIterator = moves.listIterator();
-    this.attackIterator = attacks.listIterator();
+    // this.moveIterator = moves.listIterator();
+    // this.attackIterator = attacks.listIterator();
   }
 
   /* -------------- For client side usage --------------- */
@@ -48,12 +49,10 @@ public class Commit implements java.io.Serializable {
    * @throws IllegalArgumentException when violating any rules
    */
   private void checkRules(OrderRuleChecker checker, SimpleMove simpleMove, GameMap gameMap) {
-    String result = checker.checkMyRule(simpleMove, gameMap);
+    String result = checker.checkOrder(simpleMove, gameMap);
     if (result != null) {
       throw new IllegalArgumentException(result);
     }
-    // remainingUnits.put(simpleMove.src.getName(),
-    // remainingUnits.get(simpleMove.src.getName()) - simpleMove.numUnits);
   }
 
   /**
@@ -66,7 +65,7 @@ public class Commit implements java.io.Serializable {
   public void addMove(MoveOrder move, GameMap gameMap) {
     checkRules(moveChecker, move, gameMap);
     moves.add(move);
-    moveIterator = moves.listIterator();
+    // moveIterator = moves.listIterator();
   }
 
   /**
@@ -79,22 +78,14 @@ public class Commit implements java.io.Serializable {
   public void addAttack(AttackOrder attack, GameMap gameMap) {
     checkRules(attackChecker, attack, gameMap);
     attacks.add(attack);
-    attackIterator = attacks.listIterator();
+    // attackIterator = attacks.listIterator();
   }
-
-  /*
-   * private void performAMove() {
-   * if (moveIterator.hasNext()) {
-   * moveIterator.next().takeAction();
-   * }
-   * }
-   */
 
   private String constructPrompt(String orderName, SimpleMove move, int remainingUnits) {
     return orderName + move.toString() + " cannot be performed, with " + remainingUnits + " remaining units";
   }
 
-  public void checkUsableUnitsBeforeSendingToServer() {
+  public void checkUsableUnitsAfterAllOrdersAreCollected() {
     // only check remaining units (not check > 0 here, check it with rule checker)
     HashMap<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
     for (MoveOrder move : moves) {
@@ -118,8 +109,10 @@ public class Commit implements java.io.Serializable {
         throw new IllegalArgumentException(constructPrompt("Attack", attack, remainingUnits.get(attack.src)));
       }
       remainingUnits.put(attack.src, remainingUnits.get(attack.src) - attack.numUnits);
-      remainingUnits.put(attack.dest,
-          remainingUnits.getOrDefault(attack.dest, attack.dest.getNumUnits()) + attack.numUnits);
+      // fixed a bug here: incorrect: as units attacked out are not reflected on the
+      // dest units (are only updated after a war)
+      // remainingUnits.put(attack.dest,remainingUnits.getOrDefault(attack.dest,
+      // attack.dest.getNumUnits()) + attack.numUnits);
     }
   }
 
@@ -142,7 +135,7 @@ public class Commit implements java.io.Serializable {
       checkRules(attackChecker, attack, gameMap);
     }
 
-    checkUsableUnitsBeforeSendingToServer();
+    checkUsableUnitsAfterAllOrdersAreCollected();
   }
 
   /**

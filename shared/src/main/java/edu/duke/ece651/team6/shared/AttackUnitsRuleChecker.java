@@ -9,7 +9,7 @@ public class AttackUnitsRuleChecker extends AttackOrderRuleChecker {
    * 
    * @param checker is the next rule in the rule chain
    */
-  public AttackUnitsRuleChecker(AttackOrderRuleChecker checker) {
+  public AttackUnitsRuleChecker(OrderRuleChecker checker) {
     super(checker);
   }
 
@@ -26,9 +26,9 @@ public class AttackUnitsRuleChecker extends AttackOrderRuleChecker {
    */
   @Override
   protected String checkMyRule(SimpleMove move, GameMap theMap) {
-    if (move.numUnits <= 0 || move.numUnits > move.src.getNumUnits()) {
-      return "Invalid number of units: " + move.numUnits + " with maximum " + move.src.getNumUnits()
-          + " usable units";
+    if (move.numUnits <= 0) { // || move.numUnits > move.src.getNumUnits() could be valid if some units are
+                              // moved here
+      return "Units for attack order must be postive, but was " + move.numUnits;
     }
     return null;
   }

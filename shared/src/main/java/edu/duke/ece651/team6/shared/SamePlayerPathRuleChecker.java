@@ -10,7 +10,7 @@ public class SamePlayerPathRuleChecker extends MoveOrderRuleChecker {
    * 
    * @param next the next rule of the rule chain
    */
-  public SamePlayerPathRuleChecker(MoveOrderRuleChecker checker) {
+  public SamePlayerPathRuleChecker(OrderRuleChecker checker) {
     super(checker);
   }
 
