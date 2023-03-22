@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
-import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.MyName;
 
@@ -63,14 +62,7 @@ public class App {
     player.displayGameSetting("game setting");
 
     // App app = new App(client, player);
-    /* (Only for testing.) */
-    // TestMap recvMap = (TestMap) client.recvObject(); // receive an object from
-    // server and cast it to a mao
-    // System.out.println(recvMap.getName());
-    // TestMap sendMap = new TestMap("From player: hello server, this is the updated
-    // map");
-    // client.sendObject(sendMap); // send a map object to server
-
+    
     /* 2. Initiation Phase */
     player.placeUnit();
 

@@ -206,10 +206,8 @@ public class Client {
    * @param exit
    * @throws IOException, {@link ClassNotFoundException}
    */
-  // TODO: determine the recv object's type
   public void sendExitInfo(Boolean exit) throws IOException, ClassNotFoundException {
     sendObject(exit);
-    // return recvObject() != null;
   }
 
   /**
