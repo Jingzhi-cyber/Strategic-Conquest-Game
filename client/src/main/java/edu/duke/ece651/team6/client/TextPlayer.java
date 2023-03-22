@@ -12,18 +12,14 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.duke.ece651.team6.shared.AttackOrder;
-import edu.duke.ece651.team6.shared.AttackUnitsRuleChecker;
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.MoveOrder;
-import edu.duke.ece651.team6.shared.MoveUnitsRuleChecker;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.Result;
-import edu.duke.ece651.team6.shared.SamePlayerPathRuleChecker;
-import edu.duke.ece651.team6.shared.SrcOwerIdRuleChecker;
 import edu.duke.ece651.team6.shared.Territory;
 
 /**
@@ -72,6 +68,8 @@ public class TextPlayer implements Player {
     for (Territory t : territories) {
       if (count >= territories.size()) {
         map.put(t, setting.getRemainingNumUnits());
+        printLine("The remaining " + setting.getRemainingNumUnits()
+            + " units have been automatically placed onto territory " + t.getName());
         break;
       }
       count++;
@@ -81,10 +79,11 @@ public class TextPlayer implements Player {
     }
 
     setting.initializeUnitPlacement(map);
+    
     // send back the GameBasicSetting object with the updated unit placement info.
     client.sendUpdatedGameBasicSetting(setting);
+    printLine("Units placement information has been successfully sent to the server");
     printLine((String) client.recvObject());
-    // recvAndDisplayTextMap();
   }
 
   /**
@@ -350,6 +349,7 @@ public class TextPlayer implements Player {
 
     /* -------- 4. Send commit to server --------- */
     this.client.sendCommit(commit);
+     printLine("Order information has been successfully submitted to the server");
 
     /*
      * -------- 5. Handle game result of this turn --------
@@ -427,6 +427,7 @@ public class TextPlayer implements Player {
    * @throws exceptions, {@link IOException}, {@link UnknownHostException},
    *                     {@link ClassNotFoundException}
    */
+  @Override
   public void playGame() throws IOException, UnknownHostException, ClassNotFoundException {
     while (true) {
       String result = playOneTurn(); // Constants.EXIT or Constants.GAME_OVER

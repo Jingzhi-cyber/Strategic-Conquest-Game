@@ -1,6 +1,7 @@
 package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 
@@ -31,6 +32,15 @@ public interface Player {
    * @return a String indicating the exit info of the player of the turn
    */
   public String playOneTurn() throws IOException, ClassNotFoundException;
+
+  /**
+   * Play the game by repeatedly calling playOneTurn, and properly handle result
+   * of each turn
+   * 
+   * @throws exceptions, {@link IOException}, {@link UnknownHostException},
+   *                     {@link ClassNotFoundException}
+   */
+  public void playGame() throws IOException, UnknownHostException, ClassNotFoundException;
 
   /**
    * Receive updated map information
