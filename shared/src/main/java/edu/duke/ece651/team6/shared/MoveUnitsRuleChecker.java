@@ -11,7 +11,7 @@ public class MoveUnitsRuleChecker extends MoveOrderRuleChecker {
    * 
    * @param next the next rule of the rule chain
    */
-  public MoveUnitsRuleChecker(MoveOrderRuleChecker checker) {
+  public MoveUnitsRuleChecker(OrderRuleChecker checker) {
     super(checker);
   }
 
@@ -28,8 +28,9 @@ public class MoveUnitsRuleChecker extends MoveOrderRuleChecker {
    */
   @Override
   protected String checkMyRule(SimpleMove move, GameMap theMap) {
-    if (move.numUnits < 0 || move.numUnits > move.src.getNumUnits()) {
-      return "Invalid unit number.";
+    if (move.numUnits < 0) { // || move.numUnits > move.src.getNumUnits() it could be valid if more units are
+                             // moved here
+      return "Units for move order must be non-negative but was " + move.numUnits;
     }
     return null;
   }

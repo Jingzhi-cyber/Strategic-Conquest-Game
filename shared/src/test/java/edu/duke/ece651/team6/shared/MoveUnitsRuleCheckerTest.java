@@ -11,7 +11,7 @@ public class MoveUnitsRuleCheckerTest {
     String result = checker.checkMyRule(new MoveOrder(new Territory("A", 1, 3), new Territory("B", 1, 4), 1), null);
     assertNull(result);
 
-    String result_invalid = checker.checkMyRule(new MoveOrder(new Territory("A", 1, 3), new Territory("B", 1, 4), 4),
+    String result_invalid = checker.checkMyRule(new MoveOrder(new Territory("A", 1, 3), new Territory("B", 1, 4), -2),
         null);
     assertNotNull(result_invalid);
   }

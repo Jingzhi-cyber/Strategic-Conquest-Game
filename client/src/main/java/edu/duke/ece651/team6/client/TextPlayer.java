@@ -23,6 +23,7 @@ import edu.duke.ece651.team6.shared.MoveUnitsRuleChecker;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.SamePlayerPathRuleChecker;
+import edu.duke.ece651.team6.shared.SrcOwerIdRuleChecker;
 import edu.duke.ece651.team6.shared.Territory;
 
 /**
@@ -266,8 +267,7 @@ public class TextPlayer implements Player {
    * @catch {@link IllegalArgumentException}
    */
   private Commit constructCommit() throws IOException, ClassNotFoundException {
-    Commit commit = new Commit(this.playerId, new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null)),
-        new AttackUnitsRuleChecker(null));
+    Commit commit = new Commit(this.playerId);
     while (true) {
       try {
         Character cmd = readCommand(displayAvailableCommands(), getPossibleCommandChars());
@@ -340,7 +340,7 @@ public class TextPlayer implements Player {
     while (true) {
       try {
         commit = constructCommit();
-        commit.checkUsableUnitsBeforeSendingToServer();
+        commit.checkUsableUnitsAfterAllOrdersAreCollected();
       } catch (IllegalArgumentException e) {
         printLine(e.getMessage());
         continue;
