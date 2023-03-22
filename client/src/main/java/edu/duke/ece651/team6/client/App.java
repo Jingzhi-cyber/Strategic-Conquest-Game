@@ -50,7 +50,7 @@ public class App {
       // create a client obejct and connect it to the server
       client = new Client("127.0.0.1", 12345);
       System.out.println((String) client.recvObject());
-      setting = client.recvGameBasicSetting("game setting");
+      setting = client.recvGameBasicSetting();
       input = new BufferedReader(new InputStreamReader(System.in));
     } catch (UnknownHostException e) {
       System.out.println("UnknownHostException " + e.getMessage());
@@ -62,7 +62,7 @@ public class App {
     player.displayGameSetting("game setting");
 
     // App app = new App(client, player);
-    
+
     /* 2. Initiation Phase */
     player.placeUnit();
 
