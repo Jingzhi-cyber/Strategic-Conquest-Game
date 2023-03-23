@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
 import edu.duke.ece651.team6.shared.GameBasicSetting;
-import edu.duke.ece651.team6.shared.MyName;
 
 public class App {
   Client client;
@@ -27,18 +26,6 @@ public class App {
   public App(Client client, TextPlayer player) {
     this.client = client;
     this.player = player;
-  }
-  // Takes an Inputstream and transfer its bytes into a string, then return the
-  // string
-  // private String getStringFromIS(InputStream is) throws IOException {
-  // byte[] bytes = new byte[0];
-  // bytes = new byte[is.available()];
-  // is.read(bytes);
-  // return new String(bytes);
-  // }
-
-  public String getMessage() {
-    return "Hello from the client for " + MyName.getName();
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
@@ -68,7 +55,7 @@ public class App {
     }
 
     TextPlayer player = new TextPlayer(client, input, System.out, setting);
-    player.displayGameSetting("game setting");
+    player.displayGameSetting();
 
     // App app = new App(client, player);
 
