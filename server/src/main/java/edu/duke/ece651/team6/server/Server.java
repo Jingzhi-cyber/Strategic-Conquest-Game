@@ -7,7 +7,6 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.IllegalBlockingModeException;
@@ -220,7 +219,7 @@ public class Server {
    * of confirmation to the specific player and add the object into recvedObjecs
    * ArrayList. After all threads are finished, this method will return the
    * recvedObject ArrayList.
-   * 
+   *
    * @return an ArrayList that has all the received objects.
    */
   public ArrayList<Object> recvObjectFromALL() {
@@ -348,10 +347,10 @@ public class Server {
    *                                   (playerID < 0 || index >=
    *                                   clientSockets.size())
    */
-  public void closeClientSocketByID(int playerID) throws IOException {
-    clientSockets.remove(playerID);
-    closeClientSocket(this.clientSockets.get(playerID));
-  }
+  // public void closeClientSocketByID(int playerID) throws IOException {
+  // clientSockets.remove(playerID);
+  // closeClientSocket(this.clientSockets.get(playerID));
+  // }
 
   /**
    * Closes one socket for client. And remove the clientSocket from the ArrayList
@@ -378,15 +377,15 @@ public class Server {
     clientSocket.close();
   }
 
-  /**
-   * Returns the local address of this server socket as an InetAddress object.
-   * 
-   * @return an InetAddress object that is the local address of this server
-   *         socket.
-   */
-  public InetAddress getInetAddress() {
-    return this.serverSocket.getInetAddress();
-  }
+  // /**
+  // * Returns the local address of this server socket as an InetAddress object.
+  // *
+  // * @return an InetAddress object that is the local address of this server
+  // * socket.
+  // */
+  // public InetAddress getInetAddress() {
+  // return this.serverSocket.getInetAddress();
+  // }
 
   /**
    * Get clientSockets that contains all client sockets
