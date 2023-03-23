@@ -75,10 +75,11 @@ public class Client {
    *                                  found.
    * 
    */
-  public Client(InetAddress address, int port) throws IOException, ClassNotFoundException {
-    this.socket = new Socket(address, port);
-    System.out.println((String) recvObject());
-  }
+  // public Client(InetAddress address, int port) throws IOException,
+  // ClassNotFoundException {
+  // this.socket = new Socket(address, port);
+  // System.out.println((String) recvObject());
+  // }
 
   /**
    * Receive data from the connected server. The received data is stored in the
