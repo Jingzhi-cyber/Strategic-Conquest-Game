@@ -10,12 +10,9 @@ public class Commit implements java.io.Serializable {
   int playerId;
   List<MoveOrder> moves;
   List<AttackOrder> attacks;
-  transient ListIterator<MoveOrder> moveIterator;
-  transient ListIterator<AttackOrder> attackIterator;
 
   OrderRuleChecker moveChecker;
   OrderRuleChecker attackChecker;
-  // HashMap<String, Integer> remainingUnits;
 
   /**
    * Construct a Commit object with 4 params
@@ -32,9 +29,6 @@ public class Commit implements java.io.Serializable {
         playerId);
     this.attackChecker = new SrcOwerIdRuleChecker(new AttackUnitsRuleChecker(new EnemyNeighborRuleChecker(null)),
         playerId);
-
-    // this.moveIterator = moves.listIterator();
-    // this.attackIterator = attacks.listIterator();
   }
 
   /* -------------- For client side usage --------------- */
@@ -65,7 +59,6 @@ public class Commit implements java.io.Serializable {
   public void addMove(MoveOrder move, GameMap gameMap) {
     checkRules(moveChecker, move, gameMap);
     moves.add(move);
-    // moveIterator = moves.listIterator();
   }
 
   /**
@@ -78,7 +71,6 @@ public class Commit implements java.io.Serializable {
   public void addAttack(AttackOrder attack, GameMap gameMap) {
     checkRules(attackChecker, attack, gameMap);
     attacks.add(attack);
-    // attackIterator = attacks.listIterator();
   }
 
   private String constructPrompt(String orderName, SimpleMove move, int remainingUnits) {
