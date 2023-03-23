@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.shared;
 /**
  * An abstract rule checker class to check validity of orders
  */
-public abstract class OrderRuleChecker {
+public abstract class OrderRuleChecker implements java.io.Serializable {
   private final OrderRuleChecker next;
 
   /**
@@ -18,8 +18,8 @@ public abstract class OrderRuleChecker {
   /**
    * This method checks placement rules as a whole
    * 
-   * @param theShip  is the current ship
-   * @param theBoard is the current board
+   * @param move
+   * @param theMap
    * @return a string telling if it obeys my own rule, null if all of the rules on
    *         the chain pass, or a message string if any of the rules failed
    */

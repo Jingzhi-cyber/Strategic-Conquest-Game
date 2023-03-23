@@ -7,54 +7,90 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import edu.duke.ece651.team6.shared.PlayerProfile;
 import edu.duke.ece651.team6.shared.Result;
-import edu.duke.ece651.team6.shared.SampleMap;
-import edu.duke.ece651.team6.shared.SimpleMap;
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.Territory;
+import edu.duke.ece651.team6.shared.Constants;
 //import edu.duke.ece651.team6.shared.TestMap;
 
 public class RiscMaster implements Master {
 
   private final Server server;
-  private final int serverPort;
   private final int playerNum;
+  private final GameMap gameMap;
   private final int territoryNum;
   private final int availableUnits;
+
   private HashMap<Integer, PlayerProfile> playerProfiles;
-  private GameMap gameMap;
+  private CopyOnWriteArraySet<Integer> connectedPlayers;
   private HashSet<Integer> losers;
 
-  public RiscMaster(int port, int playerNum) throws IOException {
+  /**
+   * Construct a RiscMaster
+   * 
+   * @param port the port Server listens on
+   * @param playerNum number of players
+   * @param gameMap map of the game
+   * @throws IOException if creating new Server fails
+   */
+  public RiscMaster(int port, int playerNum, GameMap gameMap) throws IOException {
     if (port <= 0 || port > 65535) {
       throw new IllegalArgumentException("port number needs to be between 1 - 65535 but is " + Integer.toString(port));
     }
-    this.serverPort = port;
     if (playerNum < 2 || playerNum > 4) {
       throw new IllegalArgumentException(
           "player number needs to be between 2 - 4 but is " + Integer.toString(playerNum));
     }
     this.playerNum = playerNum;
-    this.server = new Server(serverPort);
-    // this.territoryNum = 24;
-    this.territoryNum = 2;
-    this.availableUnits = 48;
+    this.server = new Server(port);
+    this.gameMap = gameMap;
+    this.territoryNum = this.gameMap.getTerritoryNum();
+    if (this.territoryNum % this.playerNum != 0) {
+      throw new IllegalArgumentException("The number of territories does not work for the number of players! Some territories will not have owner.");
+    }
+    this.availableUnits = Constants.UNITS_PER_PLAYER;
     this.playerProfiles = new HashMap<Integer, PlayerProfile>();
     this.losers = new HashSet<Integer>();
+    this.connectedPlayers = new CopyOnWriteArraySet<Integer>();
+  }
+
+  /**
+   * Construct a RiscMaster by passing a server - Mainly for testing
+   * 
+   * @param server
+   * @param playerNum
+   * @param gameMap
+   * @throws IOException
+   */
+  public RiscMaster(Server server, int playerNum, GameMap gameMap) throws IOException {
+    if (playerNum < 2 || playerNum > 4) {
+      throw new IllegalArgumentException(
+          "player number needs to be between 2 - 4 but is " + Integer.toString(playerNum));
+    }
+    this.playerNum = playerNum;
+    this.server = server;
+    this.gameMap = gameMap;
+    this.territoryNum = this.gameMap.getTerritoryNum();
+    this.availableUnits = Constants.UNITS_PER_PLAYER;
+    this.playerProfiles = new HashMap<Integer, PlayerProfile>();
+    this.losers = new HashSet<Integer>();
+    this.connectedPlayers = new CopyOnWriteArraySet<Integer>();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public boolean init() throws IOException {
+  public void init() throws IOException {
     /**
      * Wait for all players connecting to Master.
      * For each player connects to Master:
@@ -64,84 +100,48 @@ public class RiscMaster implements Master {
     System.out.println("RiscMaster.server initializing connection to players...");
     server.acceptMultiPlayers(playerNum);
     ArrayList<Socket> clientSockets = server.getClientSockets();
-    int ownerId = 0;
-    for (Socket sock : clientSockets) {
-      PlayerProfile playerProfile = new PlayerProfile(ownerId);
-      playerProfile.setSocket(sock);
-      playerProfiles.put(ownerId, playerProfile);
-      ownerId++;
+    int playerId = 0;
+    for (Socket socket : clientSockets) {
+      PlayerProfile playerProfile = new PlayerProfile(playerId);
+      playerProfile.setSocket(socket);
+      playerProfiles.put(playerId, playerProfile);
+      connectedPlayers.add(playerId);
+      playerId++;
     }
     System.out.println("RiscMaster.server initialize player connection finished!");
-    return true;
   }
 
-  public void prepare() {
-    /**
-     * Generate a random GameMap according to playerNum
-     */
-    // MapGenerator mapGenerator = new MapGenerator(24);
-    // this.gameMap = new GameMap(mapGenerator.getTheMap());
-
-    // Testing: Use SampleMap
-    // SampleMap sampleMap = new SampleMap();
-    // GameMap gm = new GameMap(sampleMap.getAdjList());
-    // this.gameMap = gm;
-
-    // Testing: Use SimpleMap
-    SimpleMap simpleMap = new SimpleMap();
-    GameMap gm = new GameMap(simpleMap.getAdjList());
-    this.gameMap = gm;
-
+  /**
+   * Set up the GameMap before starting the game
+   *  - Send assigned Territories to each player
+   *  - Receive players' placement of units to their territories
+   */
+  public void setUpGameBasicSettings() {
     /**
      * Randomly assign same amount of Territories to players
      * Send GameBasicSetting including territories and total units available for
      * placement to players
      */
-    ArrayList<Territory> territories = new ArrayList<Territory>(gameMap.getTerritorySet());
-    Collections.shuffle(territories);
-    int territoryNumPerPlayer = territoryNum / playerNum;
-    ArrayList<HashSet<Territory>> assignedTerritoryList = new ArrayList<HashSet<Territory>>();
-    for (int i = 0; i < playerNum; ++i) {
-      HashSet<Territory> assignedTerritories = new HashSet<Territory>();
-      for (int j = i * territoryNumPerPlayer; j < (i + 1) * territoryNumPerPlayer; ++j) {
-        assignedTerritories.add(territories.get(j));
-      }
-      assignedTerritoryList.add(assignedTerritories);
-    }
+    LinkedList<HashSet<Territory>> assignedTerritoryList = generateRandomTerritoryAssignment();
 
-    int curr = 0;
-    for (int ownerId : playerProfiles.keySet()) {
-      HashSet<Territory> assignedTerritories = assignedTerritoryList.get(curr);
-      curr++;
+    for (int playerId : connectedPlayers) {
+      HashSet<Territory> assignedTerritories = assignedTerritoryList.poll();
       for (Territory t : assignedTerritories) {
-        t.setOwnerId(ownerId);
+        t.setOwnerId(playerId);
       }
-      GameBasicSetting gameBasicSetting = new GameBasicSetting(ownerId, playerNum, assignedTerritories, availableUnits);
-      Socket sock = playerProfiles.get(ownerId).getSocket();
-      System.out.println("Sending GameBasicSetting to playerId: " + ownerId + " ...");
-      try {
-        server.sendObject(sock, gameBasicSetting);
-      } catch (IOException e) {
-        System.out.println(e.getMessage());
-      }
-      System.out.println("Send GameBasicSetting to playerId: " + ownerId + " finished!");
+      GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, assignedTerritories, availableUnits);
+      safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
     }
 
     /**
      * Receive unit placement from player
      * Check if that placement is valid (already checked in client side)
      */
-    System.out.println("Receiving GameBasicSetting from players...");
-    ArrayList<Object> objects = server.recvObjectFromALL();
-    System.out.println("Receive GameBasicSetting from players finished!");
-
-    // If valid, execute that placement
-    for (Object o : objects) {
-      GameBasicSetting gameBasicSetting = (GameBasicSetting) o;
-      HashMap<Territory, Integer> unitPlacement = gameBasicSetting.getUnitPlacement();
-      for (Territory t : unitPlacement.keySet()) {
-        Territory territory = gameMap.getTerritoryByName(t.getName());
-        territory.initNumUnits(unitPlacement.get(t));
+    for (int playerId : connectedPlayers) {
+      Object o = safeRecvObjectFromPlayer(playerId, "GameBasicSetting");
+      if (o != null) {
+        GameBasicSetting gameBasicSetting = (GameBasicSetting) o;
+        assignUnitPlacements(gameBasicSetting);
       }
     }
   }
@@ -151,77 +151,87 @@ public class RiscMaster implements Master {
    */
   @Override
   public boolean playOneTurn() throws IOException {
+    if (connectedPlayers.size() == 0) {
+      System.out.println("No players connected - Game Ends");
+      return true;
+    }
     printGameMap();
     /**
      * Generate GlobalMapInfo. This should be the same for all players.
      */
-    GlobalMapInfo globalMapInfo = new GlobalMapInfo(this.gameMap);
-    for (int id : playerProfiles.keySet()) {
-      globalMapInfo.addPlayerMapInfo(createPlayerMapInfo(id));
-    }
+    GlobalMapInfo globalMapInfo = createGlobalMapInfo();
 
     /**
      * Send GlobalMapInfo to all players.
      */
-    System.out.println("Sending GlobalMapInfo to players...");
-    server.sendObjectToAll(globalMapInfo);
-    System.out.println("Send GlobalMapInfo to players finished!");
+    for (int playerId : connectedPlayers) {
+      safeSendObjectToPlayer(playerId, globalMapInfo, "GlobalMapInfo");
+    }
 
     /**
      * Receive commit from each player, check if that is valid (already checked in
      * client side)
      * Execute the commits
      */
-    System.out.println("Receiving Commit from players...");
     ArrayList<Object> objects = new ArrayList<Object>();
-    for (int playerId : playerProfiles.keySet()) {
+    for (int playerId : connectedPlayers) {
       if (losers.contains(playerId)) {
         continue;
       }
-      try {
-        objects.add(server.recvObject(playerProfiles.get(playerId).getSocket()));
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
+      Object o = safeRecvObjectFromPlayer(playerId, "Commit");
+      if (o != null) {
+        objects.add(o);
       }
     }
-    System.out.println("Receive Commit from players finished!");
 
     ArrayList<Commit> commits = new ArrayList<Commit>();
     for (Object o : objects) {
       Commit commit = (Commit) o;
+      // double-check the commit on Master side
+      try {
+        commit.checkAll(gameMap);
+      } catch (IllegalArgumentException e) {
+        System.out.println("Receive Commit that is invalid, drop that commit");
+        continue;
+      }
       commits.add(commit);
     }
-    for (Commit c : commits) {
-      c.performMoves(this.gameMap);
-    }
-    for (Commit c : commits) {
-      c.performAttacks(this.gameMap);
-    }
-    Set<Territory> territories = this.gameMap.getTerritorySet();
-    for (Territory territory : territories) {
-      territory.update();
-    }
-    System.out.println("Commits execution finished!");
+    executeCommits(commits);
 
     /**
      * Check if anyone wins.
      * Check if anyone loses.
      */
     Result result = checkResult();
-    server.sendObjectToAll(result);
-    if (!result.getWinners().isEmpty()) {
-      for (int winnerId : result.getWinners()) {
-        System.out.println("Winner! PlayerId: " + winnerId);
-      }
-      return true;
+    for (int playerId : connectedPlayers) {
+      safeSendObjectToPlayer(playerId, result, "Result");
     }
 
     if (!result.getLosers().isEmpty()) {
       for (int loserId : result.getLosers()) {
-        System.out.println("Loser! PlayerId: " + loserId);
         losers.add(loserId);
       }
     }
+
+    for (int playerId : losers) {
+      if (!connectedPlayers.contains(playerId)) {
+        continue;
+      }
+      Boolean isExit = (Boolean) safeRecvObjectFromPlayer(playerId, "isExit");
+      if (isExit != null && isExit) {
+        connectedPlayers.remove(playerId);
+        try {
+          server.closeClientSocket(playerProfiles.get(playerId).getSocket());
+        } catch (IOException e) { // handle error occurs when closeClientSocket()
+          System.out.println("server.closeClientSocket() error: " + e.getMessage());
+        }
+      } 
+    }
+
+    if (!result.getWinners().isEmpty()) {
+      return true;
+    }
+
     return false;
   }
 
@@ -231,10 +241,115 @@ public class RiscMaster implements Master {
    * @throws IOException
    */
   public void finish() throws IOException {
-    for (int playerId : playerProfiles.keySet()) {
+    for (int playerId : connectedPlayers) {
       server.closeClientSocket(playerProfiles.get(playerId).getSocket());
     }
     server.closeServerSocket();
+    System.out.println("Game Ends.");
+  }
+
+  /**
+   * Send an object to a player specified by playerId
+   * 'safe' means java.io error are handled, especially 
+   * if a player disconnects, the exceptions are caught,
+   * playerId is removed from this.connectedPlayers, and
+   * the socket to the player is closed
+   * 
+   * @param playerId
+   * @param object
+   * @param objectName
+   */
+  private void safeSendObjectToPlayer(int playerId, Object object, String objectName) {
+    Socket socket = playerProfiles.get(playerId).getSocket();
+    System.out.println("Send " + objectName + " to playerId: " + playerId + " ...");
+    try {
+      server.sendObject(socket, object);
+    } catch (IOException e1) { // network error when sending e.g. the player disconnected
+      System.out.println("Send " + objectName + " to playerId: " + playerId + " error: " + e1.getMessage());
+      connectedPlayers.remove(playerId);
+      try {
+        server.closeClientSocket(socket);
+      } catch (IOException e2) { // handle error occurs when closeClientSocket()
+        System.out.println("server.closeClientSocket() error: " + e2.getMessage());
+      }
+    }
+    System.out.println("Send " + objectName + " to playerId: " + playerId + " success!");
+  }
+
+  /**
+   * Receive an object from a player specified by playerId
+   * 'safe' means java.io error are handled, especially 
+   * if a player disconnects, the exceptions are caught,
+   * playerId is removed from this.connectedPlayers, and
+   * the socket to the player is closed
+   * 
+   * @param playerId
+   * @param objectName
+   * @return received object
+   */
+  private Object safeRecvObjectFromPlayer(int playerId, String objectName) {
+    Socket socket = playerProfiles.get(playerId).getSocket();
+    Object object = null;
+    try {
+      object = server.recvObject(socket);
+      System.out.println("Receive " + objectName + " from playerId: " + playerId + " success!");
+    } catch (IOException e1) { // network error when sending e.g. the player disconnected
+      System.out.println("Receive " + objectName + " from playerId: " + playerId + " error: " + e1.getMessage());
+      connectedPlayers.remove(playerId);
+      try {
+        server.closeClientSocket(socket);
+      } catch (IOException e2) { // handle error occurs when closeClientSocket()
+        System.out.println("server.closeClientSocket() error: " + e2.getMessage());
+      }
+    } catch (ClassNotFoundException e) {
+      System.out.println(e.getMessage());
+    }
+    return object;
+  }
+
+  /**
+   * Create GlobalMapInfo according to gameMap
+   * 
+   * @return GlobalMapInfo
+   */
+  private GlobalMapInfo createGlobalMapInfo() {
+    GlobalMapInfo globalMapInfo = new GlobalMapInfo(this.gameMap);
+    for (int id : playerProfiles.keySet()) {
+      globalMapInfo.addPlayerMapInfo(createPlayerMapInfo(id));
+    }
+    return globalMapInfo;
+  }
+
+  /**
+   * Randomly divide territories into parts with equal number of territories corresponding to playerNum 
+   * @return LinkedList that contains those parts
+   */
+  private LinkedList<HashSet<Territory>> generateRandomTerritoryAssignment() {
+    LinkedList<Territory> territories = new LinkedList<Territory>(gameMap.getTerritorySet());
+    Collections.shuffle(territories);
+    int territoryNumPerPlayer = territoryNum / playerNum;
+    LinkedList<HashSet<Territory>> assignedTerritoryList = new LinkedList<HashSet<Territory>>();
+    for (int i = 0; i < playerNum; ++i) {
+      HashSet<Territory> assignedTerritories = new HashSet<Territory>();
+      for (int j = i * territoryNumPerPlayer; j < (i + 1) * territoryNumPerPlayer; ++j) {
+        assignedTerritories.add(territories.get(j));
+      }
+      assignedTerritoryList.add(assignedTerritories);
+    }
+    return assignedTerritoryList;
+  }
+
+  /**
+   * Assign Unit placement from player to each territory
+   * 
+   * @param gameBasicSetting
+   */
+  private void assignUnitPlacements(GameBasicSetting gameBasicSetting) {
+    HashMap<Territory, Integer> unitPlacement = gameBasicSetting.getUnitPlacement();
+    for (Territory t : unitPlacement.keySet()) {
+      Territory territory = gameMap.getTerritoryByName(t.getName());
+      territory.initNumUnits(unitPlacement.get(t));
+    }
   }
 
   /**
@@ -262,6 +377,24 @@ public class RiscMaster implements Master {
   }
 
   /**
+   * Execute Commits and update territories
+   * @param commits
+   */
+  private void executeCommits(ArrayList<Commit> commits) {
+    for (Commit c : commits) {
+      c.performMoves(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performAttacks(this.gameMap);
+    }
+    Set<Territory> territories = this.gameMap.getTerritorySet();
+    for (Territory territory : territories) {
+      territory.update();
+    }
+    System.out.println("Commits execution finished!");
+  }
+
+  /**
    * Check if any player wins or loses after every turn
    * 
    * @return Result
@@ -270,9 +403,15 @@ public class RiscMaster implements Master {
     Result result = new Result();
     HashMap<Integer, Integer> territoryCnt = new HashMap<Integer, Integer>();
     Set<Territory> territories = gameMap.getTerritorySet();
+    for (int playerId : playerProfiles.keySet()) {
+      territoryCnt.put(playerId, 0);
+    }
     for (Territory t : territories) {
       int ownerId = t.getOwnerId();
-      Integer count = territoryCnt.containsKey(ownerId) ? territoryCnt.get(ownerId) : 0;
+      if (!territoryCnt.containsKey(ownerId)) {
+        continue;
+      }
+      int count = territoryCnt.get(ownerId);
       territoryCnt.put(ownerId, count + 1);
     }
     for (int ownerId : territoryCnt.keySet()) {
@@ -290,10 +429,12 @@ public class RiscMaster implements Master {
    * Debug method, print info of every Territory to stdout
    */
   private void printGameMap() {
+    System.out.println("---------------Master Side Game Map Begins---------------");
     Set<Territory> territories = gameMap.getTerritorySet();
     for (Territory t : territories) {
       System.out.println("name: " + t.getName() + " ownerId: " + t.getOwnerId() + " numUnits: " + t.getNumUnits());
     }
+    System.out.println("---------------Master Side Game Map Ends---------------");
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {

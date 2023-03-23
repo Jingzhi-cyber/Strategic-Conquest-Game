@@ -14,6 +14,7 @@ public class GameMap implements java.io.Serializable {
    */
   private final HashMap<Territory, HashSet<Territory>> adjList;
   private final HashMap<String, Territory> nameToTerritory;
+  private final int territoryNum;
 
   /**
    * Construct a GameMap by injecting a adjacent list
@@ -26,6 +27,7 @@ public class GameMap implements java.io.Serializable {
     for (Territory t : adjList.keySet()) {
       nameToTerritory.put(t.getName(), t);
     }
+    this.territoryNum = this.adjList.size();
   }
 
   /**
@@ -45,6 +47,15 @@ public class GameMap implements java.io.Serializable {
    */
   public Set<Territory> getTerritorySet() {
     return adjList.keySet();
+  }
+
+  /**
+   * Get number of territories in the map
+   * 
+   * @return territoryNum
+   */
+  public int getTerritoryNum() {
+    return this.territoryNum;
   }
 
   /**
