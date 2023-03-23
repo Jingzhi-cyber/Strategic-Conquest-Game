@@ -179,6 +179,7 @@ public class Territory implements java.io.Serializable {
       underWar = false;
       warZone = null;
     }
+    this.numUnits++;
   }
 
   /**

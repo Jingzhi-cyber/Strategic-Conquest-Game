@@ -4,11 +4,9 @@ import java.io.IOException;
 
 public interface Master {
     /**
-     * Initialize the game (generate Map, connect to players, etc.)
-     * Postcondition: if return true, all game data is initialized
-     * @return true if initialization is successful, otherwise false
+     * Initialize network connection to all players
      */
-    public boolean init() throws IOException;
+    public void init() throws IOException;
 
     /**
      * Play one turn of the game, including sending players the current status,

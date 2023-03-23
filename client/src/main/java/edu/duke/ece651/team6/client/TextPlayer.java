@@ -82,8 +82,7 @@ public class TextPlayer implements Player {
     
     // send back the GameBasicSetting object with the updated unit placement info.
     client.sendUpdatedGameBasicSetting(setting);
-    printLine("Units placement information has been successfully sent to the server");
-    printLine((String) client.recvObject());
+    printLine("Units placement information has been successfully sent to the server, waiting for other players...");
   }
 
   /**
@@ -349,7 +348,7 @@ public class TextPlayer implements Player {
 
     /* -------- 4. Send commit to server --------- */
     this.client.sendCommit(commit);
-     printLine("Order information has been successfully submitted to the server");
+     printLine("Order information has been successfully submitted to the server, waiting for other players...");
 
     /*
      * -------- 5. Handle game result of this turn --------

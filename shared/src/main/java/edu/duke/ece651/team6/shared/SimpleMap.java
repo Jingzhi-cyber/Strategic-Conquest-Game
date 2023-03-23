@@ -8,8 +8,8 @@ public class SimpleMap {
 
     public SimpleMap() {
         adjList = new HashMap<Territory, HashSet<Territory>>();
-        Territory Narnia = new Territory("Narnia", 0, 0);
-        Territory Midkemia = new Territory("Midkemia", 0, 0);
+        Territory Narnia = new Territory("Narnia", 0, 2);
+        Territory Midkemia = new Territory("Midkemia", 1, 2);
 
         HashSet<Territory> NarniaNeighbor = new HashSet<Territory>();
         NarniaNeighbor.add(Midkemia);

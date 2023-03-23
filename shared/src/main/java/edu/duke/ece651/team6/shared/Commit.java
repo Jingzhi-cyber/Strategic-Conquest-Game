@@ -13,8 +13,8 @@ public class Commit implements java.io.Serializable {
   transient ListIterator<MoveOrder> moveIterator;
   transient ListIterator<AttackOrder> attackIterator;
 
-  transient OrderRuleChecker moveChecker;
-  transient OrderRuleChecker attackChecker;
+  OrderRuleChecker moveChecker;
+  OrderRuleChecker attackChecker;
   // HashMap<String, Integer> remainingUnits;
 
   /**

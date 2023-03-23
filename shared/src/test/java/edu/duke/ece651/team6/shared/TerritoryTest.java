@@ -44,7 +44,7 @@ public class TerritoryTest {
     t1.moveTo(t3, 3);
     t3.update();
     assertEquals(2, t1.getNumUnits());
-    assertEquals(8, t3.getNumUnits());
+    assertEquals(9, t3.getNumUnits()); // territory.update() increase numUnit by 1
   }
 
   @Test

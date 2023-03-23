@@ -41,6 +41,8 @@ public class GameMapTest {
 
     Territory hogwarts = gm.getTerritoryByName("Hogwarts");
     assertEquals(t1, hogwarts);
+    
+    assertEquals(3, gm.getTerritoryNum());
   }
 
   @Test
