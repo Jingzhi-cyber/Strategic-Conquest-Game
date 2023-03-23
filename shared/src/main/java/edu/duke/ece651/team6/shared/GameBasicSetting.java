@@ -67,25 +67,6 @@ public class GameBasicSetting implements java.io.Serializable {
     }
   }
 
-  /*
-   * Initialize unitPlacement after the user has input unit placement information.
-   * 
-   * @param map how many units are put onto which Territory
-   * 
-   * @throws InternalError
-   */
-  /*
-   * public void initializeUnitPlacement(HashMap<Territory, Integer> map) {
-   * this.unitPlacement = map;
-   * for (Territory t : assignedTerritories) {
-   * if (!map.containsKey(t)) {
-   * throw new InternalError("Missing unit placement information.");
-   * }
-   * t.initNumUnits(map.get(t));
-   * }
-   * }
-   */
-
   /**
    * Unit initialization phase
    * 
