@@ -46,9 +46,18 @@ public class App {
     Client client = null;
     GameBasicSetting setting = null;
     BufferedReader input = null;
+
+    if (args.length != 2) {
+      System.out
+          .println("Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port>");
+      System.out.println("For example, \"./client/build/install/client/bin/client localhost 12345c\"");
+      System.out.println("or \"./client/build/install/client/bin/client vcm-30819.vm.duke.edu 8999\"");
+      System.exit(1);
+    }
+
     try {
       // create a client obejct and connect it to the server
-      client = new Client("127.0.0.1", 12345);
+      client = new Client(args[0], Integer.valueOf(args[1]));
       System.out.println((String) client.recvObject());
       setting = client.recvGameBasicSetting();
       input = new BufferedReader(new InputStreamReader(System.in));
