@@ -10,4 +10,10 @@ class AppTest {
     App a = new App(null, null);
     assertEquals("Hello from the client for team6", a.getMessage());
   }
+
+  @Test
+  public void test_app() {
+    
+  }
+  
 }

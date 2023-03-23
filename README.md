@@ -21,7 +21,7 @@ Maintainer: ece651-spr23-team6
 ./gradlew installDist
 
 launch server: ./server/build/install/server/bin/server <server_port> <player_num>
-launch client: ./client/build/install/client/bin/client
+launch client: ./client/build/install/client/bin/client <server_addr> <server_port>
 ```
 
 
