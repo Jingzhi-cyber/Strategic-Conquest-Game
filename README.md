@@ -15,8 +15,6 @@ Maintainer: ece651-spr23-team6
 
 ## Usage
 ```bash
-# ./gradlew run-server
-# ./gradlew run-client
 ./gradlew build
 ./gradlew installDist
 
