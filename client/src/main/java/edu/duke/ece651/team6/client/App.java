@@ -9,10 +9,6 @@ import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
 import edu.duke.ece651.team6.shared.GameBasicSetting;
-<<<<<<< HEAD
-import edu.duke.ece651.team6.shared.MyName;
-=======
->>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
 
 public class App {
   Client client;
@@ -59,11 +55,7 @@ public class App {
     }
 
     TextPlayer player = new TextPlayer(client, input, System.out, setting);
-<<<<<<< HEAD
-    player.displayGameSetting("game setting");
-=======
     player.displayGameSetting();
->>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
 
     // App app = new App(client, player);
 
