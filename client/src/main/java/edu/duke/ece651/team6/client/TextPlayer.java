@@ -500,7 +500,6 @@ public class TextPlayer implements Player {
         setting.decreaseUnitsBy(numUnits);
       } catch (IllegalArgumentException e) {
         printLine(e.getMessage());
-        printLine(prompt);
         continue;
       }
       break;
