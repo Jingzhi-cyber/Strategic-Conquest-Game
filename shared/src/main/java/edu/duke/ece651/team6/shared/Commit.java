@@ -137,6 +137,7 @@ public class Commit implements java.io.Serializable {
    */
   public void performMoves(GameMap gameMap) {
     for (MoveOrder move : moves) {
+      System.out.println(move.toString());
       move.takeAction(gameMap);
     }
   }
@@ -148,6 +149,7 @@ public class Commit implements java.io.Serializable {
    */
   public void performAttacks(GameMap gameMap) {
     for (AttackOrder attack : attacks) {
+      System.out.println(attack.toString());
       attack.takeAction(gameMap);
     }
   }

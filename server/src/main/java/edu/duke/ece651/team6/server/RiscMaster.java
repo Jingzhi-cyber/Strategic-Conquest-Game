@@ -124,6 +124,7 @@ public class RiscMaster implements Master {
      */
     LinkedList<HashSet<Territory>> assignedTerritoryList = generateRandomTerritoryAssignment();
 
+
     for (int playerId : connectedPlayers) {
       HashSet<Territory> assignedTerritories = assignedTerritoryList.poll();
       for (Territory t : assignedTerritories) {

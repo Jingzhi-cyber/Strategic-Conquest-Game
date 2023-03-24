@@ -91,7 +91,7 @@ public class Territory implements java.io.Serializable {
    */
   private Army dispatchArmy(int numUnits) {
     if (numUnits > this.numUnits) {
-      throw new IllegalArgumentException("Cannot dispatch required number of units!");
+      throw new IllegalArgumentException("Cannot dispatch required number of units! Territory name: " + this.name + " numUnits: " + numUnits + " this.numUnits: " + this.numUnits);
     }
     Army army = new Army(ownerId, numUnits);
     this.numUnits -= numUnits;
