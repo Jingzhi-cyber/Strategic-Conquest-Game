@@ -229,11 +229,7 @@ public class TextPlayerTest {
     // when(mockSetting.getAssignedTerritories().toString()).thenReturn("[A]");
     // when(mockSetting.getRemainingNumUnits()).thenReturn(10);
 
-<<<<<<< HEAD
-    player.displayGameSetting("Some message");
-=======
     player.displayGameSetting();
->>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
 
     String expected = "From server: Welcome to RISC, you are assigned to be Player 1. \nThere are 2 players in total. These territories are assigned to you: \n[(name: A, ownerId: 1, units: 0), (name: B, ownerId: 1, units: 0)], and you have 10 units in total.\n";
     assertEquals(expected, bytes.toString());

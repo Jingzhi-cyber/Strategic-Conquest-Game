@@ -30,21 +30,6 @@ public class App {
   public App(Client client, TextPlayer player) {
     this.client = client;
     this.player = player;
-<<<<<<< HEAD
-  }
-  // Takes an Inputstream and transfer its bytes into a string, then return the
-  // string
-  // private String getStringFromIS(InputStream is) throws IOException {
-  // byte[] bytes = new byte[0];
-  // bytes = new byte[is.available()];
-  // is.read(bytes);
-  // return new String(bytes);
-  // }
-
-  public String getMessage() {
-    return "Hello from the client for " + MyName.getName();
-=======
->>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {

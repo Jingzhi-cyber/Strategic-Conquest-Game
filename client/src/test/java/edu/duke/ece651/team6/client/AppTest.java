@@ -6,19 +6,6 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
 class AppTest {
-<<<<<<< HEAD
-  @Test
-  void test_GetMessage() {
-    App a = new App(null, null);
-    assertEquals("Hello from the client for team6", a.getMessage());
-  }
-
-  @Test
-  public void test_app() {
-    
-  }
-  
-=======
 
   // class InnerAppTest {
   // Client getClient() throws IOException, UnknownHostException {
@@ -68,5 +55,4 @@ class AppTest {
   @Test
   public void test_app() throws IOException, UnknownHostException, ClassNotFoundException {
   }
->>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
 }
