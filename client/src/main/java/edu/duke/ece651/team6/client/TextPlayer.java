@@ -79,7 +79,6 @@ public class TextPlayer implements Player {
     }
 
     setting.initializeUnitPlacement(map);
-
     // send back the GameBasicSetting object with the updated unit placement info.
     client.sendUpdatedGameBasicSetting(setting);
     printLine("Units placement information has been successfully sent to the server, waiting for other players...");
