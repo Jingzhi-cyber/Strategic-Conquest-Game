@@ -127,9 +127,9 @@ public class Territory implements java.io.Serializable {
     if (!underWar) {
       underWar = true;
       warZone = new RoundFight(this);
-      if (numUnits > 0) {
-        warZone.add(dispatchArmy(numUnits));
-      }
+      // if (numUnits > 0) {
+      //   warZone.add(dispatchArmy(numUnits));
+      // }
     }
     warZone.add(army);
   }
@@ -175,6 +175,9 @@ public class Territory implements java.io.Serializable {
    */
   public void update() {
     if (underWar) {
+      if (numUnits > 0) {
+        warZone.add(dispatchArmy(numUnits));
+      }
       warZone.startWar();
       underWar = false;
       warZone = null;
