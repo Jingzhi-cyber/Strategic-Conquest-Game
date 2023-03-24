@@ -15,13 +15,12 @@ Maintainer: ece651-spr23-team6
 
 ## Usage
 ```bash
-# ./gradlew run-server
-# ./gradlew run-client
 ./gradlew build
 ./gradlew installDist
 
 launch server: ./server/build/install/server/bin/server <server_port> <player_num>
 launch client: ./client/build/install/client/bin/client <server_addr> <server_port>
+
 # e.g., vcm-30756.vm.duke.edu 12345
 ```
 

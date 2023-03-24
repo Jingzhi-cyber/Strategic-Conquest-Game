@@ -436,8 +436,4 @@ public class RiscMaster implements Master {
     }
     System.out.println("---------------Master Side Game Map Ends---------------");
   }
-
-  public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
-
-  }
 }
