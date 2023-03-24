@@ -79,7 +79,11 @@ public class TextPlayer implements Player {
     }
 
     setting.initializeUnitPlacement(map);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
     // send back the GameBasicSetting object with the updated unit placement info.
     client.sendUpdatedGameBasicSetting(setting);
     printLine("Units placement information has been successfully sent to the server, waiting for other players...");
@@ -348,7 +352,11 @@ public class TextPlayer implements Player {
 
     /* -------- 4. Send commit to server --------- */
     this.client.sendCommit(commit);
+<<<<<<< HEAD
      printLine("Order information has been successfully submitted to the server, waiting for other players...");
+=======
+    printLine("Order information has been successfully submitted to the server, waiting for other players...");
+>>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
 
     /*
      * -------- 5. Handle game result of this turn --------
@@ -452,10 +460,15 @@ public class TextPlayer implements Player {
    * 2. How many territories does the player have, and what are they
    * 3. How many units does the player have (each player has the same amount of
    * units)
+<<<<<<< HEAD
    * 
    * @param message from client end, e.g., "game setting"
    */
   public void displayGameSetting(String message) {
+=======
+   */
+  public void displayGameSetting() {
+>>>>>>> 7c17bd0bb94143c251fa4e93c0dc235bc33f4882
     printLine(
         "From server: Welcome to RISC, you are assigned to be Player " + this.playerId + ". \n"
             + "There are " + setting.getNumPlayers() + " players in total. These territories are assigned to you: \n"

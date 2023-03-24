@@ -20,13 +20,8 @@ Maintainer: ece651-spr23-team6
 
 launch server: ./server/build/install/server/bin/server <server_port> <player_num>
 launch client: ./client/build/install/client/bin/client <server_addr> <server_port>
-```
 
-
-```bash
-# port 1651 inside docker container
-# port 6651 localhost in the vm
-netcat -N -w 1 vcm-30756.vm.duke.edu 6651
+# e.g., vcm-30756.vm.duke.edu 12345
 ```
 
 ### Some useful tips during development
