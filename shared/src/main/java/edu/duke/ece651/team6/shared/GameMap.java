@@ -3,6 +3,7 @@ package edu.duke.ece651.team6.shared;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.Queue;
 
@@ -12,8 +13,8 @@ public class GameMap implements java.io.Serializable {
    * Key - Territory(use Territory.name as hashkey), Value - Set of neighbors of
    * that Territory
    */
-  private final HashMap<Territory, HashSet<Territory>> adjList;
-  private final HashMap<String, Territory> nameToTerritory;
+  private final Map<Territory, Set<Territory>> adjList;
+  private final Map<String, Territory> nameToTerritory;
   private final int territoryNum;
 
   /**
@@ -21,7 +22,7 @@ public class GameMap implements java.io.Serializable {
    * 
    * @param adjList defines the graph structure
    */
-  public GameMap(HashMap<Territory, HashSet<Territory>> adjList) {
+  public GameMap(Map<Territory, Set<Territory>> adjList) {
     this.adjList = adjList;
     this.nameToTerritory = new HashMap<String, Territory>();
     for (Territory t : adjList.keySet()) {
@@ -64,7 +65,7 @@ public class GameMap implements java.io.Serializable {
    * @param territory a territory
    * @return the Set of all the neighbors of the territory
    */
-  public HashSet<Territory> getNeighborSet(Territory territory) {
+  public Set<Territory> getNeighborSet(Territory territory) {
     for (Territory t : adjList.keySet()) {
       if (t.equals(territory)) {
         return adjList.get(t);
@@ -86,8 +87,7 @@ public class GameMap implements java.io.Serializable {
     if (src.equals(dest)) {
       return true;
     }
-    // TODO
-    HashSet<Territory> visited = new HashSet<>();
+    Set<Territory> visited = new HashSet<>();
     visited.add(src);
 
     // Use a queue for breadth-first search

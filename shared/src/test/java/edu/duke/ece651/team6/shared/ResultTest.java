@@ -3,6 +3,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class ResultTest {
     @Test
@@ -11,9 +12,9 @@ public class ResultTest {
         r.addWinner(0);
         r.addLoser(1);
         r.addLoser(2);
-        HashSet<Integer> expectedWinners = new HashSet<>();
+        Set<Integer> expectedWinners = new HashSet<>();
         expectedWinners.add(0);
-        HashSet<Integer> expectedLosers = new HashSet<>();
+        Set<Integer> expectedLosers = new HashSet<>();
         expectedLosers.add(1);
         expectedLosers.add(2);
         assertEquals(expectedWinners, r.getWinners());

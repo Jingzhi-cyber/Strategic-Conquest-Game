@@ -2,25 +2,17 @@ package edu.duke.ece651.team6.server;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import edu.duke.ece651.team6.shared.PlayerProfile;
-import edu.duke.ece651.team6.shared.Result;
-import edu.duke.ece651.team6.shared.Commit;
-import edu.duke.ece651.team6.shared.GameBasicSetting;
-import edu.duke.ece651.team6.shared.GameMap;
-import edu.duke.ece651.team6.shared.GlobalMapInfo;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
-import edu.duke.ece651.team6.shared.Territory;
-import edu.duke.ece651.team6.shared.Constants;
-//import edu.duke.ece651.team6.shared.TestMap;
+import edu.duke.ece651.team6.shared.*;
 
 public class RiscMaster implements Master {
 
@@ -30,9 +22,9 @@ public class RiscMaster implements Master {
   private final int territoryNum;
   private final int availableUnits;
 
-  private HashMap<Integer, PlayerProfile> playerProfiles;
+  private Map<Integer, PlayerProfile> playerProfiles;
   private CopyOnWriteArraySet<Integer> connectedPlayers;
-  private HashSet<Integer> losers;
+  private Set<Integer> losers;
 
   /**
    * Construct a RiscMaster
@@ -99,7 +91,7 @@ public class RiscMaster implements Master {
      */
     System.out.println("RiscMaster.server initializing connection to players...");
     server.acceptMultiPlayers(playerNum);
-    ArrayList<Socket> clientSockets = server.getClientSockets();
+    List<Socket> clientSockets = server.getClientSockets();
     int playerId = 0;
     for (Socket socket : clientSockets) {
       PlayerProfile playerProfile = new PlayerProfile(playerId);
@@ -122,11 +114,9 @@ public class RiscMaster implements Master {
      * Send GameBasicSetting including territories and total units available for
      * placement to players
      */
-    LinkedList<HashSet<Territory>> assignedTerritoryList = generateRandomTerritoryAssignment();
-
-
+    LinkedList<Set<Territory>> assignedTerritoryList = new LinkedList<>(generateRandomTerritoryAssignment());
     for (int playerId : connectedPlayers) {
-      HashSet<Territory> assignedTerritories = assignedTerritoryList.poll();
+      Set<Territory> assignedTerritories = assignedTerritoryList.poll();
       for (Territory t : assignedTerritories) {
         t.setOwnerId(playerId);
       }
@@ -174,7 +164,7 @@ public class RiscMaster implements Master {
      * client side)
      * Execute the commits
      */
-    ArrayList<Object> objects = new ArrayList<Object>();
+    List<Object> objects = new ArrayList<Object>();
     for (int playerId : connectedPlayers) {
       if (losers.contains(playerId)) {
         continue;
@@ -185,7 +175,7 @@ public class RiscMaster implements Master {
       }
     }
 
-    ArrayList<Commit> commits = new ArrayList<Commit>();
+    List<Commit> commits = new ArrayList<Commit>();
     for (Object o : objects) {
       Commit commit = (Commit) o;
       // double-check the commit on Master side
@@ -325,13 +315,13 @@ public class RiscMaster implements Master {
    * Randomly divide territories into parts with equal number of territories corresponding to playerNum 
    * @return LinkedList that contains those parts
    */
-  private LinkedList<HashSet<Territory>> generateRandomTerritoryAssignment() {
-    LinkedList<Territory> territories = new LinkedList<Territory>(gameMap.getTerritorySet());
+  private List<Set<Territory>> generateRandomTerritoryAssignment() {
+    List<Territory> territories = new LinkedList<Territory>(gameMap.getTerritorySet());
     Collections.shuffle(territories);
     int territoryNumPerPlayer = territoryNum / playerNum;
-    LinkedList<HashSet<Territory>> assignedTerritoryList = new LinkedList<HashSet<Territory>>();
+    List<Set<Territory>> assignedTerritoryList = new LinkedList<>();
     for (int i = 0; i < playerNum; ++i) {
-      HashSet<Territory> assignedTerritories = new HashSet<Territory>();
+      Set<Territory> assignedTerritories = new HashSet<>();
       for (int j = i * territoryNumPerPlayer; j < (i + 1) * territoryNumPerPlayer; ++j) {
         assignedTerritories.add(territories.get(j));
       }
@@ -346,7 +336,7 @@ public class RiscMaster implements Master {
    * @param gameBasicSetting
    */
   private void assignUnitPlacements(GameBasicSetting gameBasicSetting) {
-    HashMap<Territory, Integer> unitPlacement = gameBasicSetting.getUnitPlacement();
+    Map<Territory, Integer> unitPlacement = gameBasicSetting.getUnitPlacement();
     for (Territory t : unitPlacement.keySet()) {
       Territory territory = gameMap.getTerritoryByName(t.getName());
       territory.initNumUnits(unitPlacement.get(t));
@@ -361,11 +351,11 @@ public class RiscMaster implements Master {
    *         player's territory2 - territory2's neighbors' names
    */
   private PlayerMapInfo createPlayerMapInfo(int playerId) {
-    HashMap<Territory, HashSet<String>> info = new HashMap<Territory, HashSet<String>>();
+    Map<Territory, Set<String>> info = new HashMap<>();
     Set<Territory> territories = gameMap.getTerritorySet();
     for (Territory t : territories) {
       if (t.getOwnerId() == playerId) {
-        HashSet<String> neighbor = new HashSet<String>();
+        Set<String> neighbor = new HashSet<>();
         for (Territory n : gameMap.getNeighborSet(t)) {
           neighbor.add(n.getName());
         }
@@ -381,7 +371,7 @@ public class RiscMaster implements Master {
    * Execute Commits and update territories
    * @param commits
    */
-  private void executeCommits(ArrayList<Commit> commits) {
+  private void executeCommits(List<Commit> commits) {
     for (Commit c : commits) {
       c.performMoves(this.gameMap);
     }
@@ -402,7 +392,7 @@ public class RiscMaster implements Master {
    */
   private Result checkResult() {
     Result result = new Result();
-    HashMap<Integer, Integer> territoryCnt = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> territoryCnt = new HashMap<>();
     Set<Territory> territories = gameMap.getTerritorySet();
     for (int playerId : playerProfiles.keySet()) {
       territoryCnt.put(playerId, 0);

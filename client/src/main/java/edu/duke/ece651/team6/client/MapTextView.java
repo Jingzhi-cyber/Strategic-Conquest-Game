@@ -1,6 +1,5 @@
 package edu.duke.ece651.team6.client;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
@@ -40,7 +39,7 @@ public class MapTextView extends MapView {
         Set<Territory> territories = playerMapInfo.getTerritories();
         for (Territory t : territories) {
           ans.append(t.getNumUnits() + " units in " + t.getName() + " ");
-          HashSet<String> neighbors = playerMapInfo.getTerritoryNeighbors(t);
+          Set<String> neighbors = playerMapInfo.getTerritoryNeighbors(t);
           ans.append("(next to: ");
           for (String neighbor : neighbors) {
             ans.append(neighbor + " ");

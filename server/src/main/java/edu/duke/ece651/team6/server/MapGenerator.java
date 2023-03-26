@@ -20,7 +20,7 @@ import edu.duke.ece651.team6.shared.Territory;
 public class MapGenerator {
     private Set<String> names;
     private List<Point2D> points;
-    private int n;
+    private final int n;
     private List<Triangle> triangles;
     private Set<Edge> connections;
     
@@ -75,7 +75,6 @@ public class MapGenerator {
         List<Triangle> tempTri = new LinkedList<>();
         tempTri.add(superTri);
         Set<Edge> buffer = new HashSet<>(); 
-        
         // Delaunay triangulation incremental algorithm
         for (Point2D p : this.points) {
             buffer.clear();
@@ -119,8 +118,8 @@ public class MapGenerator {
      * Get the adjacent list of the map.
      * @return
      */
-    public HashMap<Territory, HashSet<Territory>> getTheMap() {
-        HashMap<Territory, HashSet<Territory>> map = new HashMap<>();
+    public Map<Territory, Set<Territory>> getTheMap() {
+        Map<Territory, Set<Territory>> map = new HashMap<>();
         List<Territory> list = new ArrayList<>();
         Iterator<String> it = names.iterator();
         char c = 'A';
@@ -144,4 +143,36 @@ public class MapGenerator {
         }
         return map;
     }
+
+    /**
+     * Get the map with distance between any two adjacent Territories.
+     * @return the distance map.
+     */
+    public Map<Territory, Map<Territory, Double>> getDistanceMap() {
+        Map<Territory, Map<Territory, Double>> map = new HashMap<>();
+        List<Territory> list = new ArrayList<>();
+        Iterator<String> it = names.iterator();
+        char c = 'A';
+        for (int i = 0; i < n; i++) {
+            String str;
+            if (it.hasNext()) {
+                str = it.next();
+            } else {
+                str = String.valueOf(c);
+                c++;
+            }
+            Territory t = new Territory(str);
+            map.put(t, new HashMap<>());
+            list.add(t);
+        }
+        for (Edge edge : connections) {
+            int index1 = points.indexOf(edge.p1);
+            int index2 = points.indexOf(edge.p2);
+            double distance = edge.p1.dist(edge.p2);
+            map.get(list.get(index1)).put(list.get(index2), distance);
+            map.get(list.get(index2)).put(list.get(index1), distance);
+        }
+        return map;
+    }
+
 }

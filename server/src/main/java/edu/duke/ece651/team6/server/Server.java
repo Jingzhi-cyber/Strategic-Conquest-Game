@@ -11,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.IllegalBlockingModeException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -22,16 +23,16 @@ import java.util.concurrent.TimeoutException;
  */
 public class Server {
   private ServerSocket serverSocket;
-  private ArrayList<Socket> clientSockets;
+  private List<Socket> clientSockets;
 
   private class RecvObjectThead implements Runnable {
 
     private int playerID;
     private Socket clientSocket;
 
-    private ArrayList<Object> recvedObjects;
+    private List<Object> recvedObjects;
 
-    public RecvObjectThead(int playerID, Socket clientSocket, ArrayList<Object> recvedObjects) {
+    public RecvObjectThead(int playerID, Socket clientSocket, List<Object> recvedObjects) {
       this.playerID = playerID;
       this.clientSocket = clientSocket;
       this.recvedObjects = recvedObjects;
@@ -222,13 +223,13 @@ public class Server {
    *
    * @return an ArrayList that has all the received objects.
    */
-  public ArrayList<Object> recvObjectFromALL() {
+  public List<Object> recvObjectFromALL() {
     int playerNum = clientSockets.size();
-    ArrayList<Object> recvedObjects = new ArrayList<>(playerNum);
+    List<Object> recvedObjects = new ArrayList<>(playerNum);
     for (int i = 0; i < playerNum; i++) {
       recvedObjects.add(null);
     }
-    ArrayList<Thread> recvThreads = new ArrayList<>(playerNum);
+    List<Thread> recvThreads = new ArrayList<>(playerNum);
     for (int i = 0; i < playerNum; i++) {
       Thread recvThread = new Thread(new RecvObjectThead(i, clientSockets.get(i), recvedObjects));
       recvThread.setPriority(5);
@@ -392,7 +393,7 @@ public class Server {
    * 
    * @return this.clientSockets
    */
-  public ArrayList<Socket> getClientSockets() {
+  public List<Socket> getClientSockets() {
     return this.clientSockets;
   }
 }

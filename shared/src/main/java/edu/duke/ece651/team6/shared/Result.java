@@ -1,10 +1,11 @@
 package edu.duke.ece651.team6.shared;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class Result implements java.io.Serializable {
-    HashSet<Integer> winners;
-    HashSet<Integer> losers;
+    private final Set<Integer> winners;
+    private final Set<Integer> losers;
 
     public Result() {
         winners = new HashSet<Integer>();
@@ -31,7 +32,7 @@ public class Result implements java.io.Serializable {
      * Get Set of winners
      * @return winners
      */
-    public HashSet<Integer> getWinners() {
+    public Set<Integer> getWinners() {
         return this.winners;
     }
 
@@ -39,7 +40,7 @@ public class Result implements java.io.Serializable {
      * Get Set of losers
      * @return losers
      */
-    public HashSet<Integer> getLosers() {
+    public Set<Integer> getLosers() {
         return this.losers;
     }
 }

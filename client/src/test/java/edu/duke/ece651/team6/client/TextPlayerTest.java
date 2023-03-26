@@ -14,6 +14,8 @@ import java.io.StringReader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +33,8 @@ public class TextPlayerTest {
   // private GameMap gameMap = null;
   // private MapTextView mapTextView = null;
 
-  private HashSet<Territory> createTerritories_withoutUnitsPlacement() {
-    HashSet<Territory> set = new HashSet<Territory>() {
+  private Set<Territory> createTerritories_withoutUnitsPlacement() {
+    Set<Territory> set = new HashSet<Territory>() {
       {
         add(new Territory("A", 1));
         add(new Territory("B", 1));
@@ -41,8 +43,8 @@ public class TextPlayerTest {
     return set;
   }
 
-  private HashSet<Territory> createAssignedTerritories_withUnitsPlaced() {
-    HashSet<Territory> set = new HashSet<Territory>() {
+  private Set<Territory> createAssignedTerritories_withUnitsPlaced() {
+    Set<Territory> set = new HashSet<Territory>() {
       {
         add(new Territory("A", 1, 3));
         add(new Territory("B", 1, 7));
@@ -59,7 +61,7 @@ public class TextPlayerTest {
     when(this.client.recvGameResult()).thenReturn(new Result());
   }
 
-  private TextPlayer createTextPlayer(String inputData, OutputStream bytes, HashSet<Territory> territories)
+  private TextPlayer createTextPlayer(String inputData, OutputStream bytes, Set<Territory> territories)
       throws IOException {
     BufferedReader reader = new BufferedReader(new StringReader(inputData));
     PrintStream printStream = new PrintStream(bytes, true); // ps is a PrintStream (looks like System.out) which
@@ -72,7 +74,7 @@ public class TextPlayerTest {
 
   private GlobalMapInfo createGlobalMapInfo_withUnitsPlaced(GameMap gameMap) {
     GlobalMapInfo expectedMap = new GlobalMapInfo(gameMap);
-    PlayerMapInfo playerMapInfo1 = new PlayerMapInfo(1, new HashMap<Territory, HashSet<String>>() {
+    PlayerMapInfo playerMapInfo1 = new PlayerMapInfo(1, new HashMap<Territory, Set<String>>() {
       {
         put(new Territory("A", 1, 3), new HashSet<String>() {
           {
@@ -90,7 +92,7 @@ public class TextPlayerTest {
     });
     expectedMap.addPlayerMapInfo(playerMapInfo1);
 
-    PlayerMapInfo playerMapInfo2 = new PlayerMapInfo(2, new HashMap<Territory, HashSet<String>>() {
+    PlayerMapInfo playerMapInfo2 = new PlayerMapInfo(2, new HashMap<Territory, Set<String>>() {
       {
         put(new Territory("C", 2, 6), new HashSet<String>() {
           {
@@ -112,7 +114,7 @@ public class TextPlayerTest {
   }
 
   private GameMap createGameMap_withMissingSelfNeighbors() {
-    HashMap<Territory, HashSet<Territory>> adjList = new HashMap<>();
+    Map<Territory, Set<Territory>> adjList = new HashMap<>();
     Territory terA = new Territory("A", 1);
     Territory terB = new Territory("B", 1);
     Territory terC = new Territory("C", 2);
@@ -145,7 +147,7 @@ public class TextPlayerTest {
   }
 
   private GameMap createGameMap_withoutUnitPlacement() {
-    HashMap<Territory, HashSet<Territory>> adjList = new HashMap<>();
+    Map<Territory, Set<Territory>> adjList = new HashMap<>();
     Territory terA = new Territory("A", 1);
     Territory terB = new Territory("B", 2);
     Territory terC = new Territory("C", 2);
@@ -182,7 +184,7 @@ public class TextPlayerTest {
   }
 
   private GameMap createGameMap_withUnitPlacement() {
-    HashMap<Territory, HashSet<Territory>> adjList = new HashMap<>();
+    Map<Territory, Set<Territory>> adjList = new HashMap<>();
     Territory terA = new Territory("A", 1, 3);
     Territory terB = new Territory("B", 2, 7);
     Territory terC = new Territory("C", 2, 6);

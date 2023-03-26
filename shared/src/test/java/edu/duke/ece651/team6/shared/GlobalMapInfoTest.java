@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ public class GlobalMapInfoTest {
     Territory t2 = new Territory("Narnia", 2, 3);
     Territory t3 = new Territory("Midkemia", 3, 1);
 
-    HashMap<Territory, HashSet<String>> info1 = new HashMap<Territory, HashSet<String>>();
+    Map<Territory, Set<String>> info1 = new HashMap<>();
     info1.put(t1, new HashSet<String>() {
       {
         add("Narnia");
@@ -30,7 +31,7 @@ public class GlobalMapInfoTest {
       }
     });
 
-    HashMap<Territory, HashSet<String>> info2 = new HashMap<Territory, HashSet<String>>();
+    Map<Territory, Set<String>> info2 = new HashMap<>();
     info2.put(t2, new HashSet<String>() {
       {
         add("Hogwarts");
@@ -38,7 +39,7 @@ public class GlobalMapInfoTest {
       }
     });
 
-    HashMap<Territory, HashSet<String>> info3 = new HashMap<Territory, HashSet<String>>();
+    Map<Territory, Set<String>> info3 = new HashMap<>();
     info3.put(t3, new HashSet<String>() {
       {
         add("Hogwarts");
@@ -62,7 +63,7 @@ public class GlobalMapInfoTest {
       assertEquals(true, playerMapInfo1.getTerritoryNeighbors(t).contains("Midkemia"));
     }
 
-    HashSet<String> names = new HashSet<String>() {
+    Set<String> names = new HashSet<String>() {
       {
         add("Hogwarts");
         add("Narnia");
