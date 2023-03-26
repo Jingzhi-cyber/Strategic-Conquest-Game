@@ -4,31 +4,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class PlayerMapInfoTest {
     @Test
     public void testBasicFunc() {
-        HashMap<Territory, HashSet<Territory>> adjList = new HashMap<Territory, HashSet<Territory>>();
+        Map<Territory, Set<Territory>> adjList = new HashMap<>();
         Territory t1 = new Territory("Hogwarts", 1, 5);
         Territory t2 = new Territory("Narnia", 2, 3);
         Territory t3 = new Territory("Midkemia", 3, 1);
-        HashSet<Territory> n1 = new HashSet<Territory>();
+        Set<Territory> n1 = new HashSet<>();
         n1.add(t2);
         n1.add(t3);
         adjList.put(t1, n1);
-        HashSet<Territory> n2 = new HashSet<Territory>();
+        Set<Territory> n2 = new HashSet<>();
         n2.add(t1);
         adjList.put(t2, n2);
-        HashSet<Territory> n3 = new HashSet<Territory>();
+        Set<Territory> n3 = new HashSet<>();
         n3.add(t1);
         adjList.put(t3, n3);
 
-        HashMap<Territory, HashSet<String>> info = new HashMap<Territory, HashSet<String>>();
+        Map<Territory, Set<String>> info = new HashMap<>();
         Set<Territory> territories = adjList.keySet();
         for (Territory t : territories) {
             if (t.getOwnerId() == 1) {
-                HashSet<String> neighbor = new HashSet<String>();
+                Set<String> neighbor = new HashSet<String>();
                 for (Territory n : adjList.get(t)) {
                     neighbor.add(n.getName());
                 }

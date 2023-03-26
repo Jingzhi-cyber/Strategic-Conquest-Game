@@ -1,11 +1,20 @@
 package edu.duke.ece651.team6.shared;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
+
 public class Territory implements java.io.Serializable {
   private final String name;
   private int ownerId;
-  private int numUnits;
+  private List<Deque<Unit>> units;
+  private int numLevel;
   private WarZone warZone;
   private boolean underWar;
+  private int food;
+  private int technology;
 
   public Territory() {
     this("Default Territory");
@@ -17,17 +26,21 @@ public class Territory implements java.io.Serializable {
   public Territory(String name) {
     this.name = name;
     this.ownerId = -1;
-    this.numUnits = 0;
+    unitsInit();
     warZone = null;
     underWar = false;
+    food = 0;
+    technology = 0;
   }
 
   public Territory(String name, int ownerId) {
     this.name = name;
     this.ownerId = ownerId;
-    this.numUnits = 0;
+    unitsInit();
     warZone = null;
     underWar = false;
+    food = 0;
+    technology = 0;
   }
 
   /**
@@ -43,58 +56,45 @@ public class Territory implements java.io.Serializable {
       throw new IllegalArgumentException("Territory's unit must be non-negative but is " + units);
     }
     this.ownerId = ownerId;
-    this.numUnits = units;
+    unitsInit();
+    this.units.get(0).addAll(UnitManager.newUnits(units));
     warZone = null;
     underWar = false;
+    food = 0;
+    technology = 0;
   }
 
-  /**
-   * Get the territory's name
-   * 
-   * @return the name
-   */
+  private void unitsInit() {
+    numLevel = 7;
+    units = new ArrayList<>();
+    for (int i = 0; i < numLevel; i++) {
+      units.add(new LinkedList<>());
+    }
+  }
+
   public String getName() {
     return this.name;
   }
 
-  /**
-   * Get the territory's owner
-   * 
-   * @return the owner
-   */
   public int getOwnerId() {
     return this.ownerId;
   }
 
-  /**
-   * Set the territory's ownerId
-   * @param ownerId
-   */
   public void setOwnerId(int ownerId) {
     this.ownerId = ownerId;
   }
 
-  /**
-   * Get the territory's units
-   * 
-   * @return the number of units
-   */
   public int getNumUnits() {
-    return this.numUnits;
+    return units.get(0).size();
   }
 
-  /**
-   * Dispatch an army that can move or join a war.
-   * 
-   * @param numUnits the number of units in the army
-   * @return An army has numUnits Units.
-   */
-  private Army dispatchArmy(int numUnits) {
-    if (numUnits > this.numUnits) {
-      throw new IllegalArgumentException("Cannot dispatch required number of units! Territory name: " + this.name + " numUnits: " + numUnits + " this.numUnits: " + this.numUnits);
+  private Army dispatchArmy(int[] numUnits) {
+    Army army = new Army(ownerId);
+    for (int i = 0; i < numLevel; i++) {
+      for (int j = 0; j < numUnits[i]; j++) {
+        army.add(units.get(i).poll());
+      }
     }
-    Army army = new Army(ownerId, numUnits);
-    this.numUnits -= numUnits;
     return army;
   }
 
@@ -109,11 +109,11 @@ public class Territory implements java.io.Serializable {
    * @param army to join this territory
    */
   protected void absorbArmy(Army army) {
-    if (numUnits == 0) {
+    if (Arrays.equals(getAllUnitsNum(), new int[numLevel])) {
       ownerId = army.getOwnerId();
-      numUnits = army.getAllUnits();
-    } else {
-      numUnits += army.getAllUnits();
+    }
+    for (Unit u : army.getUnitsList()) {
+      units.get(u.level()).add(u);
     }
   }
 
@@ -127,9 +127,6 @@ public class Territory implements java.io.Serializable {
     if (!underWar) {
       underWar = true;
       warZone = new RoundFight(this);
-      // if (numUnits > 0) {
-      //   warZone.add(dispatchArmy(numUnits));
-      // }
     }
     warZone.add(army);
   }
@@ -144,6 +141,22 @@ public class Territory implements java.io.Serializable {
    * @param numUnits
    */
   public void moveTo(Territory dest, int numUnits) {
+    int[] a = new int[numLevel];
+    a[0] = numUnits;
+    moveTo(dest, a);
+  }
+
+  /**
+   * Try to move some units to another Territory.
+   * @param dest the territory to move to.
+   * @param numUnits an array, represents how many units of each level are engaged in this move.
+   */
+  public void moveTo(Territory dest, int[] numUnits) {
+    for (int i = 0; i < numLevel; i++) {
+      if (numUnits[i] > units.get(i).size() || numUnits[i] < 0) {
+        throw new IllegalArgumentException("Invalid move number: " + numUnits[i]);
+      }
+    }
     if (ownerId != dest.getOwnerId()) {
       throw new IllegalArgumentException("Cannot move to a different player's territory!");
     }
@@ -160,13 +173,30 @@ public class Territory implements java.io.Serializable {
    * @param numUnits number of Units of this attack.
    */
   public void attack(Territory target, int numUnits) {
+    int[] a = new int[numLevel];
+    a[0] = numUnits;
+    attack(target, a);
+  }
+
+  /**
+   * Make an Army to attack the target.
+   * @param target the target to attack.
+   * @param numUnits an array, indicate the number of each level of units in this attack.
+   */
+  public void attack(Territory target, int[] numUnits) {
     if (ownerId == target.getOwnerId()) {
       throw new IllegalArgumentException("Player cannot attack her own territory!");
     }
-    if (numUnits <= 0) {
-      throw new IllegalArgumentException("The numUnits to attack must be positive!");
+    for (int i = 0; i < numLevel; i++) {
+      if (numUnits[i] > units.get(i).size() || numUnits[i] < 0) {
+        throw new IllegalArgumentException("Invalid attack number: " + numUnits[i]);
+      }
     }
     target.attackedBy(dispatchArmy(numUnits));
+  }
+
+  private void recover() {
+    units.get(0).add(UnitManager.newUnit());
   }
 
   /**
@@ -175,14 +205,17 @@ public class Territory implements java.io.Serializable {
    */
   public void update() {
     if (underWar) {
-      if (numUnits > 0) {
-        warZone.add(dispatchArmy(numUnits));
+      int[] allUnitsNum = getAllUnitsNum();
+      if (!Arrays.equals(allUnitsNum, new int[numLevel])) {
+        warZone.add(dispatchArmy(allUnitsNum));
       }
       warZone.startWar();
       underWar = false;
       warZone = null;
     }
-    this.numUnits++;
+    recover();
+    produceFood();
+    produceTechnology();
   }
 
   /**
@@ -202,7 +235,7 @@ public class Territory implements java.io.Serializable {
    */
   @Override
   public String toString() {
-    return "(name: " + name + ", ownerId: " + ownerId + ", units: " + numUnits + ")";
+    return "(name: " + name + ", ownerId: " + ownerId + ", units: " + units.get(0).size() + ")";
   }
 
   /**
@@ -215,6 +248,68 @@ public class Territory implements java.io.Serializable {
 
   /* Initialize units information after player gives the information. */
   public void initNumUnits(int units) {
-    this.numUnits = units;
+    this.units.get(0).addAll(UnitManager.newUnits(units));
   }
+
+  /* Produce some food resource every round */
+  protected void produceFood() {
+    food += 10;
+  }
+
+  /* Produce some technology resource every round */
+  protected void produceTechnology() {
+    technology += 10;
+  }
+
+  /* Collect food resource of this territory. */
+  public int getFood() {
+    int temp = food;
+    food = 0;
+    return temp;
+  }
+
+  /* Collect technology resource of this territory. */
+  public int getTechnology() {
+    int temp = technology;
+    technology = 0;
+    return temp;
+  }
+
+  public int getUnitsNumByLevel(int level) {
+    return units.get(level).size();
+  }
+
+  public int getAllUnits() {
+    return units.get(0).size();
+  }
+
+  /**
+   * Get how many units of each level are left in this territory.
+   * @return
+   */
+  public int[] getAllUnitsNum() {
+    int[] a = new int[numLevel];
+    for (int i = 0; i < numLevel; i++) {
+      a[i] = units.get(i).size();
+    }
+    return a;
+  }
+
+  /**
+   * Upgrade a unit with level now to level target.
+   * @param now
+   * @param target
+   */
+  public void upgradeOneUnit(int now, int target) {
+    if (units.get(now).size() == 0) {
+      throw new IllegalArgumentException("No unit with level " + now + ", upgrade failed!");
+    }
+    if (target < now || now < 0 || target < 0 || now >= numLevel || target >= numLevel) {
+      throw new IllegalArgumentException("Invalid level!");
+    }
+    Unit unit = units.get(now).poll();
+    UnitManager.upgrade(unit, target);
+    units.get(target).add(unit);
+  }
+
 }

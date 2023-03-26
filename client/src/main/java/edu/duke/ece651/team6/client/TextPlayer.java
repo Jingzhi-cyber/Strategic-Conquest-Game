@@ -11,16 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.duke.ece651.team6.shared.AttackOrder;
-import edu.duke.ece651.team6.shared.Commit;
-import edu.duke.ece651.team6.shared.Constants;
-import edu.duke.ece651.team6.shared.GameBasicSetting;
-import edu.duke.ece651.team6.shared.GameMap;
-import edu.duke.ece651.team6.shared.GlobalMapInfo;
-import edu.duke.ece651.team6.shared.MoveOrder;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
-import edu.duke.ece651.team6.shared.Result;
-import edu.duke.ece651.team6.shared.Territory;
+import edu.duke.ece651.team6.shared.*;
 
 /**
  * A class representing a text player in the risc game
@@ -62,8 +53,8 @@ public class TextPlayer implements Player {
   @Override
   public void placeUnit() throws IOException, ClassNotFoundException {
     // printLine("From client: Requesting to " + prompt);
-    HashMap<Territory, Integer> map = new HashMap<Territory, Integer>();
-    HashSet<Territory> territories = setting.getAssignedTerritories();
+    Map<Territory, Integer> map = new HashMap<>();
+    Set<Territory> territories = setting.getAssignedTerritories();
     int count = 1;
     for (Territory t : territories) {
       if (count >= territories.size()) {
@@ -94,9 +85,9 @@ public class TextPlayer implements Player {
   /**
    * Get a set of notations of possible commands
    * 
-   * @return HashSet<String> with the first letters of available commands
+   * @return Set<String> with the first letters of available commands
    */
-  private HashSet<String> getPossibleCommandChars() {
+  private Set<String> getPossibleCommandChars() {
     return new HashSet<String>() {
       {
         add("M");
@@ -113,7 +104,7 @@ public class TextPlayer implements Player {
    * @return a Character of the command
    * @throws IOException, {@link IllegalArgumentException}
    */
-  private Character readCommand(String prompt, HashSet<String> availableCommands) throws IOException {
+  private Character readCommand(String prompt, Set<String> availableCommands) throws IOException {
     String s = readInputLine(prompt).toUpperCase();
     if (s.length() != 1 || !availableCommands.contains(s)) {
       throw new IllegalArgumentException(
@@ -125,12 +116,12 @@ public class TextPlayer implements Player {
   /**
    * Construct, display and return self-owned territories with serial numbers
    * 
-   * @return a HashMap<Integer, Territory> mapping from serial number to the
+   * @return a Map<Integer, Territory> mapping from serial number to the
    *         territory
    */
-  private HashMap<Integer, Territory> displayOrderedTerritoriesSelf() {
+  private Map<Integer, Territory> displayOrderedTerritoriesSelf() {
     int i = 1;
-    HashMap<Integer, Territory> map = new HashMap<>();
+    Map<Integer, Territory> map = new HashMap<>();
 
     PlayerMapInfo playerMapInfo = mapTextView.globalMapInfo.getPlayerMapInfo(this.playerId);
 
@@ -147,9 +138,9 @@ public class TextPlayer implements Player {
    * 
    * @return HashSet<Territory> enemyTerritories
    */
-  private HashSet<Territory> findEnemyTerritories() {
-    HashSet<Territory> set = new HashSet<>();
-    HashMap<Integer, PlayerMapInfo> globalInfo = mapTextView.globalMapInfo.getGlobalMap();
+  private Set<Territory> findEnemyTerritories() {
+    Set<Territory> set = new HashSet<>();
+    Map<Integer, PlayerMapInfo> globalInfo = mapTextView.globalMapInfo.getGlobalMap();
     for (Map.Entry<Integer, PlayerMapInfo> entry : globalInfo.entrySet()) {
       if (!entry.getKey().equals(this.playerId)) {
         Set<Territory> territories = entry.getValue().getTerritories();
@@ -167,14 +158,14 @@ public class TextPlayer implements Player {
    * with the source territory
    * 
    * @param src is the source self-owned territory of the player
-   * @return HashMap<Integer, Territory> a map from the serial number to a
+   * @return Map<Integer, Territory> a map from the serial number to a
    *         territory
    */
-  private HashMap<Integer, Territory> displayConnectedOrderedTerritoriesEnemies(Territory src) {
-    HashSet<Territory> enemyTerritories = findEnemyTerritories();
+  private Map<Integer, Territory> displayConnectedOrderedTerritoriesEnemies(Territory src) {
+    Set<Territory> enemyTerritories = findEnemyTerritories();
     int i = 1;
-    HashMap<Integer, Territory> result = new HashMap<>();
-    HashSet<Territory> neighs = this.gameMap.getNeighborSet(src);
+    Map<Integer, Territory> result = new HashMap<>();
+    Set<Territory> neighs = this.gameMap.getNeighborSet(src);
     for (Territory t : neighs) {
       if (enemyTerritories.contains(t)) {
         printLine(i + ". " + t.getName());
@@ -190,10 +181,10 @@ public class TextPlayer implements Player {
    * 
    * @param src is the source territory owned by the current player. If it's null,
    *            it will display enemy territories
-   * @return HashMap<Integer, Territory> is a mapping from serial number to a
+   * @return Map<Integer, Territory> is a mapping from serial number to a
    *         territory
    */
-  private HashMap<Integer, Territory> displayOrderedTerritories(Territory src) {
+  private Map<Integer, Territory> displayOrderedTerritories(Territory src) {
     if (src == null) {
       return displayOrderedTerritoriesSelf();
     } else {
@@ -214,7 +205,7 @@ public class TextPlayer implements Player {
    * @propogates {@link IllegalArgumentException} from readAnInteger
    */
   private Territory findTerritory(Territory src, String message) throws IOException {
-    HashMap<Integer, Territory> map = displayOrderedTerritories(src);
+    Map<Integer, Territory> map = displayOrderedTerritories(src);
     if (map.size() <= 0) {
       throw new IllegalArgumentException("No suitable territory can be found. Please change an action to perform.");
     }
@@ -381,10 +372,8 @@ public class TextPlayer implements Player {
         }
         break; // get the command
       }
-      // TODO 1: server receives the exit info: true -> exit
-      // TODO 2: server removed the player from list, and send back ack -> safe to
       // exit
-      if (cmd == 'E') {
+      if (cmd != null && cmd == 'E') {
         client.sendExitInfo(Boolean.valueOf(true));
         return Constants.EXIT;
       } else {
@@ -399,7 +388,7 @@ public class TextPlayer implements Player {
    * 
    * @return HashSet<String> of exit related commands
    */
-  private HashSet<String> getExitCommands() {
+  private Set<String> getExitCommands() {
     return new HashSet<String>() {
       {
         add("W");

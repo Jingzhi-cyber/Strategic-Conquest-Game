@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.shared;
 import java.util.*;
 
 public class GlobalMapInfo implements java.io.Serializable {
-    private HashMap<Integer, PlayerMapInfo> globalMap;
+    private Map<Integer, PlayerMapInfo> globalMap;
     private GameMap gameMap;
     
     /**
@@ -49,8 +49,8 @@ public class GlobalMapInfo implements java.io.Serializable {
     return this.globalMap.get(playerId);
   }
 
-  public HashSet<String> getTerritoryNames() {
-    HashSet<String> result = new HashSet<String>();
+  public Set<String> getTerritoryNames() {
+    Set<String> result = new HashSet<String>();
     for (PlayerMapInfo playerMapInfo : globalMap.values()) {
       for (Territory territory : playerMapInfo.getTerritories()) {
         result.add(territory.getName());
@@ -59,15 +59,15 @@ public class GlobalMapInfo implements java.io.Serializable {
     return result;
   }
 
-  public HashMap<Integer, PlayerMapInfo> getGlobalMap() {
+  public Map<Integer, PlayerMapInfo> getGlobalMap() {
     return this.globalMap;
   }
 
-    /**
-     * Get GameMap
-     * @return GameMap
-     */
-    public GameMap getGameMap() {
-        return this.gameMap;
-    }
+  /**
+   * Get GameMap
+   * @return GameMap
+   */
+  public GameMap getGameMap() {
+      return this.gameMap;
+  }
 }

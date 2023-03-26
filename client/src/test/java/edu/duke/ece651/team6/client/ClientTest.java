@@ -25,7 +25,7 @@ import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.Result;
 
 public class ClientTest {
-  private static final int PORT = 8888;
+  //private static final int PORT = 8888;
   private ServerSocket server;
   private Socket clientSocket;
   OutputStream outputStream = mock(OutputStream.class);

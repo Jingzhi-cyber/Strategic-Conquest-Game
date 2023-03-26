@@ -1,18 +1,17 @@
 package edu.duke.ece651.team6.shared;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
 
 public class PlayerMapInfo implements java.io.Serializable {
     private final int playerId;
-    private final HashMap<Territory, HashSet<String>> playerMap;
+    private final Map<Territory, Set<String>> playerMap;
 
     /**
      * Construct a PlayerMapInfo with the player's id and territories owned by the player, and their neighbors
      * @param playerId
      * @param playerMap HashMap - Key: territory Value: the name of its neighbors
      */
-    public PlayerMapInfo(int playerId, HashMap<Territory, HashSet<String>> playerMap) {
+    public PlayerMapInfo(int playerId, Map<Territory, Set<String>> playerMap) {
         this.playerId = playerId;
         this.playerMap = playerMap;
     }
@@ -38,7 +37,7 @@ public class PlayerMapInfo implements java.io.Serializable {
      * @param t a Territory
      * @return HashSet of Strings that represents the neighbors' name
      */
-    public HashSet<String> getTerritoryNeighbors(Territory t) {
+    public Set<String> getTerritoryNeighbors(Territory t) {
         return playerMap.get(t);
     }
 }

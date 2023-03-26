@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,15 +20,15 @@ public class MoveOrderTest {
   }
 
   private GameMap createGameMap() {
-    HashMap<Territory, HashSet<Territory>> adjList = new HashMap<Territory, HashSet<Territory>>();
-    HashSet<Territory> setA = new HashSet<Territory>() {
+    Map<Territory, Set<Territory>> adjList = new HashMap<>();
+    Set<Territory> setA = new HashSet<Territory>() {
       {
         add(B);
       }
     };
     adjList.put(A, setA);
 
-    HashSet<Territory> setB = new HashSet<Territory>() {
+    Set<Territory> setB = new HashSet<Territory>() {
       {
         add(A);
         add(C);
@@ -34,7 +36,7 @@ public class MoveOrderTest {
     };
     adjList.put(B, setB);
 
-    HashSet<Territory> setC = new HashSet<Territory>() {
+    Set<Territory> setC = new HashSet<Territory>() {
       {
         add(B);
       }

@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,7 @@ public class RiscMasterTest {
         gameMap = new GameMap(simpleMap.getAdjList());
         assertThrows(IllegalArgumentException.class, ()->new RiscMaster(server, 0, gameMap));
         this.riscMaster = new RiscMaster(server, 2, gameMap);
-        ArrayList<Socket> clientSockets = new ArrayList<>();
+        List<Socket> clientSockets = new ArrayList<>();
         for (int i = 0; i < 2; ++i) {
             clientSockets.add(new Socket());
         }
@@ -48,7 +50,7 @@ public class RiscMasterTest {
     public void testSetUpGameBasicSettings() throws ClassNotFoundException, IOException {
         GameBasicSetting gameBasicSetting = new GameBasicSetting(0, 2, new HashSet<Territory>(), 2);
         Territory t = gameMap.getTerritoryByName("Narnia");
-        HashMap<Territory, Integer> map = new HashMap<>();
+        Map<Territory, Integer> map = new HashMap<>();
         map.put(t, 1);
         gameBasicSetting.initializeUnitPlacement(map);
         when(this.server.recvObject(any(Socket.class))).thenReturn(gameBasicSetting);

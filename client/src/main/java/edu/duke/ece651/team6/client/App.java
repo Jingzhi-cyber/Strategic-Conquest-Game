@@ -67,8 +67,12 @@ public class App {
 
     /* 4. Close Phase */
     try {
-      input.close();
-      client.closeSocket();
+      if (input != null) {
+        input.close();
+      }
+      if (client != null) {
+        client.closeSocket();
+      }
     } catch (IOException e) {
       System.out.println(e.getMessage());
     }

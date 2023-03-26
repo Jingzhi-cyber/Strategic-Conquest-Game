@@ -1,7 +1,8 @@
 package edu.duke.ece651.team6.shared;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 // Contains all information for displaying to each player at the biginning so that they can do setting based on the information
 public class GameBasicSetting implements java.io.Serializable {
@@ -9,11 +10,11 @@ public class GameBasicSetting implements java.io.Serializable {
   final int playerId;
   final int numPlayers;
 
-  final HashSet<Territory> assignedTerritories; // assigned by the game master
+  final Set<Territory> assignedTerritories; // assigned by the game master
   int remainingNumUnits;
 
   /* Units initialization by the client. */
-  HashMap<Territory, Integer> unitPlacement;
+  Map<Territory, Integer> unitPlacement;
 
   /**
    * Constructs a GameBasicSetting with 4 params
@@ -23,7 +24,7 @@ public class GameBasicSetting implements java.io.Serializable {
    * @param territories    is a group of territories assigned to the player
    * @param availableUnits is the total number of units can be used on the board
    */
-  public GameBasicSetting(int playerId, int numPlayers, HashSet<Territory> territories, int availableUnits) {
+  public GameBasicSetting(int playerId, int numPlayers, Set<Territory> territories, int availableUnits) {
     this.playerId = playerId;
     this.numPlayers = numPlayers;
     this.assignedTerritories = territories;
@@ -42,7 +43,7 @@ public class GameBasicSetting implements java.io.Serializable {
   }
 
   /* Get assigned territories */
-  public HashSet<Territory> getAssignedTerritories() {
+  public Set<Territory> getAssignedTerritories() {
     return assignedTerritories;
   }
 
@@ -72,7 +73,7 @@ public class GameBasicSetting implements java.io.Serializable {
    * 
    * @param map : Territory -> numUnits
    */
-  public void initializeUnitPlacement(HashMap<Territory, Integer> map) {
+  public void initializeUnitPlacement(Map<Territory, Integer> map) {
     this.unitPlacement = map;
   }
 
@@ -83,7 +84,7 @@ public class GameBasicSetting implements java.io.Serializable {
    * 
    * @return a HashMap from territory to number of units
    */
-  public HashMap<Territory, Integer> getUnitPlacement() {
+  public Map<Territory, Integer> getUnitPlacement() {
     return this.unitPlacement;
   }
 }

@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -102,7 +103,7 @@ public class ServerTest {
     server.sendObjectByPlayerID(0, "Time to submit your commit!");
     connect.join();
 
-    ArrayList<Socket> single = new ArrayList<>();
+    List<Socket> single = new ArrayList<>();
     single.add(connectedSocket);
 
     assertEquals(single, server.getClientSockets());
@@ -118,7 +119,7 @@ public class ServerTest {
   public void test_multi_accept() throws IOException, ClassNotFoundException, InterruptedException {
     Server server = new Server(5555);
     int playerNum = 3;
-    ArrayList<Thread> multiThreads = new ArrayList<>();
+    List<Thread> multiThreads = new ArrayList<>();
     for (int i = 0; i < playerNum; i++) {
       ConnectThread connectThread = new ConnectThread("localhost", 5555, "Hi, I'm a player!");
       Thread connect = new Thread(connectThread);
@@ -136,7 +137,7 @@ public class ServerTest {
     assertThrows(IllegalArgumentException.class, () -> server.acceptMultiPlayers(-1));
     server.acceptMultiPlayers(3);
 
-    ArrayList<Object> playerInfos = server.recvObjectFromALL();
+    List<Object> playerInfos = server.recvObjectFromALL();
     assertEquals(playerNum, playerInfos.size());
 
     for (int i = 0; i < playerNum; i++) {
@@ -149,7 +150,7 @@ public class ServerTest {
       thread.join();
     }
 
-    ArrayList<Socket> clients = server.getClientSockets();
+    List<Socket> clients = server.getClientSockets();
     Socket client1 = clients.get(0);
     Socket client2 = clients.get(1);
     Socket client3 = clients.get(2);

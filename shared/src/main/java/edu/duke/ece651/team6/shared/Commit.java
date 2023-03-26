@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.shared;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Map;
 
 /* A structure contains all orders from one player, which will be sent back to server for */
 public class Commit implements java.io.Serializable {
@@ -79,7 +79,7 @@ public class Commit implements java.io.Serializable {
 
   public void checkUsableUnitsAfterAllOrdersAreCollected() {
     // only check remaining units (not check > 0 here, check it with rule checker)
-    HashMap<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
+    Map<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
     for (MoveOrder move : moves) {
       if (!remainingUnits.containsKey(move.src)) {
         remainingUnits.put(move.src, move.src.getNumUnits());

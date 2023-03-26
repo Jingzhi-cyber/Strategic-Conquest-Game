@@ -1,6 +1,9 @@
 package edu.duke.ece651.team6.shared;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 
 public class TerritoryTest {
@@ -45,6 +48,13 @@ public class TerritoryTest {
     t3.update();
     assertEquals(2, t1.getNumUnits());
     assertEquals(9, t3.getNumUnits()); // territory.update() increase numUnit by 1
+
+    // new moveTo
+    assertThrows(IllegalArgumentException.class, () -> t1.moveTo(t3, new int[]{5, 0, 0, 0, 0, 0, 0}));
+    assertThrows(IllegalArgumentException.class, () -> t1.moveTo(t2, new int[]{1, 0, 0, 0, 0, 0, 0}));
+    t3.moveTo(t1, new int[]{6, 0, 0, 0, 0, 0, 0});
+    assertTrue(Arrays.equals(t1.getAllUnitsNum(), new int[]{8, 0, 0, 0, 0, 0, 0}));
+    assertTrue(Arrays.equals(t3.getAllUnitsNum(), new int[]{3, 0, 0, 0, 0, 0, 0}));
   }
 
   @Test
@@ -52,7 +62,7 @@ public class TerritoryTest {
     Territory t1 = new Territory("1", 1, 100);
     assertThrows(IllegalArgumentException.class, () -> t1.attack(t1, 5));
     Territory t2 = new Territory("2", 2, 1);
-    assertThrows(IllegalArgumentException.class, () -> t1.attack(t2, 0));
+    assertThrows(IllegalArgumentException.class, () -> t1.attack(t2, -1));
     t1.attack(t2, 80);
     Territory t3 = new Territory("3", 3, 10);
     t3.attack(t2, 1);
@@ -62,6 +72,24 @@ public class TerritoryTest {
     t1.attack(t4, 5);
     t4.update();
     assertEquals(1, t4.getOwnerId());
+
+    Territory t5 = new Territory("nihao", 1, 0);
+    Territory t6 = new Territory("hello", 2, 10);
+    assertThrows(IllegalArgumentException.class, () -> t6.attack(t6, new int[]{1, 0, 0, 0, 0, 0, 0}));
+    assertThrows(IllegalArgumentException.class, () -> t6.attack(t5, new int[]{5, 1, 0, 0, 0, 0, 0}));
+    t6.attack(t5, new int[]{5, 0, 0, 0, 0, 0, 0});
+    t5.update();
+    assertTrue(Arrays.equals(t5.getAllUnitsNum(), new int[]{6, 0, 0, 0, 0, 0, 0}));
+    assertEquals(2, t5.getOwnerId());
+  }
+
+  @Test
+  public void testUpgrade() {
+    Territory t1 = new Territory("hello", 1, 5);
+    assertThrows(IllegalArgumentException.class, () -> t1.upgradeOneUnit(1, 3));
+    t1.upgradeOneUnit(0, 3);
+    assertTrue(Arrays.equals(t1.getAllUnitsNum(), new int[]{4, 0, 0, 1, 0, 0, 0}));
+    assertThrows(IllegalArgumentException.class, () -> t1.upgradeOneUnit(3, 2));
   }
 
   @Test
