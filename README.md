@@ -32,7 +32,7 @@ git push -o ci.skip # not run any CI pipelines on this push
 
 ```bash
 ./gradlew (clean) build
-./gradlew run
+./gradlew run-client # to see an example launching a JavaFX stage
 ```
 
 ### Note
