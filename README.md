@@ -30,4 +30,12 @@ launch client: ./client/build/install/client/bin/client <server_addr> <server_po
 git push -o ci.skip # not run any CI pipelines on this push
 ```
 
+```bash
+./gradlew (clean) build
+./gradlew run
+```
+
+### Note
+[Download](https://gluonhq.com/products/javafx/) JavaFX SDK if it's not included in your Java SDK
+
 
