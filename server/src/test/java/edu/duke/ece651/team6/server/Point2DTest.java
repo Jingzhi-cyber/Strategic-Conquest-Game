@@ -32,7 +32,7 @@ public class Point2DTest {
         assertNotEquals(p1.hashCode(), p2.hashCode());
         Point2D p3 = new Point2D(1, 0);
         assertNotEquals(p1, p3);
-        Edge e = new Edge(p1, p2);
+        Edge e = new Edge(p1, p3);
         assertNotEquals(p1, e);
     }
     

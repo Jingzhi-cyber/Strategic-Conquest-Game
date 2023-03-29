@@ -23,6 +23,7 @@ public class MapGenerator {
     private final int n;
     private List<Triangle> triangles;
     private Set<Edge> connections;
+    private Set<Edge> voronoi;
     
     public MapGenerator(int n) {
         names = new HashSet<>();
@@ -52,12 +53,12 @@ public class MapGenerator {
                 if (adder++ > 100) {
                     throw new RuntimeException("Cannot generate the map!");
                 }
-                int x = random.nextInt(1800) + 100;
-                int y = random.nextInt(800) + 100;
+                int x = random.nextInt(960) + 20;
+                int y = random.nextInt(460) + 20;
                 Point2D p = new Point2D(x, y);
                 boolean closeTo = false;
                 for (Point2D point : points) {
-                    if (point.closeTo(p, 100.0)) {
+                    if (point.closeTo(p, 50.0)) {
                         closeTo = true;
                         break;
                     }
@@ -112,6 +113,7 @@ public class MapGenerator {
         for (Triangle t : triangles) {
             connections.addAll(t.getEdges());
         }
+        generateVoronoi();
     }
 
     /**
@@ -173,6 +175,43 @@ public class MapGenerator {
             map.get(list.get(index2)).put(list.get(index1), distance);
         }
         return map;
+    }
+
+    /**
+     * Get voronoi map.
+     */
+    private void generateVoronoi() {
+        voronoi = new HashSet<>();
+        for (Edge e : connections) {
+            Triangle t1 = null;
+            Triangle t2 = null;
+            for (Triangle t : triangles) {
+                if (t.overlaps(e.p1) && t.overlaps(e.p2)) {
+                    if (t1 == null) {
+                        t1 = t;
+                    } else {
+                        t2 = t;
+                        break;
+                    }
+                }
+            }
+            if (t1 != null && t2 != null) {
+                voronoi.add(new Edge(t1.c, t2.c));
+            } else if (t1 != null) {
+                Edge ve = t1.getVoronoiEdge(e);
+                if (ve != null) {
+                    voronoi.add(ve);
+                }
+            }
+        }
+    }
+    
+    public List<Point2D> getPoints() {
+        return points;
+    }
+
+    public Set<Edge> getVoronoi() {
+        return voronoi;
     }
 
 }

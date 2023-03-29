@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import edu.duke.ece651.team6.shared.Territory;
 
 public class MapGeneratorTest {
+
     @Test
     void testGetTheMap() {
         MapGenerator m = new MapGenerator(15, "Hello", "Nihao", "Hi", "yeah");
@@ -40,5 +41,8 @@ public class MapGeneratorTest {
                 assertEquals(dist.get(t2), distMap.get(t2).get(t1));
             }
         }
+        m.getPoints();
+        m.getVoronoi();
+        //SimplePrinter.main(null);
     }
 }
