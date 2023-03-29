@@ -1,6 +1,8 @@
 package edu.duke.ece651.team6.server;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -10,8 +12,8 @@ public class Triangle {
     private Point2D p1;
     private Point2D p2;
     private Point2D p3;
-    private Point2D c;
-    private double r;
+    protected Point2D c;
+    protected double r;
 
     public Triangle(Point2D p1, Point2D p2, Point2D p3) {
         this.p1 = p1;
@@ -106,6 +108,42 @@ public class Triangle {
         edges.add(e2);
         edges.add(e3);
         return edges;
+    }
+
+    public Edge getVoronoiEdge(Edge e) {
+        if (c.x <= 0 || c.x >= 1000 || c.y <= 0 || c.y >= 500) {
+            return null;
+        }
+        Point2D mid = e.middle();
+        Edge verticalE = new Edge(c, mid);
+        List<Point2D> points = new ArrayList<>();
+        Point2D p1 = new Edge(new Point2D(0, 0), new Point2D(1000, 0)).getIntersection(verticalE);
+        Point2D p2 = new Edge(new Point2D(1000, 500), new Point2D(1000, 0)).getIntersection(verticalE);
+        Point2D p3 = new Edge(new Point2D(0, 0), new Point2D(0, 500)).getIntersection(verticalE);
+        Point2D p4 = new Edge(new Point2D(1000, 500), new Point2D(0, 500)).getIntersection(verticalE);
+        if (p1 != null) {
+            points.add(p1);
+        }
+        if (p2 != null) {
+            points.add(p2);
+        }
+        if (p3 != null) {
+            points.add(p3);
+        }
+        if (p4 != null) {
+            points.add(p4);
+        }
+        Set<Edge> edges = getEdges();
+        edges.remove(e);
+        List<Edge> edges2 = new ArrayList<>(edges);
+        Point2D pt = edges2.get(0).getIntersection(verticalE);
+        if (pt == null) {
+            pt = edges2.get(1).getIntersection(verticalE);
+        }
+        if ((mid.x - pt.x) / (points.get(0).x - pt.x) >= 0) {
+            return new Edge(points.get(0), c);
+        }
+        return new Edge(points.get(1), c);
     }
 
 }
