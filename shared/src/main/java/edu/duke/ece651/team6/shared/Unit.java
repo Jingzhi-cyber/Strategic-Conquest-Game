@@ -1,9 +1,11 @@
 package edu.duke.ece651.team6.shared;
 
+import java.io.Serializable;
+
 /**
  * This class represents an Unit, which has level, bonus and name. There are 7 different levels, from 0-6.
  */
-public class Unit {
+public class Unit implements Serializable {
     private int level;
     private int bouns;
     private String name;
