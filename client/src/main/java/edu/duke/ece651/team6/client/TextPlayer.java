@@ -24,7 +24,7 @@ public class TextPlayer implements Player {
   MapTextView mapTextView;
   GameMap gameMap;
   private boolean hasLost;
-  final Integer playerId;
+  private int playerId;
 
   /**
    * Constructs TextPlayer with 4 params
@@ -42,7 +42,9 @@ public class TextPlayer implements Player {
     this.setting = setting;
     this.mapTextView = null; // initiate when receiving a global map info
     this.hasLost = false;
-    this.playerId = Integer.valueOf(setting.getPlayerId());
+    if (setting != null) {
+      this.playerId = Integer.valueOf(setting.getPlayerId());
+    }
   }
 
   /**
@@ -505,6 +507,9 @@ public class TextPlayer implements Player {
   @Override
   public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException {
     GlobalMapInfo mapInfo = this.client.recvGlobalMapInfo();
+    if (mapInfo.playerId != -1) {
+      this.playerId = mapInfo.playerId;
+    }
     this.mapTextView = new MapTextView(mapInfo);
     this.gameMap = mapInfo.getGameMap();
     printLine(this.mapTextView.display());

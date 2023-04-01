@@ -32,39 +32,42 @@ public class App {
     /* 1. Build connection */
     Client client = null;
     GameBasicSetting setting = null;
-    BufferedReader input = null;
-
-    if (args.length != 2) {
+    BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+    StringBuilder sb = new StringBuilder();
+    if (args.length >= 3 || args.length <= 4) {
+      sb.append(args[2]);
+      sb.append(" ");
+      if (args.length == 4) {
+        if (Integer.valueOf(args[3]) < 2 || Integer.valueOf(args[3]) > 4) {
+          System.out
+            .println("Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port> <username> [<num_players>]");
+          System.exit(1);
+        }
+        sb.append(args[3]);
+      }
+    } else {
       System.out
-          .println("Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port>");
-      System.out.println("For example, \"./client/build/install/client/bin/client localhost 12345c\"");
-      System.out.println("or \"./client/build/install/client/bin/client vcm-30819.vm.duke.edu 8999\"");
+        .println("Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port> <username> [<num_players>]");
       System.exit(1);
     }
 
-    try {
-      // create a client obejct and connect it to the server
-      client = new Client(args[0], Integer.valueOf(args[1]));
+    // create a client obejct and connect it to the server
+    client = new Client(args[0], Integer.valueOf(args[1]));
+    client.sendObject(sb.toString());
+    TextPlayer player;
+    if (args.length == 3) {
+      player = new TextPlayer(client, input, System.out, null);
+    } else {
       System.out.println((String) client.recvObject());
       setting = client.recvGameBasicSetting();
-      input = new BufferedReader(new InputStreamReader(System.in));
-    } catch (UnknownHostException e) {
-      System.out.println("UnknownHostException " + e.getMessage());
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
+      player = new TextPlayer(client, input, System.out, setting);
+      player.displayGameSetting();
+      /* 2. Initiation Phase */
+      player.placeUnit();
     }
-
-    TextPlayer player = new TextPlayer(client, input, System.out, setting);
-    player.displayGameSetting();
-
-    // App app = new App(client, player);
-
-    /* 2. Initiation Phase */
-    player.placeUnit();
-
     /* 3. Play Phase */
     player.playGame();
-
+    
     /* 4. Close Phase */
     try {
       if (input != null) {

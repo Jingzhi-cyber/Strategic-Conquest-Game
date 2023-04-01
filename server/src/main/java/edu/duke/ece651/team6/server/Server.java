@@ -7,12 +7,11 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.IllegalBlockingModeException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
+
+import edu.duke.ece651.team6.shared.SocketKey;
 
 /**
  * This class is a wrapper class for server side socket that has a ServerSocket
@@ -22,28 +21,27 @@ import java.util.concurrent.TimeoutException;
  * client", "send/receive serializable obeject to/from connect client"
  */
 public class Server {
-  private ServerSocket serverSocket;
-  private List<Socket> clientSockets;
+  private List<SocketKey> clientSockets;
 
-  private class RecvObjectThead implements Runnable {
+  private class RecvObjectThread implements Runnable {
 
     private int playerID;
-    private Socket clientSocket;
+    private SocketKey key;
 
     private List<Object> recvedObjects;
 
-    public RecvObjectThead(int playerID, Socket clientSocket, List<Object> recvedObjects) {
+    public RecvObjectThread(int playerID, SocketKey key, List<Object> recvedObjects) {
       this.playerID = playerID;
-      this.clientSocket = clientSocket;
+      this.key = key;
       this.recvedObjects = recvedObjects;
     }
 
     @Override
     public void run() {
       try {
-        Object object = recvObject(clientSocket);
+        Object object = recvObject(key);
         this.recvedObjects.set(playerID, object);
-        sendObject(clientSocket, "Your commit has been received!");
+        sendObject(key, "Your commit has been received!");
       } catch (IOException | ClassNotFoundException e) {
         e.printStackTrace();
         // maybe request the client to send again?
@@ -51,89 +49,8 @@ public class Server {
     }
   }
 
-  /**
-   * constructs a wrapper server object. Takes an int as the local port number and
-   * bind the ServerSocket to listen to that port.
-   * 
-   * @param port is the local port number to bind. Range: 0 - 65535. If the given
-   *             value is 0, it means that the port number is automatically
-   *             allocated, typically from an ephemeral port range. This port
-   *             number can then be retrieved by calling getLocalPort().
-   * @throws IOException              if an I/O error occurs when opening the
-   *                                  socket.
-   * @throws SecurityException        if a security manager exists and its
-   *                                  checkListen method doesn't allow the
-   *                                  operation.
-   * @throws IllegalArgumentException if the port parameter is outside the
-   *                                  specified range of valid port values, which
-   *                                  is between 0 and 65535, inclusive
-   */
-  public Server(int port) throws IOException {
-    this.serverSocket = new ServerSocket(port);
-    clientSockets = new ArrayList<>();
-  }
-
-  /**
-   * Listens for a connection to be made to wrapper server socket and accepts it.
-   * Then add the connected client socket into clientSockets ArrayList.
-   * The method blocks until a connection is made.
-   * 
-   * @return a socket object for the client connection
-   * @throws IOException                  if an I/O error occurs when waiting for
-   *                                      a
-   *                                      connection.
-   * @throws SecurityException            if a security manager exists and its
-   *                                      checkAccept
-   *                                      method doesn't allow the operation
-   * @throws TimeoutException             if a timeout was previously set with
-   *                                      setSoTimeout
-   *                                      and the timeout has been reached.
-   * @throws IllegalBlockingModeException if this socket has an associated
-   *                                      channel, the channel is in non-blocking
-   *                                      mode, and there is no connection ready
-   *                                      to be accepted
-   */
-  public Socket accept() throws IOException {
-    Socket clientSocket = serverSocket.accept();
-    clientSockets.add(clientSocket);
-    sendObject(clientSocket, "Connected to server successfully!");
-    return clientSocket;
-  }
-
-  /**
-   * This method takes an int as the number of players to connect to the server.
-   * Then accepts these players one by one and adds their corresponding client
-   * sockets to the ArrayList "ClientSockets". The client socket of the first
-   * accepted player will be the first to be added to the ArrayList, so this
-   * player will have playerID 0. And the next accepted player will have playerID
-   * 1 and so on. This method will block until the required number (aka,
-   * playerNum) of connections are made.
-   * 
-   * @param playerNum is an int of the number of players trying to connect to this
-   *                  server. This playerNum must not be less than 0. If it is 0,
-   *                  then this method does nothing.
-   * @throws IOException                  if an I/O error occurs when waiting for
-   *                                      a
-   *                                      connection.
-   * @throws SecurityException            if a security manager exists and its
-   *                                      checkAccept
-   *                                      method doesn't allow the operation
-   * @throws TimeoutException             if a timeout was previously set with
-   *                                      setSoTimeout
-   *                                      and the timeout has been reached.
-   * @throws IllegalBlockingModeException if this socket has an associated
-   *                                      channel, the channel is in non-blocking
-   *                                      mode, and there is no connection ready
-   *                                      to be accepted
-   * @throws IllegalArgumentException     if the given playerNum is less than 0
-   */
-  public void acceptMultiPlayers(int playerNum) throws IOException {
-    if (playerNum < 0) {
-      throw new IllegalArgumentException("The given playerNum must not less than 0, but is : " + playerNum);
-    }
-    for (int i = 0; i < playerNum; i++) {
-      this.accept();
-    }
+  public Server(List<SocketKey> clientSockets) {
+    this.clientSockets = clientSockets;
   }
 
   /**
@@ -171,7 +88,7 @@ public class Server {
    * be received must be Serializable. (e.g., Class Map implements Serializable,
    * then receive a Map object using this method.)
    *
-   * @param clientSocket is a Socket object for the client to receive one
+   * @param key is a Socket object for the client to receive one
    *                     serializable object from
    * @return a serializable object that is receive from the client socket.
    * @throws IOException            if an I/O error occurs when creating the input
@@ -181,7 +98,9 @@ public class Server {
    * @throws ClassNotFoundException if the class of a serialized object cannot be
    *                                found.
    */
-  public Object recvObject(Socket clientSocket) throws IOException, ClassNotFoundException {
+  public Object recvObject(SocketKey key) throws IOException, ClassNotFoundException {
+    AccountManager m = AccountManager.getInstance();
+    Socket clientSocket = m.getSocket(key);
     InputStream in = clientSocket.getInputStream();
     ObjectInputStream objectIn = new ObjectInputStream(in);
     return objectIn.readObject();
@@ -231,7 +150,7 @@ public class Server {
     }
     List<Thread> recvThreads = new ArrayList<>(playerNum);
     for (int i = 0; i < playerNum; i++) {
-      Thread recvThread = new Thread(new RecvObjectThead(i, clientSockets.get(i), recvedObjects));
+      Thread recvThread = new Thread(new RecvObjectThread(i, clientSockets.get(i), recvedObjects));
       recvThread.setPriority(5);
       recvThread.start();
       recvThreads.add(recvThread);
@@ -252,7 +171,7 @@ public class Server {
    * the serializable object to be sent. (e.g., Class Map implements Serializable,
    * then send a Map object using this method.)
    * 
-   * @param clientSocket is a socket object for the client to send one
+   * @param key is a socket object for the client to send one
    *                     serializable object to
    * @param object       is the serializable object to be sent
    * @throws IOException              if an I/O error occurs when creating the
@@ -264,7 +183,9 @@ public class Server {
    *                                  implement the java.io.Serializable
    *                                  interface.
    */
-  public void sendObject(Socket clientSocket, Object object) throws IOException {
+  public void sendObject(SocketKey key, Object object) throws IOException {
+    AccountManager m = AccountManager.getInstance();
+    Socket clientSocket = m.getSocket(key);
     OutputStream out = clientSocket.getOutputStream();
     ObjectOutputStream objectOut = new ObjectOutputStream(out);
     objectOut.writeObject(object);
@@ -311,20 +232,9 @@ public class Server {
    *                                  interface.
    */
   public void sendObjectToAll(Object object) throws IOException {
-    for (Socket clientSocket : clientSockets) {
+    for (SocketKey clientSocket : clientSockets) {
       sendObject(clientSocket, object);
     }
-  }
-
-  /**
-   * Closes this server socket. Any thread currently blocked in accept() will
-   * throw a SocketException.
-   * If this socket has an associated channel then the channel is closed as well.
-   * 
-   * @throws IOException if an I/O error occurs when closing the serverSocket
-   */
-  public void closeServerSocket() throws IOException {
-    this.serverSocket.close();
   }
 
   /**
@@ -370,11 +280,9 @@ public class Server {
    * @param clientSocket is the socket for one client that is to be closed.
    * @throws IOException if an I/O error occurs when closing this socket.
    */
-  public void closeClientSocket(Socket clientSocket) throws IOException {
-    if (!clientSockets.remove(clientSocket)) {
-      throw new IllegalArgumentException(
-          "The given clientSocket to remove is not in the clientSockets arraylist in server!");
-    }
+  public void closeClientSocket(SocketKey key) throws IOException {
+    AccountManager m = AccountManager.getInstance();
+    Socket clientSocket = m.getSocket(key);
     clientSocket.close();
   }
 
@@ -393,7 +301,7 @@ public class Server {
    * 
    * @return this.clientSockets
    */
-  public List<Socket> getClientSockets() {
+  public List<SocketKey> getClientSockets() {
     return this.clientSockets;
   }
 }

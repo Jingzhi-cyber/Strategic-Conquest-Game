@@ -5,6 +5,8 @@ import java.util.*;
 public class GlobalMapInfo implements java.io.Serializable {
     private Map<Integer, PlayerMapInfo> globalMap;
     private GameMap gameMap;
+    // To tell the newly connected socket playerId.
+    public int playerId = -1;
     
     /**
      * Construct GlobalMapInfo with empty globalMap
