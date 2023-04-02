@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.shared;
 public class AttackOrder extends SimpleMove {
 
   public AttackOrder(Territory src, Territory dest, int numUnits) {
-    super(src, dest, numUnits);
+    super("Attack", src, dest, numUnits);
   }
 
   /**

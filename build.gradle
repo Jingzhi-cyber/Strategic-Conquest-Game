@@ -60,6 +60,9 @@ subprojects{
             showStandardStreams = true
             exceptionFormat = 'full'
         }
+        //systemProperty "testfx.headless", "true"
+        //systemProperty "testfx.robot", "glass"
+
     }
     test {
         // Use junit platform for unit tests
