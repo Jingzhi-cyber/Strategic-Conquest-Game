@@ -16,6 +16,11 @@ Maintainer: ece651-spr23-team6
 ![uml](v1-final-uml-group6-risc.png)
 ## Usage
 ```bash
+# client ui developing..
+./gradlew run-client # to launch the GUI scene
+```
+
+```bash
 ./gradlew build
 ./gradlew installDist
 
@@ -38,4 +43,5 @@ git push -o ci.skip # not run any CI pipelines on this push
 ### Note
 [Download](https://gluonhq.com/products/javafx/) JavaFX SDK if it's not included in your Java SDK
 
-
+### Resources
+- [JavaFX-tutorial](https://jenkov.com/tutorials/javafx/3d.html)
