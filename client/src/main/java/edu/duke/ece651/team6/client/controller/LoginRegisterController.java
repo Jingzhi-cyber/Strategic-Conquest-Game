@@ -1,15 +1,21 @@
 package edu.duke.ece651.team6.client.controller;
 
+import java.util.HashMap;
+
+import edu.duke.ece651.team6.client.Client;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
-public class LoginRegisterController {
+public class LoginRegisterController extends Controller {
 
   @FXML
   private TabPane tabPane;
@@ -38,6 +44,10 @@ public class LoginRegisterController {
   @FXML
   private Button registerButton;
 
+  public LoginRegisterController(Client client) {
+    super(client);
+  }
+
   public void initialize() {
     // Set up the login button event handler
     loginButton.setOnAction(event -> {
@@ -46,7 +56,12 @@ public class LoginRegisterController {
 
       if (loginUser(username, password)) {
         // Show the main game window
-        showMainWindow();
+        try {
+          switchToGameMainPage();
+        } catch (Exception e) {
+          // Show an error message if the window fails to load
+          showError("Failed to load main window.");
+        }
       } else {
         // Show an error message
         showError("Invalid username or password.");
@@ -80,9 +95,11 @@ public class LoginRegisterController {
     return true;
   }
 
-  private void showMainWindow() {
+  private void switchToGameMainPage() throws Exception {
     // Load the main game window
     // ...
+
+    switchToPage("/ui/risc-game-main-page.xml", new HashMap<Class<?>, Object>(), "RISC", tabPane);
   }
 
   private void showSuccess(String message) {

@@ -63,15 +63,14 @@ public class Client {
    * @throws IOException              if an I/O error occurs when creating the
    *                                  socket.
    * @throws SecurityException        if a security manager exists and its
-   *                                  checkConnect
-   *                                  method doesn't allow the operation.
+   *                                  checkConnect method doesn't allow the
+   *                                  operation.
    * @throws IllegalArgumentException if the port parameter is outside the
    *                                  specified range of valid port values, which
    *                                  is between 0 and 65535, inclusive.
    * @throws NullPointerException     if address is null.
    * @throws ClassNotFoundException   if the class of a serialized object cannot
-   *                                  be
-   *                                  found.
+   *                                  be found.
    * 
    */
   // public Client(InetAddress address, int port) throws IOException,
@@ -82,8 +81,8 @@ public class Client {
 
   /**
    * Receive data from the connected server. The received data is stored in the
-   * InputStream of the current client socket.
-   * Returns the InputStream of the current client socket.
+   * InputStream of the current client socket. Returns the InputStream of the
+   * current client socket.
    * 
    * @return the InputStream for the given socket.
    * @throws IOException if an I/O error occurs when creating the input stream,
@@ -98,8 +97,7 @@ public class Client {
    * Takes an InputStream object for the data to send, send all bytes in the given
    * InputStream to the connected server
    * 
-   * @param tosend is an InputStream object that has the bytes as the data
-   *               to send
+   * @param tosend is an InputStream object that has the bytes as the data to send
    * @throws IOException if an I/O error occurs when creating the output stream or
    *                     if the socket is not connected.
    */
@@ -114,8 +112,8 @@ public class Client {
 
   /**
    * Receive an object from the connected server. The object to be received must
-   * be Serializable. (e.g., Class Map implements
-   * Serializable, then receive a Map object using this method.)
+   * be Serializable. (e.g., Class Map implements Serializable, then receive a Map
+   * object using this method.)
    *
    * @return a serializable object that is receive from the client socket.
    * @throws IOException            if an I/O error occurs when creating the input
@@ -133,8 +131,8 @@ public class Client {
 
   /**
    * takes the serializable object to be sent and send the serializable object to
-   * the connected server (e.g., Class Map implements Serializable,
-   * then send a Map object using this method.)
+   * the connected server (e.g., Class Map implements Serializable, then send a
+   * Map object using this method.)
    * 
    * @param object is the serializable object to be sent
    * @throws IOException              if an I/O error occurs when creating the
@@ -153,9 +151,8 @@ public class Client {
   }
 
   /**
-   * Closes the current client socket.
-   * Any thread currently blocked in an I/O operation upon this socket will throw
-   * a SocketException.
+   * Closes the current client socket. Any thread currently blocked in an I/O
+   * operation upon this socket will throw a SocketException.
    * 
    * Once a socket has been closed, it is not available for further networking use
    * (i.e. can't be reconnected or rebound). A new socket needs to be created.
@@ -183,8 +180,7 @@ public class Client {
   /**
    * Send settings (how many units to put on each territory)
    */
-  public void sendUpdatedGameBasicSetting(GameBasicSetting setting)
-      throws IOException, ClassNotFoundException {
+  public void sendUpdatedGameBasicSetting(GameBasicSetting setting) throws IOException, ClassNotFoundException {
     sendObject(setting);
   }
 
@@ -199,9 +195,8 @@ public class Client {
   }
 
   /**
-   * Send exit info to server
-   * - True: ask for leave
-   * - False: ask for keeping watching
+   * Send exit info to server - True: ask for leave - False: ask for keeping
+   * watching
    * 
    * @param exit
    * @throws IOException, {@link ClassNotFoundException}
