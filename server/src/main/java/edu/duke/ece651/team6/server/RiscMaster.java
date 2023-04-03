@@ -25,8 +25,6 @@ public class RiscMaster implements Master {
   private List<PlayerProfile> playerProfiles;
   private Set<Integer> losers;
 
-
-
   /**
    * Construct a RiscMaster by passing a server - Mainly for testing
    * 
@@ -75,8 +73,8 @@ public class RiscMaster implements Master {
 
   /**
    * Set up the GameMap before starting the game
-   *  - Send assigned Territories to each player
-   *  - Receive players' placement of units to their territories
+   * - Send assigned Territories to each player
+   * - Receive players' placement of units to their territories
    */
   public void setUpGameBasicSettings() {
     /**
@@ -90,7 +88,8 @@ public class RiscMaster implements Master {
       for (Territory t : assignedTerritories) {
         t.setOwnerId(playerId);
       }
-      GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, assignedTerritories, availableUnits);
+      GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, assignedTerritories,
+          availableUnits);
       safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
     }
 
@@ -175,7 +174,9 @@ public class RiscMaster implements Master {
      */
     Result result = checkResult();
     for (int playerId = 0; playerId < playerNum; playerId++) {
-      if (disconnectedList.contains(playerId)) { continue; }
+      if (disconnectedList.contains(playerId)) {
+        continue;
+      }
       if (!safeSendObjectToPlayer(playerId, result, "Result")) {
         disconnectedList.add(playerId);
       }
@@ -195,7 +196,7 @@ public class RiscMaster implements Master {
         } catch (IOException e) { // handle error occurs when closeClientSocket()
           System.out.println("server.closeClientSocket() error: " + e.getMessage());
         }
-      } 
+      }
     }
 
     if (!result.getWinners().isEmpty()) {
@@ -220,7 +221,7 @@ public class RiscMaster implements Master {
 
   /**
    * Send an object to a player specified by playerId
-   * 'safe' means java.io error are handled, especially 
+   * 'safe' means java.io error are handled, especially
    * if a player disconnects, the exceptions are caught,
    * playerId is removed from this.connectedPlayers, and
    * the socket to the player is closed
@@ -250,7 +251,7 @@ public class RiscMaster implements Master {
 
   /**
    * Receive an object from a player specified by playerId
-   * 'safe' means java.io error are handled, especially 
+   * 'safe' means java.io error are handled, especially
    * if a player disconnects, the exceptions are caught,
    * playerId is removed from this.connectedPlayers, and
    * the socket to the player is closed
@@ -293,7 +294,9 @@ public class RiscMaster implements Master {
   }
 
   /**
-   * Randomly divide territories into parts with equal number of territories corresponding to playerNum 
+   * Randomly divide territories into parts with equal number of territories
+   * corresponding to playerNum
+   * 
    * @return LinkedList that contains those parts
    */
   private List<Set<Territory>> generateRandomTerritoryAssignment() {
@@ -350,6 +353,7 @@ public class RiscMaster implements Master {
 
   /**
    * Execute Commits and update territories
+   * 
    * @param commits
    */
   private void executeCommits(List<Commit> commits) {
