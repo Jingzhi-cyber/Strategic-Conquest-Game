@@ -1,19 +1,16 @@
 package edu.duke.ece651.team6.client.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.Client;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 public class LoginRegisterController extends Controller {
 
@@ -48,23 +45,30 @@ public class LoginRegisterController extends Controller {
     super(client);
   }
 
+  private void loginOrRegister(boolean result) throws IOException, ClassNotFoundException {
+    if (result) {
+      try {
+        switchToGameMainPage();
+      } catch (Exception e) {
+        // Show an error message if the window fails to load
+        showError("Failed to load main window.");
+      }
+    } else {
+      // Show an error message
+      showError("Invalid username or password.");
+    }
+  }
+
   public void initialize() {
     // Set up the login button event handler
     loginButton.setOnAction(event -> {
       String username = usernameField.getText();
       String password = passwordField.getText();
 
-      if (loginUser(username, password)) {
-        // Show the main game window
-        try {
-          switchToGameMainPage();
-        } catch (Exception e) {
-          // Show an error message if the window fails to load
-          showError("Failed to load main window.");
-        }
-      } else {
-        // Show an error message
-        showError("Invalid username or password.");
+      try {
+        loginOrRegister(loginUser(username, password));
+      } catch (ClassNotFoundException | IOException e) {
+        showError(e.getMessage());
       }
     });
 
@@ -73,25 +77,29 @@ public class LoginRegisterController extends Controller {
       String username = registerUsernameField.getText();
       String password = registerPasswordField.getText();
 
-      if (registerUser(username, password)) {
-        // Show a success message
-        showSuccess("Registration successful. Please log in.");
-      } else {
-        // Show an error message
-        showError("Failed to register user.");
+      try {
+        loginOrRegister(registerUser(username, password));
+      } catch (ClassNotFoundException | IOException e) {
+        showError(e.getMessage());
       }
     });
   }
 
-  private boolean loginUser(String username, String password) {
+  private boolean loginUser(String username, String password) throws IOException, ClassNotFoundException {
     // Check if the username and password match an existing user in the database
     // Return true if the user is successfully authenticated, false otherwise
+    // TODO
+    // username is empty / null
+    // TODO
+    // client.sendLoginInfo(username);
     return true;
   }
 
-  private boolean registerUser(String username, String password) {
+  private boolean registerUser(String username, String password) throws IOException, ClassNotFoundException {
     // Add the new user to the database
     // Return true if the user was successfully registered, false otherwise
+    // TODO
+    // client.sendLoginInfo(username);
     return true;
   }
 
@@ -99,7 +107,9 @@ public class LoginRegisterController extends Controller {
     // Load the main game window
     // ...
 
-    switchToPage("/ui/risc-game-main-page.xml", new HashMap<Class<?>, Object>(), "RISC", tabPane);
+    HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
+    controllers.put(RiscController.class, new RiscController(client));
+    switchToPage("/ui/mainPage.xml", controllers, "RISC", tabPane);
   }
 
   private void showSuccess(String message) {
