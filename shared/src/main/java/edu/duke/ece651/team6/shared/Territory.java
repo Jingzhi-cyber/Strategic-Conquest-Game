@@ -148,8 +148,10 @@ public class Territory implements java.io.Serializable {
 
   /**
    * Try to move some units to another Territory.
-   * @param dest the territory to move to.
-   * @param numUnits an array, represents how many units of each level are engaged in this move.
+   * 
+   * @param dest     the territory to move to.
+   * @param numUnits an array, represents how many units of each level are engaged
+   *                 in this move.
    */
   public void moveTo(Territory dest, int[] numUnits) {
     for (int i = 0; i < numLevel; i++) {
@@ -180,8 +182,10 @@ public class Territory implements java.io.Serializable {
 
   /**
    * Make an Army to attack the target.
-   * @param target the target to attack.
-   * @param numUnits an array, indicate the number of each level of units in this attack.
+   * 
+   * @param target   the target to attack.
+   * @param numUnits an array, indicate the number of each level of units in this
+   *                 attack.
    */
   public void attack(Territory target, int[] numUnits) {
     if (ownerId == target.getOwnerId()) {
@@ -285,6 +289,7 @@ public class Territory implements java.io.Serializable {
 
   /**
    * Get how many units of each level are left in this territory.
+   * 
    * @return
    */
   public int[] getAllUnitsNum() {
@@ -297,6 +302,7 @@ public class Territory implements java.io.Serializable {
 
   /**
    * Upgrade a unit with level now to level target.
+   * 
    * @param now
    * @param target
    */
