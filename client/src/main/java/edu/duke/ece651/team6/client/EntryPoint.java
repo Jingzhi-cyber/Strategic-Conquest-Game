@@ -38,7 +38,7 @@ public class EntryPoint extends Application {
 
     HashMap<Class<?>, Object> controllers = new HashMap<>();
     controllers.put(LoginRegisterController.class, new LoginRegisterController(this.client));
-    controllers.put(RiscController.class, new RiscController(client));
+    //controllers.put(RiscController.class, new RiscController(client));
     // TODO controllers.put(RiscController.class, new RiscController());
     loader.setControllerFactory((c) -> { // on set the call back func here. the real call happens when loader calls its
                                          // load() method

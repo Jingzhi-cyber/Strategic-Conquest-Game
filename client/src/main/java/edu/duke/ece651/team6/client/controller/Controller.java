@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 
 public class Controller {
 
-  private Client client;
+  protected Client client;
 
   public Controller(Client client) {
     this.client = client;

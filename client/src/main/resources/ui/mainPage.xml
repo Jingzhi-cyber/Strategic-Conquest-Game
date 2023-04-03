@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="458.0" prefWidth="695.0" style="-fx-background-color: PeachPuff;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1600.0" style="-fx-background-color: PeachPuff;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.duke.ece651.team6.client.controller.RiscController">
    <children>
       <VBox prefHeight="92.0" prefWidth="695.0">
          <children>
@@ -57,14 +57,14 @@
             </HBox>
          </children>
       </VBox>
-      <HBox alignment="CENTER" prefHeight="327.0" prefWidth="695.0">
+      <HBox alignment="CENTER" prefHeight="500.0" prefWidth="1000.0">
          <children>
             <Pane prefHeight="268.0" prefWidth="416.0" />
             <VBox prefHeight="327.0" prefWidth="284.0">
                <children>
                   <Pane prefHeight="79.0" prefWidth="282.0">
                      <children>
-                        <ChoiceBox layoutX="35.0" layoutY="40.0" prefHeight="28.0" prefWidth="109.0" />
+                        <ChoiceBox fx:id="orderMenu" layoutX="35.0" layoutY="40.0" prefHeight="28.0" prefWidth="109.0" />
                         <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="212.0" text="Available order types:" textAlignment="CENTER">
                            <font>
                               <Font size="14.0" />
@@ -77,14 +77,14 @@
             </VBox>
          </children>
       </HBox>
-      <HBox alignment="CENTER" prefHeight="40.0" prefWidth="695.0">
+      <HBox alignment="CENTER" prefHeight="40.0" prefWidth="900.0">
          <children>
             <Pane prefHeight="40.0" prefWidth="695.0">
                <children>
-                  <ButtonBar layoutX="219.0" prefHeight="40.0" prefWidth="238.0">
+                  <ButtonBar layoutX="219.0" prefHeight="40.0" prefWidth="500.0">
                     <buttons>
-                        <Button mnemonicParsing="false" text="Submit " />
-                      <Button mnemonicParsing="false" prefHeight="30.0" prefWidth="110.0" style="-fx-background-color: Violet;" text="Done" />
+                        <Button mnemonicParsing="false" text="Place an order " />
+                      <Button mnemonicParsing="false" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: Violet;" text="Submit all orders" />
                     </buttons>
                   </ButtonBar>
                </children>

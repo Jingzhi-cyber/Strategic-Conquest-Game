@@ -205,6 +205,17 @@ public class Client {
     sendObject(exit);
   }
 
+    /**
+   * Send exit info to server - True: ask for leave - False: ask for keeping
+   * watching
+   * 
+   * @param exit
+   * @throws IOException, {@link ClassNotFoundException}
+   */
+  public void sendLoginInfo(String loginInfo) throws IOException, ClassNotFoundException {
+    sendObject(loginInfo);
+  }
+
   /**
    * A generic method to receive a specified object from server through socket
    * 
