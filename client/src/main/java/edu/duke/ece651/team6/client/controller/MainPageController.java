@@ -8,9 +8,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 
-public class RiscController extends Controller implements Initializable {
+public class MainPageController extends Controller implements Initializable {
+  // @FXML
+  // Label username;
+
+  // private String user;
+
+  // public void setUser(String user) {
+  // this.user = user;
+  // }
 
   @FXML
   ChoiceBox<String> orderMenu;
@@ -21,8 +30,9 @@ public class RiscController extends Controller implements Initializable {
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
   }
-  
-  public RiscController(Client client) {
+
+  public MainPageController(Client client) {
     super(client);
+    // this.username.setText(userName);
   }
 }

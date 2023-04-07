@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.Client;
+import edu.duke.ece651.team6.client.model.GameLounge;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
@@ -45,13 +46,19 @@ public class LoginRegisterController extends Controller {
     super(client);
   }
 
+  public String getUserName() {
+    return this.usernameField.getText();
+  }
+
   private void loginOrRegister(boolean result) throws IOException, ClassNotFoundException {
     if (result) {
       try {
-        switchToGameMainPage();
+        // switchToGameMainPage();
+        switchToGameLoungePage();
       } catch (Exception e) {
         // Show an error message if the window fails to load
-        showError("Failed to load main window.");
+        e.printStackTrace();
+        showError("Failed to load next window.");
       }
     } else {
       // Show an error message
@@ -68,6 +75,7 @@ public class LoginRegisterController extends Controller {
       try {
         loginOrRegister(loginUser(username, password));
       } catch (ClassNotFoundException | IOException e) {
+        e.printStackTrace();
         showError(e.getMessage());
       }
     });
@@ -80,6 +88,7 @@ public class LoginRegisterController extends Controller {
       try {
         loginOrRegister(registerUser(username, password));
       } catch (ClassNotFoundException | IOException e) {
+        e.printStackTrace();
         showError(e.getMessage());
       }
     });
@@ -106,21 +115,18 @@ public class LoginRegisterController extends Controller {
   private void switchToGameMainPage() throws Exception {
     // Load the main game window
     // ...
-
     HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
-    controllers.put(RiscController.class, new RiscController(client));
-    switchToPage("/ui/mainPage.xml", controllers, "RISC", tabPane);
+    // System.out.print(this.usernameField.getText());
+    controllers.put(MainPageController.class, new MainPageController(client));
+    switchToPage("/ui/mainPage.xml", "/ui/buttonstyle.css", controllers, "Main Page", tabPane);
   }
 
-  private void showSuccess(String message) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setContentText(message);
-    alert.showAndWait();
-  }
-
-  private void showError(String message) {
-    Alert alert = new Alert(Alert.AlertType.ERROR);
-    alert.setContentText(message);
-    alert.showAndWait();
+  private void switchToGameLoungePage() throws Exception {
+    // Load the main game window
+    // ...
+    HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
+    // System.out.print(this.usernameField.getText());
+    controllers.put(GameLoungeController.class, new GameLoungeController(client, new GameLounge()));
+    switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", tabPane);
   }
 }

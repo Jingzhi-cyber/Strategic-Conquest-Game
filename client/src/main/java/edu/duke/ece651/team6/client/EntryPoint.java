@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.controller.LoginRegisterController;
-import edu.duke.ece651.team6.client.controller.RiscController;
+import edu.duke.ece651.team6.client.controller.MainPageController;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -38,7 +38,7 @@ public class EntryPoint extends Application {
 
     HashMap<Class<?>, Object> controllers = new HashMap<>();
     controllers.put(LoginRegisterController.class, new LoginRegisterController(this.client));
-    //controllers.put(RiscController.class, new RiscController(client));
+    // controllers.put(RiscController.class, new RiscController(client));
     // TODO controllers.put(RiscController.class, new RiscController());
     loader.setControllerFactory((c) -> { // on set the call back func here. the real call happens when loader calls its
                                          // load() method
@@ -54,6 +54,9 @@ public class EntryPoint extends Application {
     Scene scene = new Scene(tp, 1600, 1000);
 
     // Load the CSS stylesheet
+    URL cssResource = getClass().getResource("/ui/buttonstyle.css");
+    scene.getStylesheets().add(cssResource.toString());
+    // Load the CSS stylesheet
     // URL cssResource = getClass().getResource("/ui/someStyle.css");
     // scene.getStylesheets().add(cssResource.toString());
 
@@ -66,5 +69,4 @@ public class EntryPoint extends Application {
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
     Application.launch();
   }
-
 }
