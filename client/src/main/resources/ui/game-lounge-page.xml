@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.Button?>
+<?import java.lang.Double?>
+
+<GridPane fx:id="gameLoungeGridPane" xmlns:fx="http://javafx.com/fxml"
+          fx:controller="edu.duke.ece651.team6.client.controller.GameLoungeController">
+  <columnConstraints>
+        <ColumnConstraints percentWidth="20" />
+        <ColumnConstraints percentWidth="60" />
+        <ColumnConstraints percentWidth="10" />
+        <ColumnConstraints percentWidth="10" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints percentHeight="10" />
+         <RowConstraints percentHeight="80" />
+        <RowConstraints percentHeight="10" />
+    </rowConstraints>
+    <children>
+    <ListView fx:id="gameLoungeList" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <Button fx:id="newGame"
+            text="New game"
+            GridPane.rowIndex="0"
+            GridPane.columnIndex="2"
+            styleClass="expandable,newgamebtn"
+            onAction="#onNewGameButton"/>
+     <Button fx:id="switchPageButton"
+            text="Switch to game"
+            GridPane.rowIndex="0"
+            GridPane.columnIndex="3"
+            styleClass="expandable,newgamebtn"
+            onAction="#onSwitchPageButton"/>
+  </children>
+</GridPane>
