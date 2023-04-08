@@ -12,7 +12,7 @@ public class GlobalMapInfo implements java.io.Serializable {
      * Construct GlobalMapInfo with empty globalMap
      */
     public GlobalMapInfo(GameMap gameMap) {
-        this.globalMap = new HashMap<Integer, PlayerMapInfo>();
+        this.globalMap = new HashMap<>();
         this.gameMap = gameMap;
     }
 
@@ -20,7 +20,7 @@ public class GlobalMapInfo implements java.io.Serializable {
    * Construct GlobalMapInfo with empty globalMap
    */
   public GlobalMapInfo() {
-    this.globalMap = new HashMap<Integer, PlayerMapInfo>();
+    this.globalMap = new HashMap<>();
   }
 
   /**

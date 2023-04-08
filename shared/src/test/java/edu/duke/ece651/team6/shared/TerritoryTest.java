@@ -98,4 +98,24 @@ public class TerritoryTest {
     t.initNumUnits(5);
     assertEquals(5, t.getNumUnits());
   }
+
+  @Test
+  public void testSetterAndGetters() {
+    Territory t = new Territory("A", 1, 4);
+    t.setFood(2);
+    t.setTechnology(2);
+    assertEquals(2, t.getFood());
+    assertEquals(2, t.getTechnology());
+    assertEquals(7, t.getNumLevels());
+    assertEquals(4, t.getUnitsNumByLevel(0));
+    assertEquals(4, t.getAllUnits());
+  }
+
+  @Test
+  public void testClone() {
+    Territory t = new Territory("A", 1, 4);
+    Territory cloned = (Territory) t.clone();
+    assertEquals("A", cloned.getName());
+    assertEquals(4, cloned.getUnitsNumByLevel(0));
+  }
 }

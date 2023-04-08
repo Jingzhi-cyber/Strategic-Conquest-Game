@@ -27,10 +27,14 @@ public class MoveUnitsRuleChecker extends MoveOrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  protected String checkMyRule(SimpleMove move, GameMap theMap) {
-    if (move.numUnits < 0) { // || move.numUnits > move.src.getNumUnits() it could be valid if more units are
-                             // moved here
-      return "Units for move order must be non-negative but was " + move.numUnits;
+  protected String checkMyRule(Order order, GameMap theMap) {
+    SimpleMove move = (SimpleMove) order;
+    Territory src = move.src;
+    Territory dest = move.dest;
+    try {
+      src.moveTo(dest, move.numUnitsByLevel);
+    } catch (IllegalArgumentException e) {
+      return e.getMessage();
     }
     return null;
   }

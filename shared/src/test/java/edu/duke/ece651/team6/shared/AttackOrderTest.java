@@ -15,7 +15,8 @@ public class AttackOrderTest {
   Territory C = new Territory("C", 2, 3);
 
   private AttackOrder createAttackOrder() {
-    AttackOrder move = new AttackOrder(A, B, 2);
+    int[] numUnitsByLevel = {1, 0, 0, 0, 0, 0, 0};
+    AttackOrder move = new AttackOrder(A, B, numUnitsByLevel);
     return move;
   }
 

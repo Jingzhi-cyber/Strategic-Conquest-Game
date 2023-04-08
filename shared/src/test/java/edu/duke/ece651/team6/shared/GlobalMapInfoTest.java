@@ -23,27 +23,27 @@ public class GlobalMapInfoTest {
     Territory t2 = new Territory("Narnia", 2, 3);
     Territory t3 = new Territory("Midkemia", 3, 1);
 
-    Map<Territory, Set<String>> info1 = new HashMap<>();
-    info1.put(t1, new HashSet<String>() {
+    Map<Territory, Map<Territory, Integer>> info1 = new HashMap<>();
+    info1.put(t1, new HashMap<Territory, Integer>() {
       {
-        add("Narnia");
-        add("Midkemia");
+        put(t2, 1);
+        put(t3, 1);
       }
     });
 
-    Map<Territory, Set<String>> info2 = new HashMap<>();
-    info2.put(t2, new HashSet<String>() {
+    Map<Territory, Map<Territory, Integer>> info2 = new HashMap<>();
+    info2.put(t2, new HashMap<Territory, Integer>() {
       {
-        add("Hogwarts");
-        add("Midkemia");
+        put(t1, 1);
+        put(t3, 1);
       }
     });
 
-    Map<Territory, Set<String>> info3 = new HashMap<>();
-    info3.put(t3, new HashSet<String>() {
+    Map<Territory, Map<Territory, Integer>> info3 = new HashMap<>();
+    info3.put(t3, new HashMap<Territory, Integer>() {
       {
-        add("Hogwarts");
-        add("Narnia");
+        put(t1, 1);
+        put(t2, 1);
       }
     });
 
@@ -59,8 +59,8 @@ public class GlobalMapInfoTest {
     PlayerMapInfo newInfo = globalMapInfo.getPlayerMapInfo(1);
     for (Territory t : newInfo.getTerritories()) {
       assertEquals("Hogwarts", t.getName());
-      assertEquals(true, playerMapInfo1.getTerritoryNeighbors(t).contains("Narnia"));
-      assertEquals(true, playerMapInfo1.getTerritoryNeighbors(t).contains("Midkemia"));
+      assertEquals(true, playerMapInfo1.getTerritoryNeighbors(t).containsKey(t2));
+      assertEquals(true, playerMapInfo1.getTerritoryNeighbors(t).containsKey(t3));
     }
 
     Set<String> names = new HashSet<String>() {

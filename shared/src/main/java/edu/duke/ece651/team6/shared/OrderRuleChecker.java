@@ -23,15 +23,15 @@ public abstract class OrderRuleChecker implements java.io.Serializable {
    * @return a string telling if it obeys my own rule, null if all of the rules on
    *         the chain pass, or a message string if any of the rules failed
    */
-  public String checkOrder(SimpleMove move, GameMap theMap) {
+  public String checkOrder(Order order, GameMap theMap) {
     // if we fail our own rule: stop the placement is not legal
-    String myRule = checkMyRule(move, theMap);
+    String myRule = checkMyRule(order, theMap);
     if (myRule != null)
       return myRule;
 
     // other wise, ask the rest of the chain.
     if (next != null) {
-      return next.checkOrder(move, theMap);
+      return next.checkOrder(order, theMap);
     }
 
     // if there are no more rules, then the placement is legal
@@ -41,13 +41,13 @@ public abstract class OrderRuleChecker implements java.io.Serializable {
   /**
    * This method checks current rule.
    *
-   * @param move           is a simple move object that can be moveOrder or
-   *                       attackOrder
+   * @param order          is an order object
+   *                       
    * @param remainingUnits is the number of remaining units allowed to perform
    *                       actions
    * @param theMap         is the game map that has adjacency information
    * @return a string telling if it obeys my own rule, null if so, a message
    *         string if otherwise.
    */
-  protected abstract String checkMyRule(SimpleMove move, GameMap theMap);
+  protected abstract String checkMyRule(Order order, GameMap theMap);
 }

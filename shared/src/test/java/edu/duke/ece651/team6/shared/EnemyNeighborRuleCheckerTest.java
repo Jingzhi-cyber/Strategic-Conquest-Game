@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
+import java.util.HashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,9 +19,9 @@ public class EnemyNeighborRuleCheckerTest {
 
   @BeforeEach
   public void setUp() {
-    when(gameMap.getNeighborSet(t1)).thenReturn(new HashSet<Territory>() {
+    when(gameMap.getNeighborDist(t1)).thenReturn(new HashMap<Territory, Integer>() {
       {
-        add(t2);
+        put(t2, 1);
       }
     });
   }
@@ -29,9 +29,10 @@ public class EnemyNeighborRuleCheckerTest {
   @Test
   public void test_enemyNeighbor() {
     OrderRuleChecker checker = new EnemyNeighborRuleChecker(null);
-    AttackOrder validAttack = new AttackOrder(t1, t2, 2);
-    AttackOrder invalidAttack = new AttackOrder(t1, t3, 2);
-    AttackOrder invalidAttack2 = new AttackOrder(t1, t1, 2);
+    int[] numUnitsByLevel = {2, 0, 0, 0, 0, 0, 0};
+    AttackOrder validAttack = new AttackOrder(t1, t2, numUnitsByLevel);
+    AttackOrder invalidAttack = new AttackOrder(t1, t3, numUnitsByLevel);
+    AttackOrder invalidAttack2 = new AttackOrder(t1, t1, numUnitsByLevel);
     assertNull(checker.checkOrder(validAttack, gameMap));
     assertNotNull(checker.checkOrder(invalidAttack, gameMap));
     assertNotNull(checker.checkOrder(invalidAttack2, gameMap));

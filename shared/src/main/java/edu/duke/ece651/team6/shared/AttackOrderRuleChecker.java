@@ -18,8 +18,8 @@ public abstract class AttackOrderRuleChecker extends OrderRuleChecker {
   /**
    * This method checks current rule.
    *
-   * @param move           is a simple move object that can be moveOrder or
-   *                       attackOrder
+   * @param order          is an order object
+
    * @param remainingUnits is the number of remaining units allowed to perform
    *                       actions
    * @param theMap         is the game map that has adjacency information
@@ -27,6 +27,6 @@ public abstract class AttackOrderRuleChecker extends OrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  abstract protected String checkMyRule(SimpleMove move, GameMap theMap);
+  abstract protected String checkMyRule(Order order, GameMap theMap);
 
 }

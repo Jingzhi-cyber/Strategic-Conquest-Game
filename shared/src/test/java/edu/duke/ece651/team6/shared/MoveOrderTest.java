@@ -13,9 +13,10 @@ public class MoveOrderTest {
   Territory A = new Territory("A", 1, 3);
   Territory B = new Territory("B", 1, 4);
   Territory C = new Territory("C", 1, 3);
+  int[] numUnitsByLevel = { 2, 0, 0, 0, 0, 0, 0 };
 
   private MoveOrder createMoveOrder() {
-    MoveOrder move = new MoveOrder(A, B, 2);
+    MoveOrder move = new MoveOrder(A, B, numUnitsByLevel);
     return move;
   }
 
@@ -47,7 +48,7 @@ public class MoveOrderTest {
 
   @Test
   public void test_toString() {
-    MoveOrder move = new MoveOrder(new Territory("A", 1, 3), new Territory("B", 1, 4), 2);
+    MoveOrder move = new MoveOrder(new Territory("A", 1, 3), new Territory("B", 1, 4), numUnitsByLevel);
     String expected = "{ from: (name: A, ownerId: 1, units: 3), to: (name: B, ownerId: 1, units: 4), numUnits: 2 }";
     assertEquals(expected, move.toString());
   }

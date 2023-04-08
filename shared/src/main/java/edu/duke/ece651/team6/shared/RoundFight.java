@@ -25,8 +25,8 @@ public class RoundFight extends WarZone {
             Unit strong = army1.pollLast();
             Unit weak = army2.pollFirst();
             Random random = new Random();
-            int d1 = random.nextInt(20) + strong.bouns();
-            int d2 = random.nextInt(20) + weak.bouns();
+            int d1 = random.nextInt(20) + strong.bonus();
+            int d2 = random.nextInt(20) + weak.bonus();
             if (d1 > d2) {
                 weak = null;
             } else if (d2 > d1) {
