@@ -11,8 +11,9 @@ public class SrcOwerIdRuleCheckerTest {
     Territory t1 = new Territory("t1", 1, 2);
     Territory t2 = new Territory("t2", 2, 3);
 
-    assertNotNull(checker.checkOrder(new AttackOrder(t1, t2, 2), null));
-    assertNull(checker.checkOrder(new AttackOrder(t2, t1, 2), null));
+    int[] numUnitsByLevel = { 2, 0, 0, 0, 0, 0, 0 };
+    assertNotNull(checker.checkOrder(new AttackOrder(t1, t2, numUnitsByLevel), null));
+    assertNull(checker.checkOrder(new AttackOrder(t2, t1, numUnitsByLevel), null));
   }
 
 }

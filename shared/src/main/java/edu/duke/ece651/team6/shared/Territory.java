@@ -6,11 +6,11 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Territory implements java.io.Serializable {
+public class Territory implements java.io.Serializable, Cloneable {
   private final String name;
   private int ownerId;
   private List<Deque<Unit>> units;
-  private int numLevel;
+  private final int numLevel;
   private WarZone warZone;
   private boolean underWar;
   private int food;
@@ -26,21 +26,23 @@ public class Territory implements java.io.Serializable {
   public Territory(String name) {
     this.name = name;
     this.ownerId = -1;
+    numLevel = 7;
     unitsInit();
     warZone = null;
     underWar = false;
-    food = 0;
-    technology = 0;
+    food = 1;
+    technology = 1;
   }
 
   public Territory(String name, int ownerId) {
     this.name = name;
     this.ownerId = ownerId;
+    numLevel = 7;
     unitsInit();
     warZone = null;
     underWar = false;
-    food = 0;
-    technology = 0;
+    food = 1;
+    technology = 1;
   }
 
   /**
@@ -56,16 +58,28 @@ public class Territory implements java.io.Serializable {
       throw new IllegalArgumentException("Territory's unit must be non-negative but is " + units);
     }
     this.ownerId = ownerId;
+    numLevel = 7;
     unitsInit();
     this.units.get(0).addAll(UnitManager.newUnits(units));
     warZone = null;
     underWar = false;
-    food = 0;
-    technology = 0;
+    food = 1;
+    technology = 1;
+  }
+
+  @Override
+  public Object clone() {
+    Territory territory = new Territory(this.name, this.ownerId);
+    for (int i = 0; i < numLevel; i++) {
+      Deque<Unit> sameLevelUnits = territory.units.get(i);
+      for (Unit unit : this.units.get(i)) {
+        sameLevelUnits.add((Unit) unit.clone());
+      }
+    }
+    return territory;
   }
 
   private void unitsInit() {
-    numLevel = 7;
     units = new ArrayList<>();
     for (int i = 0; i < numLevel; i++) {
       units.add(new LinkedList<>());
@@ -156,7 +170,7 @@ public class Territory implements java.io.Serializable {
   public void moveTo(Territory dest, int[] numUnits) {
     for (int i = 0; i < numLevel; i++) {
       if (numUnits[i] > units.get(i).size() || numUnits[i] < 0) {
-        throw new IllegalArgumentException("Invalid move number: " + numUnits[i]);
+        throw new IllegalArgumentException("Invalid move number: " + numUnits[i] + " in level: " + i + " Currently has " + units.get(i).size() + " units");
       }
     }
     if (ownerId != dest.getOwnerId()) {
@@ -189,11 +203,11 @@ public class Territory implements java.io.Serializable {
    */
   public void attack(Territory target, int[] numUnits) {
     if (ownerId == target.getOwnerId()) {
-      throw new IllegalArgumentException("Player cannot attack her own territory!");
+      throw new IllegalArgumentException("Player cannot attack own territory!");
     }
     for (int i = 0; i < numLevel; i++) {
       if (numUnits[i] > units.get(i).size() || numUnits[i] < 0) {
-        throw new IllegalArgumentException("Invalid attack number: " + numUnits[i]);
+        throw new IllegalArgumentException("Invalid attack number: " + numUnits[i] + " in level: " + i + " Currently has " + units.get(i).size() + " units");
       }
     }
     target.attackedBy(dispatchArmy(numUnits));
@@ -218,8 +232,6 @@ public class Territory implements java.io.Serializable {
       warZone = null;
     }
     recover();
-    produceFood();
-    produceTechnology();
   }
 
   /**
@@ -255,28 +267,38 @@ public class Territory implements java.io.Serializable {
     this.units.get(0).addAll(UnitManager.newUnits(units));
   }
 
-  /* Produce some food resource every round */
-  protected void produceFood() {
-    food += 10;
+  /**
+   * Set the amount of food produced by this territory
+   * @param food the amount of food
+   */
+  public void setFood(int food) {
+    this.food = food;
   }
 
-  /* Produce some technology resource every round */
-  protected void produceTechnology() {
-    technology += 10;
-  }
-
-  /* Collect food resource of this territory. */
+  /* Get the amount of food produced by this territory. */
   public int getFood() {
-    int temp = food;
-    food = 0;
-    return temp;
+    return this.food;
   }
 
-  /* Collect technology resource of this territory. */
+  /**
+   * Set the amount of technology produced by this territory
+   * @param technology the amount of technology
+   */
+  public void setTechnology(int technology) {
+    this.technology = technology;
+  }
+
+  /* Get the amount of technology produced by this territory. */
   public int getTechnology() {
-    int temp = technology;
-    technology = 0;
-    return temp;
+    return this.technology;
+  }
+
+  /**
+   * Get the total number of unit levels 
+   * @return this.numLevel
+   */
+  public int getNumLevels() {
+    return this.numLevel;
   }
 
   public int getUnitsNumByLevel(int level) {

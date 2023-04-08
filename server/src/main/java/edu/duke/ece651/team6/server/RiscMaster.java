@@ -44,7 +44,7 @@ public class RiscMaster implements Master {
     this.territoryNum = this.gameMap.getTerritoryNum();
     this.availableUnits = Constants.UNITS_PER_PLAYER;
     this.m = AccountManager.getInstance();
-    disconnectedList = new HashSet<>();
+    this.disconnectedList = new HashSet<>();
     this.playerProfiles = new ArrayList<>();
     this.losers = new HashSet<Integer>();
   }
@@ -65,6 +65,7 @@ public class RiscMaster implements Master {
     int playerId = 0;
     for (SocketKey key : clientSockets) {
       PlayerProfile playerProfile = new PlayerProfile(playerId);
+      playerId++;
       playerProfile.setSocket(key);
       playerProfiles.add(playerProfile);
     }
@@ -92,6 +93,7 @@ public class RiscMaster implements Master {
           availableUnits);
       safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
     }
+    gameMap.initMaxTechLevel();
 
     /**
      * Receive unit placement from player
@@ -112,6 +114,17 @@ public class RiscMaster implements Master {
   @Override
   public boolean playOneTurn() throws IOException {
     printGameMap();
+
+    /**
+     * Calculate Resources for each player and update playerProfile
+     */
+    Set<Integer> playerIds = new HashSet<Integer>();
+    for (PlayerProfile playerProfile : playerProfiles) {
+      playerIds.add(playerProfile.getId());
+    }
+    ResourceProduceCounter resourceProduceCounter = new ResourceProduceCounter(this.gameMap.getTerritorySet(), playerIds);
+    this.gameMap.updateResource(resourceProduceCounter.updateAndGetResult());
+
     /**
      * Generate GlobalMapInfo. This should be the same for all players.
      */
@@ -157,13 +170,14 @@ public class RiscMaster implements Master {
     List<Commit> commits = new ArrayList<Commit>();
     for (Object o : objects) {
       Commit commit = (Commit) o;
-      // double-check the commit on Master side
-      try {
-        commit.checkAll(gameMap);
-      } catch (IllegalArgumentException e) {
-        System.out.println("Receive Commit that is invalid, drop that commit");
-        continue;
-      }
+      // // double-check the commit on Master side
+      // try {
+      //   commit.checkAll(gameMap);
+      // } catch (IllegalArgumentException e) {
+      //   System.out.println("Receive Commit that is invalid, drop that commit");
+      //   System.out.println(e.getMessage());
+      //   continue;
+      // }
       commits.add(commit);
     }
     executeCommits(commits);
@@ -287,7 +301,11 @@ public class RiscMaster implements Master {
    */
   private GlobalMapInfo createGlobalMapInfo() {
     GlobalMapInfo globalMapInfo = new GlobalMapInfo(this.gameMap);
-    for (int id = 0; id < playerNum; id++) {
+    Set<Integer> playerIds = new HashSet<Integer>();
+    for (PlayerProfile playerProfile : playerProfiles) {
+      playerIds.add(playerProfile.getId());
+    }
+    for (int id : playerIds) {
       globalMapInfo.addPlayerMapInfo(createPlayerMapInfo(id));
     }
     return globalMapInfo;
@@ -335,18 +353,13 @@ public class RiscMaster implements Master {
    *         player's territory2 - territory2's neighbors' names
    */
   private PlayerMapInfo createPlayerMapInfo(int playerId) {
-    Map<Territory, Set<String>> info = new HashMap<>();
+    Map<Territory, Map<Territory, Integer>> info = new HashMap<>();
     Set<Territory> territories = gameMap.getTerritorySet();
     for (Territory t : territories) {
       if (t.getOwnerId() == playerId) {
-        Set<String> neighbor = new HashSet<>();
-        for (Territory n : gameMap.getNeighborSet(t)) {
-          neighbor.add(n.getName());
-        }
-        info.put(t, neighbor);
+        info.put(t, gameMap.getNeighborDist(t));
       }
     }
-
     PlayerMapInfo playerMapInfo = new PlayerMapInfo(playerId, info);
     return playerMapInfo;
   }
@@ -362,6 +375,12 @@ public class RiscMaster implements Master {
     }
     for (Commit c : commits) {
       c.performAttacks(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performResearch(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performUpgrade(gameMap);
     }
     Set<Territory> territories = this.gameMap.getTerritorySet();
     for (Territory territory : territories) {

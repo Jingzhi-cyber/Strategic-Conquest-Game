@@ -14,6 +14,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
+import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.Result;
 
@@ -29,6 +32,8 @@ public class SocketHandlerTest {
   private ServerSocket server;
   private Socket clientSocket;
   OutputStream outputStream = mock(OutputStream.class);
+  GameMap gameMap = new GameMap(new HashMap<>());
+  Map<String, Integer> resources = new HashMap<String, Integer>();
 
   @BeforeEach
   void setup() throws IOException {
@@ -131,7 +136,7 @@ public class SocketHandlerTest {
   void testRecvObject() throws IOException, ClassNotFoundException {
     /* Create a client with the client socket */
     SocketHandler client = new SocketHandler(clientSocket);
-    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1));
+    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1, gameMap, resources));
 
     /* Test recv general object */
     // receive the object from the server
@@ -160,7 +165,7 @@ public class SocketHandlerTest {
   @Test
   void test_recvObject_invalidCase() throws IOException, ClassNotFoundException {
     SocketHandler client = new SocketHandler(clientSocket);
-    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1));
+    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1, gameMap, resources));
     assertThrows(InvalidObjectException.class, () -> client.recvGameResult());
   }
 
@@ -168,7 +173,7 @@ public class SocketHandlerTest {
   void testSendObject() throws IOException, ClassNotFoundException {
     // create a client with the client socket
     SocketHandler client = new SocketHandler(clientSocket);
-    Commit commit = new Commit(1); // replace with your own object
+    Commit commit = new Commit(1, gameMap, resources); // replace with your own object
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(baos);
     oos.writeObject(commit);

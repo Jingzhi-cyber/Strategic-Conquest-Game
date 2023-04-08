@@ -22,6 +22,7 @@ public class TextGame extends Game {
   private final GameBasicSetting setting;
   MapTextView mapTextView;
   GameMap gameMap;
+  Map<String, Integer> resource;
   private boolean hasLost;
   private int playerId;
 
@@ -39,6 +40,7 @@ public class TextGame extends Game {
     this.inputReader = inputReader;
     this.out = out;
     this.setting = setting;
+    this.resource = new HashMap<>();
     this.mapTextView = null; // initiate when receiving a global map info
     this.hasLost = false;
     if (setting != null) {
@@ -80,7 +82,7 @@ public class TextGame extends Game {
    * @return a string to display available commands
    */
   private String displayAvailableCommands() {
-    return "You are the Player" + this.playerId + ", what would you like to do?\n(M)ove\n(A)ttack\n(D)one\n";
+    return "You are the Player" + this.playerId + ", what would you like to do?\n(M)ove\n(A)ttack\n(R)esearch\n(U)pgrade\n(D)one\n";
   }
 
   /**
@@ -93,6 +95,8 @@ public class TextGame extends Game {
       {
         add("M");
         add("A");
+        add("R");
+        add("U");
         add("D");
       }
     };
@@ -109,7 +113,7 @@ public class TextGame extends Game {
     String s = readInputLine(prompt).toUpperCase();
     if (s.length() != 1 || !availableCommands.contains(s)) {
       throw new IllegalArgumentException(
-          "Command must be one of " + getPossibleCommandChars().toString() + ", but was " + s);
+          "Command must be one of " + availableCommands.toString() + ", but was " + s);
     }
     return s.charAt(0);
   }
@@ -164,8 +168,8 @@ public class TextGame extends Game {
     Set<Territory> enemyTerritories = findEnemyTerritories();
     int i = 1;
     Map<Integer, Territory> result = new HashMap<>();
-    Set<Territory> neighs = this.gameMap.getNeighborSet(src);
-    for (Territory t : neighs) {
+    Map<Territory, Integer> neighs = this.gameMap.getNeighborDist(src);
+    for (Territory t : neighs.keySet()) {
       if (enemyTerritories.contains(t)) {
         printLine(i + ". " + t.getName());
         result.put(i, t);
@@ -227,8 +231,61 @@ public class TextGame extends Game {
     String message = "Player" + this.playerId + ", which territory do you want to move units ";
     Territory src = findTerritory(null, message + "from?");
     Territory dest = findTerritory(null, message + "to?");
-    int units = readAnInteger("Player" + this.playerId + ", how many units do you want to move?");
-    return new MoveOrder(src, dest, units);
+    return new MoveOrder(src, dest, constructOrderOfDifferentUnits(src));
+  }
+
+  /**
+   * Display different level of units on the territory
+   * @param territory
+   */
+  protected void displayUnitsInDifferentLevels(Territory territory) {
+    printLine("In this territory, you have these units: ");
+    for (int level = 0; level < territory.getNumLevels(); level++) {
+      int numUnits = territory.getUnitsNumByLevel(level);
+      printLine("level: " + level + " num: " + numUnits);
+    }
+  }
+
+  /**
+   * 
+   * @param src
+   * @return
+   * @throws IOException
+   */
+  protected int[] constructOrderOfDifferentUnits(Territory src) throws IOException {
+    int[] numUnitsByLevel = new int[src.getNumLevels()];
+    displayUnitsInDifferentLevels(src);
+    Set<String> opts = new HashSet<>();
+    opts.add("Y");
+    opts.add("N"); 
+    while (true) {
+      try {
+        int selectedLevel = readAnInteger("Player" + this.playerId + ", which level of units do you want to move?");
+        if (selectedLevel < 0 || selectedLevel >= src.getNumLevels()) {
+          printLine("Invalid level: " + selectedLevel + " there are " + src.getNumLevels() + " levels in total");
+          continue;
+        }
+        int numUnits = readAnInteger("Player" + this.playerId + ", how many units do you want to move?");
+        numUnitsByLevel[selectedLevel] += numUnits;
+      } catch (IllegalArgumentException e) {
+        printLine(e.getMessage());
+        continue;
+      }
+      Character cmd = null;
+      while (true) {
+        try {
+          cmd = readCommand("Finish this move order?\n(Y)es\n(N)o\n", opts);
+        } catch (IllegalArgumentException e) {
+          printLine(e.getMessage());
+          continue;
+        }
+        break;
+      }
+      if (cmd == Character.valueOf('Y')) {
+        break;
+      }
+    }
+    return numUnitsByLevel;
   }
 
   /**
@@ -242,8 +299,43 @@ public class TextGame extends Game {
     String message = "Player" + this.playerId + ", which territory do you want to attack ";
     Territory src = findTerritory(null, message + "from?");
     Territory dest = findTerritory(src, message + "to?");
-    int units = readAnInteger("Player" + this.playerId + ", how many units do you want to attack?");
-    return new AttackOrder(src, dest, units);
+    return new AttackOrder(src, dest, constructOrderOfDifferentUnits(src));
+  }
+
+  /**
+   * Constructs a research order
+   * @return an {@link ResearchOrder}
+   */
+  protected ResearchOrder constructResearch() {
+    return new ResearchOrder(this.playerId);
+  }
+
+  protected UpgradeOrder constructUpgrade() throws IOException {
+    String message = "Player" + this.playerId + ", which territory do you want to upgrade your units?";
+    Territory src = findTerritory(null, message);
+    displayUnitsInDifferentLevels(src);
+    UpgradeOrder upgrade = null;
+    while (true) {
+      try {
+        int selectedNowLevel = readAnInteger("Player" + this.playerId + ", which level of units do you want to upgrade?");
+        if (selectedNowLevel < 0 || selectedNowLevel >= src.getNumLevels()) {
+          printLine("Invalid level: " + selectedNowLevel + " there are " + src.getNumLevels() + " levels in total");
+          continue;
+        }
+        int selectedTargetLevel = readAnInteger("Player" + this.playerId + ", which level do you want to upgrade to?");
+        if (selectedTargetLevel < 0 || selectedTargetLevel >= src.getNumLevels()) {
+          printLine("Invalid level: " + selectedTargetLevel + " there are " + src.getNumLevels() + " levels in total");
+          continue;
+        }
+        int numUnits = readAnInteger("Player" + this.playerId + ", how many units do you want to upgrade?");
+        upgrade = new UpgradeOrder(src, selectedNowLevel, selectedTargetLevel, numUnits);
+        break;
+      } catch (IllegalArgumentException e) {
+        printLine(e.getMessage());
+        continue;
+      }
+    }
+      return upgrade;
   }
 
   /**
@@ -254,7 +346,9 @@ public class TextGame extends Game {
    * @catch {@link IllegalArgumentException}
    */
   private Commit constructCommit() throws IOException, ClassNotFoundException {
-    Commit commit = new Commit(this.playerId);
+    Map<String, Integer> copiedResource = new HashMap<>();
+    copiedResource.putAll(this.resource);
+    Commit commit = new Commit(this.playerId, (GameMap) this.gameMap.clone(), copiedResource);
     while (true) {
       try {
         Character cmd = readCommand(displayAvailableCommands(), getPossibleCommandChars());
@@ -263,10 +357,16 @@ public class TextGame extends Game {
           break;
         } else if (cmd == Character.valueOf('M')) {
           /* move */
-          commit.addMove(constructMove(), this.gameMap);
-        } else {
+          commit.addMove(constructMove());
+        } else if (cmd == Character.valueOf('A')) {
           /* attack */
-          commit.addAttack(constructAttack(), this.gameMap);
+          commit.addAttack(constructAttack());
+        } else if (cmd == Character.valueOf('R')) {
+          /* research */
+          commit.addResearch(constructResearch());
+        } else {
+          /* upgrade */
+          commit.addUpgrade(constructUpgrade());
         }
       } catch (IllegalArgumentException e) {
         printLine(e.getMessage());
@@ -323,7 +423,7 @@ public class TextGame extends Game {
     while (true) {
       try {
         commit = constructCommit();
-        commit.checkUsableUnitsAfterAllOrdersAreCollected();
+        // commit.checkUsableUnitsAfterAllOrdersAreCollected();
       } catch (IllegalArgumentException e) {
         printLine(e.getMessage());
         continue;
@@ -502,6 +602,10 @@ public class TextGame extends Game {
     this.mapTextView = new MapTextView(mapInfo);
     this.gameMap = mapInfo.getGameMap();
     printLine(this.mapTextView.display());
+    this.resource.put(Constants.RESOURCE_FOOD, this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
+    this.resource.put(Constants.RESOURCE_TECH, this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH)); 
+    String resourceStr = "You have these resource: \nfood: " + this.resource.get(Constants.RESOURCE_FOOD) + "\ntechnology: " + this.resource.get(Constants.RESOURCE_TECH) + "\n\n";
+    printLine(resourceStr);
     return mapInfo;
   }
 }

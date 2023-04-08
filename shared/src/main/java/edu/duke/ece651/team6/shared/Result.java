@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Result implements java.io.Serializable {
-    private final Set<Integer> winners;
-    private final Set<Integer> losers;
+    private Set<Integer> winners;
+    private Set<Integer> losers;
 
     public Result() {
         winners = new HashSet<Integer>();

@@ -2,8 +2,8 @@ package edu.duke.ece651.team6.shared;
 
 public class AttackOrder extends SimpleMove {
 
-  public AttackOrder(Territory src, Territory dest, int numUnits) {
-    super("Attack", src, dest, numUnits);
+  public AttackOrder(Territory src, Territory dest, int[] numUnitsByLevel) {
+    super("Attack", src, dest, numUnitsByLevel);
   }
 
   /**
@@ -13,11 +13,10 @@ public class AttackOrder extends SimpleMove {
    */
   @Override
   public void takeAction(GameMap gameMap) {
-    // TODO: modify Territories on gameMap
     Territory from = gameMap.getTerritoryByName(src.getName());
     Territory to = gameMap.getTerritoryByName(dest.getName());
-    // from.moveTo(to, numUnits);
-    // src.attack(dest, numUnits);
-    from.attack(to, numUnits);
+    from.attack(to, numUnitsByLevel);
+    int cost = CostCalculator.calculateAttackCost(this, gameMap);
+    gameMap.consumeResource(from.getOwnerId(), Constants.RESOURCE_FOOD, cost);
   }
 }
