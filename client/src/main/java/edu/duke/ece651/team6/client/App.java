@@ -11,9 +11,9 @@ import java.net.UnknownHostException;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 
 public class App {
-  Client client;
+  SocketHandler client;
 
-  TextPlayer player;
+  TextGame game;
 
   /**
    * Construct an app with 2 params
@@ -23,14 +23,14 @@ public class App {
    * @param player for handling interaction (e.g. user input for commands,
    *               initializations, play turns) with players
    */
-  public App(Client client, TextPlayer player) {
+  public App(SocketHandler client, TextGame game) {
     this.client = client;
-    this.player = player;
+    this.game = game;
   }
 
   public static void main(String[] args) throws IOException, UnknownHostException, ClassNotFoundException {
     /* 1. Build connection */
-    Client client = null;
+    SocketHandler client = null;
     GameBasicSetting setting = null;
     BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
     StringBuilder sb = new StringBuilder();
@@ -39,35 +39,36 @@ public class App {
       sb.append(" ");
       if (args.length == 4) {
         if (Integer.valueOf(args[3]) < 2 || Integer.valueOf(args[3]) > 4) {
-          System.out
-            .println("Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port> <username> [<num_players>]");
+          System.out.println(
+              "Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port> <username> [<num_players>]");
           System.exit(1);
         }
         sb.append(args[3]);
       }
     } else {
-      System.out
-        .println("Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port> <username> [<num_players>]");
+      System.out.println(
+          "Invalid Argument! Usage: ./client/build/install/client/bin/client <server_addr> <server_port> <username> [<num_players>]");
       System.exit(1);
     }
 
     // create a client obejct and connect it to the server
-    client = new Client(args[0], Integer.valueOf(args[1]));
+    client = new SocketHandler(args[0], Integer.valueOf(args[1]));
     client.sendObject(sb.toString());
-    TextPlayer player;
+    TextGame game;
     if (args.length == 3) {
-      player = new TextPlayer(client, input, System.out, null);
+      // connect to a previous game
+      game = new TextGame(client, input, System.out, null);
     } else {
       System.out.println((String) client.recvObject());
       setting = client.recvGameBasicSetting();
-      player = new TextPlayer(client, input, System.out, setting);
-      player.displayGameSetting();
+      game = new TextGame(client, input, System.out, setting);
+      game.displayGameSetting();
       /* 2. Initiation Phase */
-      player.placeUnit();
+      game.placeUnit();
     }
     /* 3. Play Phase */
-    player.playGame();
-    
+    game.playGame();
+
     /* 4. Close Phase */
     try {
       if (input != null) {

@@ -16,8 +16,7 @@ import edu.duke.ece651.team6.shared.*;
 /**
  * A class representing a text player in the risc game
  */
-public class TextPlayer implements Player {
-  private final Client client;
+public class TextGame extends Game {
   BufferedReader inputReader;
   final PrintStream out;
   private final GameBasicSetting setting;
@@ -34,9 +33,9 @@ public class TextPlayer implements Player {
    * @param out
    * @param setting     is game basic setting in the initialization phase
    */
-  public TextPlayer(Client client, BufferedReader inputReader, PrintStream out, GameBasicSetting setting)
+  public TextGame(SocketHandler socketHandler, BufferedReader inputReader, PrintStream out, GameBasicSetting setting)
       throws UnknownHostException, IOException {
-    this.client = client;
+    super(socketHandler);
     this.inputReader = inputReader;
     this.out = out;
     this.setting = setting;
@@ -66,14 +65,14 @@ public class TextPlayer implements Player {
         break;
       }
       count++;
-      Integer i = readNumUnits("Player" + this.playerId + ", how many units to you want to place on the "
-          + t.getName() + " territory? (" + setting.getRemainingNumUnits() + " remainings)");
+      Integer i = readNumUnits("Player" + this.playerId + ", how many units to you want to place on the " + t.getName()
+          + " territory? (" + setting.getRemainingNumUnits() + " remainings)");
       map.put(t, i);
     }
 
     setting.initializeUnitPlacement(map);
     // send back the GameBasicSetting object with the updated unit placement info.
-    client.sendUpdatedGameBasicSetting(setting);
+    socketHandler.sendUpdatedGameBasicSetting(setting);
     printLine("Units placement information has been successfully sent to the server, waiting for other players...");
   }
 
@@ -118,8 +117,7 @@ public class TextPlayer implements Player {
   /**
    * Construct, display and return self-owned territories with serial numbers
    * 
-   * @return a Map<Integer, Territory> mapping from serial number to the
-   *         territory
+   * @return a Map<Integer, Territory> mapping from serial number to the territory
    */
   private Map<Integer, Territory> displayOrderedTerritoriesSelf() {
     int i = 1;
@@ -160,8 +158,7 @@ public class TextPlayer implements Player {
    * with the source territory
    * 
    * @param src is the source self-owned territory of the player
-   * @return Map<Integer, Territory> a map from the serial number to a
-   *         territory
+   * @return Map<Integer, Territory> a map from the serial number to a territory
    */
   private Map<Integer, Territory> displayConnectedOrderedTerritoriesEnemies(Territory src) {
     Set<Territory> enemyTerritories = findEnemyTerritories();
@@ -280,28 +277,24 @@ public class TextPlayer implements Player {
   }
 
   /**
-   * Player plays one turn by
-   * 1. Display the map (recv a map from server and display it)
-   * 2. Display commands (Move, Attack, Done) repeatedly until Done, allowing 0-N
-   * orders in each turn
-   * 3. Receive user input for one/multiple command(s), and the parameters for
-   * each
-   * command (refer to Move in Battleship). readACommand, readATerritory(display
-   * all territories and number them with A, B, C, ... -> decode them back to a
-   * territory and send it back to server) -> MoveFrom, MoveTo
-   * 4. Compile up all Moves and all Attacks in a single Commit and send it back
-   * to
-   * server in some order (List of Movements, List of Attacks?)
-   * - 4.1 Rules and checks are encapsulated in List (has 0-N MoveOrder(s); each
-   * MoveOrder extends SimpleMove) and List (has 0-N AttackOrder(s); each
-   * AttackOrder extends SimpleMove)? after user input and before sending it to
-   * server?
+   * Player plays one turn by 1. Display the map (recv a map from server and
+   * display it) 2. Display commands (Move, Attack, Done) repeatedly until Done,
+   * allowing 0-N orders in each turn 3. Receive user input for one/multiple
+   * command(s), and the parameters for each command (refer to Move in
+   * Battleship). readACommand, readATerritory(display all territories and number
+   * them with A, B, C, ... -> decode them back to a territory and send it back to
+   * server) -> MoveFrom, MoveTo 4. Compile up all Moves and all Attacks in a
+   * single Commit and send it back to server in some order (List of Movements,
+   * List of Attacks?) - 4.1 Rules and checks are encapsulated in List (has 0-N
+   * MoveOrder(s); each MoveOrder extends SimpleMove) and List (has 0-N
+   * AttackOrder(s); each AttackOrder extends SimpleMove)? after user input and
+   * before sending it to server?
    * 
    * - Rules of Move: territories throughout the path from src to dest belong to
-   * the
-   * current player; Number of units for moving belongs to [0, numberOfUnits(src)]
-   * - Rules of Attack: src must belong to the current player; dest must belong to
-   * another player; Number of units for moving belongs to [1, numberOfUnits(src)]
+   * the current player; Number of units for moving belongs to [0,
+   * numberOfUnits(src)] - Rules of Attack: src must belong to the current player;
+   * dest must belong to another player; Number of units for moving belongs to [1,
+   * numberOfUnits(src)]
    * 
    * 
    * 5. Issue orders: Commit (Has-A List; Has-A List)
@@ -314,8 +307,8 @@ public class TextPlayer implements Player {
     updateAndDisplayMapInfo(); // will update local variables: mapTextView and gameMap
 
     /*
-     * ---------2. Skip constructing a commit, and skip sending it to the
-     * server, instead, directly waiting for the game result. ----------
+     * ---------2. Skip constructing a commit, and skip sending it to the server,
+     * instead, directly waiting for the game result. ----------
      */
     if (this.hasLost) {
       return receiveGameResult();
@@ -339,7 +332,7 @@ public class TextPlayer implements Player {
     }
 
     /* -------- 4. Send commit to server --------- */
-    this.client.sendCommit(commit);
+    this.socketHandler.sendCommit(commit);
     printLine("Order information has been successfully submitted to the server, waiting for other players...");
 
     /*
@@ -357,7 +350,7 @@ public class TextPlayer implements Player {
    * @catch {@link IllegalArgumentException}
    */
   private String receiveGameResult() throws IOException, ClassNotFoundException {
-    Result result = this.client.recvGameResult(); // this receives a Result object
+    Result result = this.socketHandler.recvGameResult(); // this receives a Result object
     if (result.getWinners().size() > 0) {
       printLine("Player " + result.getWinners().toString() + " wins!");
       return Constants.GAME_OVER;
@@ -376,10 +369,10 @@ public class TextPlayer implements Player {
       }
       // exit
       if (cmd != null && cmd == 'E') {
-        client.sendExitInfo(Boolean.valueOf(true));
+        socketHandler.sendExitInfo(Boolean.valueOf(true));
         return Constants.EXIT;
       } else {
-        client.sendExitInfo(Boolean.valueOf(false));
+        socketHandler.sendExitInfo(Boolean.valueOf(false));
       }
     }
     return null;
@@ -436,20 +429,16 @@ public class TextPlayer implements Player {
   }
 
   /**
-   * A method to request game setting information from the server,
-   * information including:
-   * 1. The number of players in the game
-   * 2. How many territories does the player have, and what are they
-   * 3. How many units does the player have (each player has the same amount of
-   * units)
+   * A method to request game setting information from the server, information
+   * including: 1. The number of players in the game 2. How many territories does
+   * the player have, and what are they 3. How many units does the player have
+   * (each player has the same amount of units)
    */
   public void displayGameSetting() {
-    printLine(
-        "From server: Welcome to RISC, you are assigned to be Player " + this.playerId + ". \n"
-            + "There are " + setting.getNumPlayers() + " players in total. These territories are assigned to you: \n"
-            + Arrays.toString(setting.getAssignedTerritories().toArray()) + ", and you have "
-            + setting.getRemainingNumUnits()
-            + " units in total.");
+    printLine("From server: Welcome to RISC, you are assigned to be Player " + this.playerId + ". \n" + "There are "
+        + setting.getNumPlayers() + " players in total. These territories are assigned to you: \n"
+        + Arrays.toString(setting.getAssignedTerritories().toArray()) + ", and you have "
+        + setting.getRemainingNumUnits() + " units in total.");
   }
 
   /**
@@ -506,7 +495,7 @@ public class TextPlayer implements Player {
    */
   @Override
   public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException {
-    GlobalMapInfo mapInfo = this.client.recvGlobalMapInfo();
+    GlobalMapInfo mapInfo = this.socketHandler.recvGlobalMapInfo();
     if (mapInfo.playerId != -1) {
       this.playerId = mapInfo.playerId;
     }

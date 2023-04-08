@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import edu.duke.ece651.team6.client.Client;
+import edu.duke.ece651.team6.client.SocketHandler;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +25,11 @@ public class GameLoungeController extends Controller implements Initializable {
 
   @FXML
   ListView<String> gameLoungeList;
+
+  public GameLoungeController(SocketHandler client, GameLounge gameLounge) {
+    super(client);
+    this.gameLounge = gameLounge;
+  }
 
   @FXML
   public void onSwitchPageButton(ActionEvent ae) {
@@ -94,8 +100,4 @@ public class GameLoungeController extends Controller implements Initializable {
     switchToPage("/ui/mainPage.xml", "/ui/buttonstyle.css", controllers, "Main Page", gameLoungeGridPane);
   }
 
-  public GameLoungeController(Client client, GameLounge gameLounge) {
-    super(client);
-    this.gameLounge = gameLounge;
-  }
 }

@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.client.controller;
 import java.net.URL;
 import java.util.HashMap;
 
-import edu.duke.ece651.team6.client.Client;
+import edu.duke.ece651.team6.client.SocketHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -14,18 +14,13 @@ import javafx.stage.Stage;
 
 public class Controller {
 
-  protected Scene scene;
-  protected Client client;
+  protected SocketHandler client;
 
-  public Controller(Client client) {
+  public Controller(SocketHandler client) {
     this.client = client;
   }
 
-  public void setScene(Scene scene) {
-    this.scene = scene;
-  }
-
-  public Client getClient() {
+  public SocketHandler getClient() {
     return this.client;
   }
 

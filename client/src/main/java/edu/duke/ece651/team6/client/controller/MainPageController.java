@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.client.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import edu.duke.ece651.team6.client.Client;
+import edu.duke.ece651.team6.client.SocketHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -21,6 +21,8 @@ public class MainPageController extends Controller implements Initializable {
   // this.user = user;
   // }
 
+  SocketHandler socketHandler;
+
   @FXML
   ChoiceBox<String> orderMenu;
 
@@ -31,7 +33,7 @@ public class MainPageController extends Controller implements Initializable {
     orderMenu.setValue("Move");
   }
 
-  public MainPageController(Client client) {
+  public MainPageController(SocketHandler client) {
     super(client);
     // this.username.setText(userName);
   }
