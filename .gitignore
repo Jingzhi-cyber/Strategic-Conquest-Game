@@ -36,3 +36,7 @@ build/
 .DS_Store
 
 client/bin/*
+
+.project
+.settings/org.eclipse.buildship.core.prefs
+.settings/org.eclipse.jdt.core.prefs

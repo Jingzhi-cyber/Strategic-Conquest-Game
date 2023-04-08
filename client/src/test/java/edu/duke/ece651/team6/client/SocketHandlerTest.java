@@ -24,7 +24,7 @@ import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.Result;
 
-public class ClientTest {
+public class SocketHandlerTest {
   //private static final int PORT = 8888;
   private ServerSocket server;
   private Socket clientSocket;
@@ -130,7 +130,7 @@ public class ClientTest {
   @Test
   void testRecvObject() throws IOException, ClassNotFoundException {
     /* Create a client with the client socket */
-    Client client = new Client(clientSocket);
+    SocketHandler client = new SocketHandler(clientSocket);
     setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1));
 
     /* Test recv general object */
@@ -159,7 +159,7 @@ public class ClientTest {
 
   @Test
   void test_recvObject_invalidCase() throws IOException, ClassNotFoundException {
-    Client client = new Client(clientSocket);
+    SocketHandler client = new SocketHandler(clientSocket);
     setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1));
     assertThrows(InvalidObjectException.class, () -> client.recvGameResult());
   }
@@ -167,7 +167,7 @@ public class ClientTest {
   @Test
   void testSendObject() throws IOException, ClassNotFoundException {
     // create a client with the client socket
-    Client client = new Client(clientSocket);
+    SocketHandler client = new SocketHandler(clientSocket);
     Commit commit = new Commit(1); // replace with your own object
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -207,7 +207,7 @@ public class ClientTest {
     @Override
     public void run() {
       try {
-        Client client = new Client(hostname, port);
+        SocketHandler client = new SocketHandler(hostname, port);
         String message = (String) client.recvObject();
         assertEquals(message, "Connected to server successfully!");
       } catch (IOException | ClassNotFoundException e) {

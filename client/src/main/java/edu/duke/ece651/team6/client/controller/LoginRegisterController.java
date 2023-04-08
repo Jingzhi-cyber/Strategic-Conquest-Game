@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.Client;
 import edu.duke.ece651.team6.client.model.GameLounge;
+import edu.duke.ece651.team6.client.SocketHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -42,7 +43,7 @@ public class LoginRegisterController extends Controller {
   @FXML
   private Button registerButton;
 
-  public LoginRegisterController(Client client) {
+  public LoginRegisterController(SocketHandler client) {
     super(client);
   }
 

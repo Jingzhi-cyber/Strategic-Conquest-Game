@@ -18,9 +18,9 @@ import javafx.stage.Stage;
 
 public class EntryPoint extends Application {
 
-  private Client client = null;
+  private SocketHandler client = null;
 
-  public EntryPoint(Client client) {
+  public EntryPoint(SocketHandler client) {
     this.client = client;
   }
 
