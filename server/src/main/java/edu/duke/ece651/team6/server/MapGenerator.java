@@ -1,16 +1,9 @@
 package edu.duke.ece651.team6.server;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import edu.duke.ece651.team6.shared.Edge;
+import edu.duke.ece651.team6.shared.Point2D;
 import edu.duke.ece651.team6.shared.Territory;
 
 /**
@@ -23,7 +16,9 @@ public class MapGenerator {
     private final int n;
     private List<Triangle> triangles;
     private Set<Edge> connections;
-    private Set<Edge> voronoi;
+    private Map<Point2D, Territory> territories;
+    private double width = 1000;
+    private double height = 500;
     
     public MapGenerator(int n) {
         names = new HashSet<>();
@@ -34,9 +29,7 @@ public class MapGenerator {
     public MapGenerator(int n, String... names) {
         this.names = new HashSet<>();
         this.n = n;
-        for (String name : names) {
-            this.names.add(name);
-        }
+        Collections.addAll(this.names, names);
         generateMap();
     }
 
@@ -102,48 +95,11 @@ public class MapGenerator {
             }
         }
         triangles.addAll(tempTri);
-        ListIterator<Triangle> it = triangles.listIterator();
-        while (it.hasNext()) {
-            Triangle t = it.next();
-            if (t.overlaps(superTri)) {
-                it.remove();
-            }
-        }
+        triangles.removeIf(t -> t.overlaps(superTri));
         connections = new HashSet<>();
         for (Triangle t : triangles) {
             connections.addAll(t.getEdges());
         }
-        generateVoronoi();
-    }
-
-    /**
-     * Get the adjacent list of the map.
-     * @return
-     */
-    public Map<Territory, Set<Territory>> getTheMap() {
-        Map<Territory, Set<Territory>> map = new HashMap<>();
-        List<Territory> list = new ArrayList<>();
-        Iterator<String> it = names.iterator();
-        char c = 'A';
-        for (int i = 0; i < n; i++) {
-            String str;
-            if (it.hasNext()) {
-                str = it.next();
-            } else {
-                str = String.valueOf(c);
-                c++;
-            }
-            Territory t = new Territory(str);
-            map.put(t, new HashSet<>());
-            list.add(t);
-        }
-        for (Edge edge : connections) {
-            int index1 = points.indexOf(edge.p1);
-            int index2 = points.indexOf(edge.p2);
-            map.get(list.get(index1)).add(list.get(index2));
-            map.get(list.get(index2)).add(list.get(index1));
-        }
-        return map;
     }
 
     /**
@@ -152,9 +108,9 @@ public class MapGenerator {
      */
     public Map<Territory, Map<Territory, Double>> getDistanceMap() {
         Map<Territory, Map<Territory, Double>> map = new HashMap<>();
-        List<Territory> list = new ArrayList<>();
         Iterator<String> it = names.iterator();
         char c = 'A';
+        territories = new HashMap<>();
         for (int i = 0; i < n; i++) {
             String str;
             if (it.hasNext()) {
@@ -165,15 +121,16 @@ public class MapGenerator {
             }
             Territory t = new Territory(str);
             map.put(t, new HashMap<>());
-            list.add(t);
+            territories.put(points.get(i), t);
         }
         for (Edge edge : connections) {
-            int index1 = points.indexOf(edge.p1);
-            int index2 = points.indexOf(edge.p2);
+            Territory t1 = territories.get(edge.p1);
+            Territory t2 = territories.get(edge.p2);
             double distance = edge.p1.dist(edge.p2);
-            map.get(list.get(index1)).put(list.get(index2), distance);
-            map.get(list.get(index2)).put(list.get(index1), distance);
+            map.get(t1).put(t2, distance);
+            map.get(t2).put(t1, distance);
         }
+        generateVoronoi();
         return map;
     }
 
@@ -181,10 +138,11 @@ public class MapGenerator {
      * Get voronoi map.
      */
     private void generateVoronoi() {
-        voronoi = new HashSet<>();
         for (Edge e : connections) {
             Triangle t1 = null;
             Triangle t2 = null;
+            Territory terri1 = territories.get(e.p1);
+            Territory terri2 = territories.get(e.p2);
             for (Triangle t : triangles) {
                 if (t.overlaps(e.p1) && t.overlaps(e.p2)) {
                     if (t1 == null) {
@@ -196,11 +154,18 @@ public class MapGenerator {
                 }
             }
             if (t1 != null && t2 != null) {
-                voronoi.add(new Edge(t1.c, t2.c));
+                if (t1.c.isInsideRectangle(width, height) || t2.c.isInsideRectangle(width, height)) {
+                    Edge edge = new Edge(t1.c, t2.c).getEdgeInsideRectangle(width, height);
+                    if (edge != null) {
+                        terri1.addEdge(edge);
+                        terri2.addEdge(edge);
+                    }
+                }
             } else if (t1 != null) {
-                Edge ve = t1.getVoronoiEdge(e);
+                Edge ve = t1.getVoronoiEdge(e).getEdgeInsideRectangle(width, height);
                 if (ve != null) {
-                    voronoi.add(ve);
+                    terri1.addEdge(ve);
+                    terri2.addEdge(ve);
                 }
             }
         }
@@ -208,10 +173,6 @@ public class MapGenerator {
     
     public List<Point2D> getPoints() {
         return points;
-    }
-
-    public Set<Edge> getVoronoi() {
-        return voronoi;
     }
 
 }

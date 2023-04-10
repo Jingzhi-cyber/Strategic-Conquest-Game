@@ -1,0 +1,84 @@
++------------------------------------------+-----------------+------------+-----------+-----------+---------+
+|               Class Name                 | Total Coverage% | Cvrd Stmts | Ttl Stmts | Cvrdd Brs | Ttl Brs |
++------------------------------------------+-----------------+------------+-----------+-----------+---------+
+|           team6.client.HelloFx           |        0        |     0      |     7     |     0     |    0    |
+|             team6.client.App             |        0        |     0      |    27     |     0     |    6    |
+|             team6.server.App             |        0        |     0      |    11     |     0     |    4    |
+|           team6.client.MapView           |       100       |     1      |     1     |     0     |    0    |
+|           team6.client.Player            |       100       |     0      |     0     |     0     |    0    |
+|         team6.client.TextPlayer          |       100       |    147     |    147    |    28     |   28    |
+|           team6.client.Client            |       100       |     19     |    19     |     2     |    2    |
+|         team6.client.MapTextView         |       100       |     19     |    19     |     2     |    2    |
+|           team6.server.Point2D           |       100       |     11     |    11     |     4     |    4    |
+|            team6.server.Edge             |       100       |     12     |    12     |     6     |    6    |
+|         team6.server.RiscMaster          |       100       |    173     |    173    |    36     |   36    |
+|          team6.server.Triangle           |       100       |     40     |    40     |     8     |    8    |
+|        team6.server.MapGenerator         |       100       |     78     |    78     |    24     |   24    |
+|           team6.server.Server            |       100       |     8      |     8     |     0     |    0    |
+|           team6.server.Master            |       100       |     0      |     0     |     0     |    0    |
+|   team6.shared.AttackOrderRuleChecker    |       100       |     1      |     1     |     0     |    0    |
+|        team6.shared.PlayerProfile        |       100       |     8      |     8     |     0     |    0    |
+|            team6.shared.Army             |       100       |     15     |    15     |     6     |    6    |
+|         team6.shared.RoundFight          |       100       |     22     |    22     |    16     |   16    |
+|           team6.shared.Commit            |       100       |     38     |    38     |    10     |   10    |
+|           team6.shared.Result            |       100       |     6      |     6     |     0     |    0    |
+|        team6.shared.GlobalMapInfo        |       100       |     13     |    13     |     0     |    0    |
+|  team6.shared.EnemyNeighborRuleChecker   |       100       |     8      |     8     |     4     |    4    |
+|      team6.shared.GameBasicSetting       |       100       |     14     |    14     |     2     |    2    |
+|         team6.shared.SimpleMove          |       100       |     4      |     4     |     0     |    0    |
+|          team6.shared.Territory          |       100       |     57     |    57     |    20     |   20    |
+|    team6.shared.SrcOwerIdRuleChecker     |       100       |     5      |     5     |     2     |    2    |
+|  team6.shared.SamePlayerPathRuleChecker  |       100       |     4      |     4     |     2     |    2    |
+|      team6.shared.OrderRuleChecker       |       100       |     7      |     7     |     4     |    4    |
+|          team6.shared.SimpleMap          |       100       |     10     |    10     |     0     |    0    |
+|    team6.shared.MoveOrderRuleChecker     |       100       |     1      |     1     |     0     |    0    |
+|          team6.shared.Constants          |       100       |     0      |     0     |     0     |    0    |
+|          team6.shared.SampleMap          |       100       |     61     |    61     |     0     |    0    |
+|    team6.shared.MoveUnitsRuleChecker     |       100       |     4      |     4     |     2     |    2    |
+|         team6.shared.AttackOrder         |       100       |     4      |     4     |     0     |    0    |
+|           team6.shared.GameMap           |       100       |     29     |    29     |    12     |   12    |
+|           team6.shared.WarZone           |       100       |     7      |     7     |     2     |    2    |
+|   team6.shared.AttackUnitsRuleChecker    |       100       |     4      |     4     |     2     |    2    |
+|          team6.shared.MoveOrder          |       100       |     4      |     4     |     0     |    0    |
+|        team6.shared.PlayerMapInfo        |       100       |     5      |     5     |     0     |    0    |
+|         team6.client.PlayerTest          |       100       |     0      |     0     |     0     |    0    |
+|         team6.client.MapViewTest         |       100       |     0      |     0     |     0     |    0    |
+|         team6.client.ClientTest          |       100       |     7      |     7     |     0     |    0    |
+|           team6.client.AppTest           |       100       |     0      |     0     |     0     |    0    |
+|       team6.client.MapTextViewTest       |       100       |     31     |    31     |     2     |    2    |
+|       team6.client.TextPlayerTest        |       100       |    170     |    170    |     0     |    0    |
+|         team6.server.ServerTest          |       100       |     15     |    15     |     2     |    2    |
+|         team6.server.Point2DTest         |       100       |     16     |    16     |     0     |    0    |
+|           team6.server.AppTest           |       100       |     0      |     0     |     0     |    0    |
+|      team6.server.MapGeneratorTest       |       100       |     17     |    17     |     8     |    8    |
+|        team6.server.TriangleTest         |       100       |     41     |    41     |     0     |    0    |
+|          team6.server.EdgeTest           |       100       |     11     |    11     |     0     |    0    |
+|       team6.server.RiscMasterTest        |       100       |     63     |    63     |     2     |    2    |
+|       team6.shared.RoundFightTest        |       100       |     25     |    25     |     0     |    0    |
+|        team6.shared.SimpleMapTest        |       100       |     11     |    11     |     0     |    0    |
+|       team6.shared.AttackOrderTest       |       100       |     20     |    20     |     0     |    0    |
+|  team6.shared.MoveOrderRuleCheckerTest   |       100       |     0      |     0     |     0     |    0    |
+|team6.shared.SamePlayerPathRuleCheckerTest|       100       |     13     |    13     |     0     |    0    |
+|  team6.shared.MoveUnitsRuleCheckerTest   |       100       |     5      |     5     |     0     |    0    |
+|       team6.shared.SimpleMoveTest        |       100       |     0      |     0     |     0     |    0    |
+|         team6.shared.GameMapTest         |       100       |     38     |    38     |     0     |    0    |
+|      team6.shared.PlayerMapInfoTest      |       100       |     28     |    28     |     2     |    2    |
+|  team6.shared.SrcOwerIdRuleCheckerTest   |       100       |     5      |     5     |     0     |    0    |
+|         team6.shared.CommitTest          |       100       |     94     |    94     |     0     |    0    |
+|      team6.shared.GlobalMapInfoTest      |       100       |     38     |    38     |     0     |    0    |
+|    team6.shared.GameBasicSettingTest     |       100       |     22     |    22     |     0     |    0    |
+|        team6.shared.MoveOrderTest        |       100       |     23     |    23     |     0     |    0    |
+|        team6.shared.TerritoryTest        |       100       |     45     |    45     |     0     |    0    |
+|      team6.shared.PlayerProfileTest      |       100       |     6      |     6     |     0     |    0    |
+|         team6.shared.ResultTest          |       100       |     11     |    11     |     0     |    0    |
+|    team6.shared.OrderRuleCheckerTest     |       100       |     0      |     0     |     0     |    0    |
+|          team6.shared.ArmyTest           |       100       |     22     |    22     |     0     |    0    |
+| team6.shared.AttackOrderRuleCheckerTest  |       100       |     0      |     0     |     0     |    0    |
+| team6.shared.AttackUnitsRuleCheckerTest  |       100       |     9      |     9     |     0     |    0    |
+|team6.shared.EnemyNeighborRuleCheckerTest |       100       |     9      |     9     |     0     |    0    |
++------------------------------------------+-----------------+------------+-----------+-----------+---------+
+|                  Totals                  |       97        |    1634    |   1679    |    210    |   220   |
++------------------------------------------+-----------------+------------+-----------+-----------+---------+
+
+
+Remove Colors From All Buffers

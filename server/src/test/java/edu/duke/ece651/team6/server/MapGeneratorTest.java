@@ -16,7 +16,7 @@ public class MapGeneratorTest {
     void testGetTheMap() {
         MapGenerator m = new MapGenerator(15, "Hello", "Nihao", "Hi", "yeah");
         int a = 0, b = 0, c = 0, d = 0;
-        Map<Territory, Set<Territory>> map = m.getTheMap();
+        Map<Territory, Map<Territory, Double>> map = m.getDistanceMap();
         for (Territory t : map.keySet()) {
             if (t.getName().equals("Hello")) {
                 a = 1;
@@ -42,7 +42,6 @@ public class MapGeneratorTest {
             }
         }
         m.getPoints();
-        m.getVoronoi();
         //SimplePrinter.main(null);
     }
 }

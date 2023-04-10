@@ -3,8 +3,13 @@ package edu.duke.ece651.team6.shared;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 
 public class Territory implements java.io.Serializable, Cloneable {
   private final String name;
@@ -15,6 +20,8 @@ public class Territory implements java.io.Serializable, Cloneable {
   private boolean underWar;
   private int food;
   private int technology;
+  private List<Edge> edges;
+  private List<Point2D> points;
 
   public Territory() {
     this("Default Territory");
@@ -338,6 +345,119 @@ public class Territory implements java.io.Serializable, Cloneable {
     Unit unit = units.get(now).poll();
     UnitManager.upgrade(unit, target);
     units.get(target).add(unit);
+  }
+
+  public void addEdge(Edge e) {
+    if (edges == null) {
+      edges = new LinkedList<>();
+    }
+    edges.add(e);
+  }
+
+  private void getPoints() {
+    if (points != null) {
+      return;
+    }
+    points = new ArrayList<>();
+    updateEdges();
+    Edge e = edges.get(0);
+    Point2D p = e.p1;
+    Point2D pleft = e.p2;
+    Edge adEdge = getAdjacentEdge(e, e.p1);
+    Point2D pright = adEdge.p1;
+    if (adEdge.p1.equals(p)) {
+      pright = adEdge.p2;
+    }
+    double angleLeft = Math.asin((pleft.y - p.y) / p.dist(pleft));
+    double angleRight = Math.asin((pright.y - p.y) / p.dist(pright));
+    double angle;
+    if (angleLeft > angleRight) {
+      angle = angleLeft - angleRight;
+    } else {
+      angle = Math.PI - (angleRight - angleLeft);
+    }
+    if (angle > Math.PI / 2) {
+      Point2D temp = pleft;
+      pleft = pright;
+      pright = temp;
+    }
+    points.add(pleft);
+    points.add(p);
+    points.add(pright);
+    Edge ei = new Edge(p, pright);
+    Point2D pi = pright;
+    while (true) {
+      Edge edge = getAdjacentEdge(ei, pi);
+      Point2D next = edge.p1;
+      if (edge.p1.equals(pi)) {
+        next = edge.p2;
+      }
+      if (points.get(0).equals(next)) {
+        break;
+      }
+      points.add(next);
+      pi = next;
+      ei = edge;
+    }
+  }
+
+  private void updateEdges() {
+    Set<Point2D> set = new HashSet<>();
+    for (Edge e : edges) {
+      if (e.p1.isOnRectangle(1000, 500)) {
+        set.add(e.p1);
+      }
+      if (e.p2.isOnRectangle(1000, 500)) {
+        set.add(e.p2);
+      }
+    }
+    if (set.size() == 2) {
+      List<Point2D> list = new ArrayList<>(set);
+      Point2D p1 = list.get(0);
+      Point2D p2 = list.get(1);
+      if (p2.x < p1.x) {
+        Point2D temp = p1;
+        p1 = p2;
+        p2 = temp;
+      }
+      if (Math.abs(p1.x - p2.x) < 0.000001 || Math.abs(p1.y - p2.y) < 0.000001) {
+        edges.add(new Edge(p1, p2));
+      } else {
+        Point2D p;
+        if (Math.abs(p1.x) < 0.000001) {
+          p = new Point2D(p1.x, p2.y);
+        } else {
+          p = new Point2D(p2.x, p1.y);
+        }
+        edges.add(new Edge(p, p1));
+        edges.add(new Edge(p, p2));
+      }
+    }
+  }
+
+  private Edge getAdjacentEdge(Edge e, Point2D p) {
+    for (Edge edge : edges) {
+      if (e.equals(edge)) {
+        continue;
+      }
+      if (edge.p1.equals(p) || edge.p2.equals(p)) {
+        return edge;
+      }
+    }
+    return null;
+  }
+
+  public Polygon getPolygon() {
+    getPoints();
+    Polygon polygon = new Polygon();
+    for (Point2D p : points) {
+      polygon.getPoints().add(p.x);
+      polygon.getPoints().add(p.y);
+    }
+    polygon.setFill(Color.rgb(235, 233, 243));
+    polygon.setStroke(Color.BLACK);
+    polygon.setStrokeWidth(2);
+    return polygon;
   }
 
 }

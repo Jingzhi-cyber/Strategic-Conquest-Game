@@ -51,7 +51,7 @@ public class GameReactor {
             String username = args[0];
             int numPlayer = 0;
             if (args.length > 1) {
-                numPlayer = Integer.valueOf(args[1]);
+                numPlayer = Integer.parseInt(args[1]);
             }
             System.out.println(numPlayer);
             SocketKey key = null;
@@ -80,7 +80,7 @@ public class GameReactor {
      */
     private class GameStarter implements Runnable {
 
-        private List<SocketKey> clientSockets;
+        private final List<SocketKey> clientSockets;
 
         public GameStarter(List<SocketKey> clientSockets) {
             this.clientSockets = clientSockets;

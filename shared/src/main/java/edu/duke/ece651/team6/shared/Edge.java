@@ -1,11 +1,16 @@
-package edu.duke.ece651.team6.server;
+package edu.duke.ece651.team6.shared;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * A line on the 2D plain, consists of two Point2Ds.
  */
-public class Edge {
-    protected Point2D p1;
-    protected Point2D p2;
+public class Edge implements Serializable {
+    public Point2D p1;
+    public Point2D p2;
 
     private double k;
     private double b;
@@ -42,6 +47,12 @@ public class Edge {
         return new Point2D((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
     }
 
+    /**
+     * Return the intersection of this Edge and another Edge e. 
+     * @param e another Edge
+     * @return If the intersection is on this Edge, return the intersection in the form of Point2D.
+     * Else return null;
+     */
     public Point2D getIntersection(Edge e) {
         if (Math.abs(k - e.k) < 0.000001 || (vertical && e.vertical)) {
             return null;
@@ -68,6 +79,60 @@ public class Edge {
             return new Point2D(x, y);
         }
         return null;
+    }
+
+    public List<Point2D> getInterWithRectangle(double width, double height) {
+        Point2D down = new Edge(0, 0, width, 0).getIntersection(this);
+        Point2D right = new Edge(width, 0, width, height).getIntersection(this);
+        Point2D up = new Edge(0, height, width, height).getIntersection(this);
+        Point2D left = new Edge(0, 0, 0, height).getIntersection(this);
+        List<Point2D> res = new ArrayList<>();
+        if (down != null) {
+            res.add(down);
+        }
+        if (right != null) {
+            res.add(right);
+        }
+        if (up != null) {
+            res.add(up);
+        }
+        if (left != null) {
+            res.add(left);
+        }
+        return res;
+    }
+
+    public Edge getEdgeInsideRectangle(double width, double height) {
+        boolean p1inside = p1.isInsideRectangle(width, height);
+        boolean p2inside = p2.isInsideRectangle(width, height);
+        if (p1inside && p2inside) {
+            return this;
+        }
+        if (!p1inside && !p2inside) {
+            return null;
+        }
+        List<Point2D> points = getInterWithRectangle(width, height);
+        for (Point2D p : points) {
+            if (this.containsPoint(p)) {
+                try {
+                    if (!p1inside) {
+                        return new Edge(p2, p);
+                    } else {
+                        return new Edge(p1, p);
+                    }
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean containsPoint(Point2D p) {
+        if (!vertical && (p.x - p1.x) * (p.x - p2.x) <= 0 || vertical && (p.y - p1.y) * (p.y - p2.y) <= 0) {
+            return true;
+        }
+        return false;
     }
 
     @Override

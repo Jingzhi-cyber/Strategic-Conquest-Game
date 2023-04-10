@@ -9,6 +9,9 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import edu.duke.ece651.team6.shared.Edge;
+import edu.duke.ece651.team6.shared.Point2D;
+
 public class TriangleTest {
     @Test
     void testCircleContains() {

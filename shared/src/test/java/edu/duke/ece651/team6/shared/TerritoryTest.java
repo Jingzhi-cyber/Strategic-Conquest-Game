@@ -118,4 +118,28 @@ public class TerritoryTest {
     assertEquals("A", cloned.getName());
     assertEquals(4, cloned.getUnitsNumByLevel(0));
   }
+
+  @Test
+  void testGetEdge() {
+    Territory t = new Territory("A", 1, 4);
+    t.addEdge(new Edge(1, 1, 1, 0));
+    t.addEdge(new Edge(1, 1, 0, 1.5));
+    t.getPolygon();
+    t.getPolygon();
+    t = new Territory("A", 1, 4);
+    t.addEdge(new Edge(1, 1, 2, 2));
+    t.addEdge(new Edge(1, 1, 2, 0.5));
+    t.addEdge(new Edge(2, 2, 2, 0.5));
+    t.getPolygon();
+    t = new Territory("a", 1, 4);
+    t.addEdge(new Edge(2, 2, 3, 3));
+    t.addEdge(new Edge(2, 2, 1, 3));
+    t.addEdge(new Edge(1, 3, 3, 3));
+    t.getPolygon();
+    t = new Territory("a", 1, 4);
+    t.addEdge(new Edge(2, 0, 2, 1));
+    t.addEdge(new Edge(3.5, 0, 3, 1));
+    t.addEdge(new Edge(2, 1, 3, 1));
+    t.getPolygon();
+  }
 }
