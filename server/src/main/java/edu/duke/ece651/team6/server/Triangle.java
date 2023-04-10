@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import edu.duke.ece651.team6.shared.Edge;
+import edu.duke.ece651.team6.shared.Point2D;
+
 /**
  * A 2D triangle, consists of three Point2Ds.
  */
@@ -111,28 +114,9 @@ public class Triangle {
     }
 
     public Edge getVoronoiEdge(Edge e) {
-        if (c.x <= 0 || c.x >= 1000 || c.y <= 0 || c.y >= 500) {
-            return null;
-        }
         Point2D mid = e.middle();
         Edge verticalE = new Edge(c, mid);
-        List<Point2D> points = new ArrayList<>();
-        Point2D p1 = new Edge(new Point2D(0, 0), new Point2D(1000, 0)).getIntersection(verticalE);
-        Point2D p2 = new Edge(new Point2D(1000, 500), new Point2D(1000, 0)).getIntersection(verticalE);
-        Point2D p3 = new Edge(new Point2D(0, 0), new Point2D(0, 500)).getIntersection(verticalE);
-        Point2D p4 = new Edge(new Point2D(1000, 500), new Point2D(0, 500)).getIntersection(verticalE);
-        if (p1 != null) {
-            points.add(p1);
-        }
-        if (p2 != null) {
-            points.add(p2);
-        }
-        if (p3 != null) {
-            points.add(p3);
-        }
-        if (p4 != null) {
-            points.add(p4);
-        }
+        List<Point2D> points = verticalE.getInterWithRectangle(1000, 500);
         Set<Edge> edges = getEdges();
         edges.remove(e);
         List<Edge> edges2 = new ArrayList<>(edges);
@@ -140,7 +124,7 @@ public class Triangle {
         if (pt == null) {
             pt = edges2.get(1).getIntersection(verticalE);
         }
-        if ((mid.x - pt.x) / (points.get(0).x - pt.x) >= 0) {
+        if (new Edge(pt, points.get(0)).containsPoint(mid)) {
             return new Edge(points.get(0), c);
         }
         return new Edge(points.get(1), c);
