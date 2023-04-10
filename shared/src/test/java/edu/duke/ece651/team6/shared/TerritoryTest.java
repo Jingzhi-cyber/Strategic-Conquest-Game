@@ -121,25 +121,28 @@ public class TerritoryTest {
 
   @Test
   void testGetEdge() {
+    PolygonGetter pg = new PolygonGetter();
     Territory t = new Territory("A", 1, 4);
     t.addEdge(new Edge(1, 1, 1, 0));
     t.addEdge(new Edge(1, 1, 0, 1.5));
-    t.getPolygon();
-    t.getPolygon();
-    t = new Territory("A", 1, 4);
+    pg.getPolygon(t);
+    pg.getPolygon(t);
+    t = new Territory("b", 1, 4);
     t.addEdge(new Edge(1, 1, 2, 2));
     t.addEdge(new Edge(1, 1, 2, 0.5));
     t.addEdge(new Edge(2, 2, 2, 0.5));
-    t.getPolygon();
-    t = new Territory("a", 1, 4);
+    pg.getPolygon(t);
+    pg.updatePolygon(t);
+    pg.updatePolygon(null);
+    t = new Territory("c", 1, 4);
     t.addEdge(new Edge(2, 2, 3, 3));
     t.addEdge(new Edge(2, 2, 1, 3));
     t.addEdge(new Edge(1, 3, 3, 3));
-    t.getPolygon();
-    t = new Territory("a", 1, 4);
+    pg.getPolygon(t);
+    t = new Territory("d", 1, 4);
     t.addEdge(new Edge(2, 0, 2, 1));
     t.addEdge(new Edge(3.5, 0, 3, 1));
     t.addEdge(new Edge(2, 1, 3, 1));
-    t.getPolygon();
+    pg.getPolygon(t);
   }
 }

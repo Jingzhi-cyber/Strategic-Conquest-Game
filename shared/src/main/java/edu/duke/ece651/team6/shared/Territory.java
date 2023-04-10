@@ -22,6 +22,7 @@ public class Territory implements java.io.Serializable, Cloneable {
   private int technology;
   private List<Edge> edges;
   private List<Point2D> points;
+  private int[] color;
 
   public Territory() {
     this("Default Territory");
@@ -56,7 +57,7 @@ public class Territory implements java.io.Serializable, Cloneable {
    * Constructs a territory that has a specified name, with owner and some units
    * 
    * @param name  the name of territory
-   * @param owner the owner of territory
+   * @param ownerId the owner of territory
    * @param units the number of units on the territory
    */
   public Territory(String name, int ownerId, int units) {
@@ -354,9 +355,9 @@ public class Territory implements java.io.Serializable, Cloneable {
     edges.add(e);
   }
 
-  private void getPoints() {
+  public List<Point2D> getPoints() {
     if (points != null) {
-      return;
+      return points;
     }
     points = new ArrayList<>();
     updateEdges();
@@ -399,6 +400,7 @@ public class Territory implements java.io.Serializable, Cloneable {
       pi = next;
       ei = edge;
     }
+    return points;
   }
 
   private void updateEdges() {
@@ -447,17 +449,20 @@ public class Territory implements java.io.Serializable, Cloneable {
     return null;
   }
 
-  public Polygon getPolygon() {
-    getPoints();
-    Polygon polygon = new Polygon();
-    for (Point2D p : points) {
-      polygon.getPoints().add(p.x);
-      polygon.getPoints().add(p.y);
+  public void setColor(int r, int g, int b) {
+    if (color == null) {
+      color = new int[3];
     }
-    polygon.setFill(Color.rgb(235, 233, 243));
-    polygon.setStroke(Color.BLACK);
-    polygon.setStrokeWidth(2);
-    return polygon;
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+  }
+
+  public int[] getColor() {
+    if (color == null) {
+      setColor(235, 233, 243);
+    }
+    return color;
   }
 
 }
