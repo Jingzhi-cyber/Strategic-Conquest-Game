@@ -15,14 +15,15 @@ import javafx.scene.shape.Polygon;
 public class SimplePrinter extends Application {
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         MapGenerator map = new MapGenerator(24);
         Map<Territory, Map<Territory, Double>> m = map.getDistanceMap();
         List<Point2D> points = map.getPoints();
         Pane pane = new Pane();
         pane.setPrefSize(1000, 500);
+        PolygonGetter pg = new PolygonGetter();
         for (Territory t : m.keySet()) {
-            Polygon p = t.getPolygon();
+            Polygon p = pg.getPolygon(t);
             pane.getChildren().add(p);
         }
         for (Point2D p : points) {
