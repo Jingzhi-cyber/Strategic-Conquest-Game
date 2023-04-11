@@ -3,16 +3,46 @@
 -fx-max-height: infinity;
 }
 
-.newgamebtn:hover {
+.gameloungebtn:hover {
 -fx-background-color: #333355, #101169;
 -fx-text-fill: ivory;
 -fx-background-radius: 10, 10;
 -fx-background-insets: 2, 5;
 }
 
-.newgamebtn:pressed {
+.gameloungebtn:pressed {
 -fx-background-color: #000029, #000149;
 -fx-text-fill: ivory;
 -fx-background-radius: 10, 10;
 -fx-background-insets: 2, 5;
+}
+
+.resetbtn:hover {
+-fx-background-color: #054aad, #054aad;
+-fx-text-fill: ivory;
+}
+
+.resetbtn:pressed {
+-fx-background-color: #054ada,  #054ada;
+-fx-text-fill: ivory;
+}
+
+.exitbtn:hover {
+-fx-background-color: #fdd13a,  #fdd13a;
+-fx-text-fill: ivory;
+}
+
+.exitbtn:pressed {
+-fx-background-color:rgb(253, 161, 62), #fda13e;
+-fx-text-fill: ivory;
+}
+
+.commitbtn:hover {
+-fx-background-color: #24b248, #24b240;
+-fx-text-fill: ivory;
+}
+
+.commitbtn:pressed {
+-fx-background-color: #38a048,  #38a058;
+-fx-text-fill: ivory;
 }

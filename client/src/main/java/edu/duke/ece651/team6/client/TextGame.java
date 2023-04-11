@@ -53,7 +53,6 @@ public class TextGame extends Game {
    * 
    * @throws IOException, ClassNotFoundException
    */
-  @Override
   public void placeUnit() throws IOException, ClassNotFoundException {
     // printLine("From client: Requesting to " + prompt);
     Map<Territory, Integer> map = new HashMap<>();
@@ -82,7 +81,8 @@ public class TextGame extends Game {
    * @return a string to display available commands
    */
   private String displayAvailableCommands() {
-    return "You are the Player" + this.playerId + ", what would you like to do?\n(M)ove\n(A)ttack\n(R)esearch\n(U)pgrade\n(D)one\n";
+    return "You are the Player" + this.playerId
+        + ", what would you like to do?\n(M)ove\n(A)ttack\n(R)esearch\n(U)pgrade\n(D)one\n";
   }
 
   /**
@@ -112,8 +112,7 @@ public class TextGame extends Game {
   private Character readCommand(String prompt, Set<String> availableCommands) throws IOException {
     String s = readInputLine(prompt).toUpperCase();
     if (s.length() != 1 || !availableCommands.contains(s)) {
-      throw new IllegalArgumentException(
-          "Command must be one of " + availableCommands.toString() + ", but was " + s);
+      throw new IllegalArgumentException("Command must be one of " + availableCommands.toString() + ", but was " + s);
     }
     return s.charAt(0);
   }
@@ -142,7 +141,8 @@ public class TextGame extends Game {
    * 
    * @return HashSet<Territory> enemyTerritories
    */
-  private Set<Territory> findEnemyTerritories() {
+  @Override
+  protected Set<Territory> findEnemyTerritories() {
     Set<Territory> set = new HashSet<>();
     Map<Integer, PlayerMapInfo> globalInfo = mapTextView.globalMapInfo.getGlobalMap();
     for (Map.Entry<Integer, PlayerMapInfo> entry : globalInfo.entrySet()) {
@@ -207,7 +207,8 @@ public class TextGame extends Game {
    *                                  valid territory
    * @propogates {@link IllegalArgumentException} from readAnInteger
    */
-  private Territory findTerritory(Territory src, String message) throws IOException {
+  @Override
+  protected Territory findTerritory(Territory src, String message) throws IOException {
     Map<Integer, Territory> map = displayOrderedTerritories(src);
     if (map.size() <= 0) {
       throw new IllegalArgumentException("No suitable territory can be found. Please change an action to perform.");
@@ -227,7 +228,7 @@ public class TextGame extends Game {
    * @propogates {@link IllegalArgumentException} from findTerritory and
    *             readAnInteger
    */
-  protected MoveOrder constructMove() throws IOException {
+  public MoveOrder constructMoveOrder() throws IOException {
     String message = "Player" + this.playerId + ", which territory do you want to move units ";
     Territory src = findTerritory(null, message + "from?");
     Territory dest = findTerritory(null, message + "to?");
@@ -236,6 +237,7 @@ public class TextGame extends Game {
 
   /**
    * Display different level of units on the territory
+   * 
    * @param territory
    */
   protected void displayUnitsInDifferentLevels(Territory territory) {
@@ -257,7 +259,7 @@ public class TextGame extends Game {
     displayUnitsInDifferentLevels(src);
     Set<String> opts = new HashSet<>();
     opts.add("Y");
-    opts.add("N"); 
+    opts.add("N");
     while (true) {
       try {
         int selectedLevel = readAnInteger("Player" + this.playerId + ", which level of units do you want to move?");
@@ -295,7 +297,7 @@ public class TextGame extends Game {
    * @throws IOException
    * @throws {@link      IllegalArgumentException} from readAnInteger
    */
-  protected AttackOrder constructAttack() throws IOException {
+  public AttackOrder constructAttackOrder() throws IOException {
     String message = "Player" + this.playerId + ", which territory do you want to attack ";
     Territory src = findTerritory(null, message + "from?");
     Territory dest = findTerritory(src, message + "to?");
@@ -304,20 +306,22 @@ public class TextGame extends Game {
 
   /**
    * Constructs a research order
+   * 
    * @return an {@link ResearchOrder}
    */
-  protected ResearchOrder constructResearch() {
+  public ResearchOrder constructResearchOrder() {
     return new ResearchOrder(this.playerId);
   }
 
-  protected UpgradeOrder constructUpgrade() throws IOException {
+  public UpgradeOrder constructUpgradeOrder() throws IOException {
     String message = "Player" + this.playerId + ", which territory do you want to upgrade your units?";
     Territory src = findTerritory(null, message);
     displayUnitsInDifferentLevels(src);
     UpgradeOrder upgrade = null;
     while (true) {
       try {
-        int selectedNowLevel = readAnInteger("Player" + this.playerId + ", which level of units do you want to upgrade?");
+        int selectedNowLevel = readAnInteger(
+            "Player" + this.playerId + ", which level of units do you want to upgrade?");
         if (selectedNowLevel < 0 || selectedNowLevel >= src.getNumLevels()) {
           printLine("Invalid level: " + selectedNowLevel + " there are " + src.getNumLevels() + " levels in total");
           continue;
@@ -335,7 +339,7 @@ public class TextGame extends Game {
         continue;
       }
     }
-      return upgrade;
+    return upgrade;
   }
 
   /**
@@ -345,7 +349,7 @@ public class TextGame extends Game {
    * @throws IOException, {@link ClassNotFoundException}
    * @catch {@link IllegalArgumentException}
    */
-  private Commit constructCommit() throws IOException, ClassNotFoundException {
+  public Commit constructCommit() throws IOException, ClassNotFoundException {
     Map<String, Integer> copiedResource = new HashMap<>();
     copiedResource.putAll(this.resource);
     Commit commit = new Commit(this.playerId, (GameMap) this.gameMap.clone(), copiedResource);
@@ -357,16 +361,16 @@ public class TextGame extends Game {
           break;
         } else if (cmd == Character.valueOf('M')) {
           /* move */
-          commit.addMove(constructMove());
+          commit.addMove(constructMoveOrder());
         } else if (cmd == Character.valueOf('A')) {
           /* attack */
-          commit.addAttack(constructAttack());
+          commit.addAttack(constructAttackOrder());
         } else if (cmd == Character.valueOf('R')) {
           /* research */
-          commit.addResearch(constructResearch());
+          commit.addResearch(constructResearchOrder());
         } else {
           /* upgrade */
-          commit.addUpgrade(constructUpgrade());
+          commit.addUpgrade(constructUpgradeOrder());
         }
       } catch (IllegalArgumentException e) {
         printLine(e.getMessage());
@@ -404,7 +408,7 @@ public class TextGame extends Game {
   @Override
   public String playOneTurn() throws IOException, ClassNotFoundException {
     /* -------- 1. Receive and display the map --------- */
-    updateAndDisplayMapInfo(); // will update local variables: mapTextView and gameMap
+    refreshMap(); // will update local variables: mapTextView and gameMap
 
     /*
      * ---------2. Skip constructing a commit, and skip sending it to the server,
@@ -509,7 +513,6 @@ public class TextGame extends Game {
    * @throws exceptions, {@link IOException}, {@link UnknownHostException},
    *                     {@link ClassNotFoundException}
    */
-  @Override
   public void playGame() throws IOException, UnknownHostException, ClassNotFoundException {
     while (true) {
       String result = playOneTurn(); // Constants.EXIT or Constants.GAME_OVER
@@ -594,7 +597,7 @@ public class TextGame extends Game {
    * @throws InvalidObjectException
    */
   @Override
-  public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException {
+  public GlobalMapInfo refreshMap() throws IOException, ClassNotFoundException {
     GlobalMapInfo mapInfo = this.socketHandler.recvGlobalMapInfo();
     if (mapInfo.playerId != -1) {
       this.playerId = mapInfo.playerId;
@@ -602,9 +605,12 @@ public class TextGame extends Game {
     this.mapTextView = new MapTextView(mapInfo);
     this.gameMap = mapInfo.getGameMap();
     printLine(this.mapTextView.display());
-    this.resource.put(Constants.RESOURCE_FOOD, this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
-    this.resource.put(Constants.RESOURCE_TECH, this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH)); 
-    String resourceStr = "You have these resource: \nfood: " + this.resource.get(Constants.RESOURCE_FOOD) + "\ntechnology: " + this.resource.get(Constants.RESOURCE_TECH) + "\n\n";
+    this.resource.put(Constants.RESOURCE_FOOD,
+        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
+    this.resource.put(Constants.RESOURCE_TECH,
+        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
+    String resourceStr = "You have these resource: \nfood: " + this.resource.get(Constants.RESOURCE_FOOD)
+        + "\ntechnology: " + this.resource.get(Constants.RESOURCE_TECH) + "\n\n";
     printLine(resourceStr);
     return mapInfo;
   }

@@ -49,7 +49,7 @@ public class MoveOrderTest {
   @Test
   public void test_toString() {
     MoveOrder move = new MoveOrder(new Territory("A", 1, 3), new Territory("B", 1, 4), numUnitsByLevel);
-    String expected = "{ from: (name: A, ownerId: 1, units: 3), to: (name: B, ownerId: 1, units: 4), numUnits: 2 }";
+    String expected = "Move{ from: (name: A, ownerId: 1, units: 3), to: (name: B, ownerId: 1, units: 4), numUnits: 2 }";
     assertEquals(expected, move.toString());
   }
 

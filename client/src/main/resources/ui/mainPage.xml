@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.ChoiceBox?>
@@ -8,88 +9,124 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import java.lang.Double?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1600.0" style="-fx-background-color: PeachPuff;" xmlns:fx="http://javafx.com/fxml/" xmlns="http://javafx.com/javafx/" fx:controller="edu.duke.ece651.team6.client.controller.MainPageController">
-   <children>
-      <VBox prefHeight="92.0" prefWidth="695.0">
-         <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="600.0">
-               <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="42.0" prefWidth="102.0" text="Player 1" textAlignment="CENTER">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="CENTER" prefHeight="53.0" prefWidth="238.0" style="-fx-border-color: Turquoise;" text="Status: issue order">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER">
-               <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="237.0" text="Maximum tech level: 2" textAlignment="CENTER">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="36.0" prefWidth="234.0" text="Food resources: 45 (units)" textAlignment="CENTER">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="45.0" prefWidth="226.0" text="Tech resources: 50 (units)" textAlignment="CENTER">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" prefHeight="36.0" prefWidth="600.0">
-               <children>
-                  <Label alignment="CENTER" prefHeight="36.0" prefWidth="695.0" text="Player 1, what would you like to do?" textAlignment="CENTER">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
-         </children>
-      </VBox>
-      <HBox alignment="CENTER" prefHeight="500.0" prefWidth="1000.0">
-         <children>
-            <Pane prefHeight="268.0" prefWidth="416.0" />
-            <VBox prefHeight="327.0" prefWidth="284.0">
-               <children>
-                  <Pane prefHeight="79.0" prefWidth="282.0">
-                     <children>
-                        <ChoiceBox fx:id="orderMenu" layoutX="35.0" layoutY="40.0" prefHeight="28.0" prefWidth="109.0" />
-                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="212.0" text="Available order types:" textAlignment="CENTER">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
+<GridPane xmlns:fx="http://javafx.com/fxml"
+          fx:controller="edu.duke.ece651.team6.client.controller.MainPageController"
+          style="-fx-background-color: PeachPuff;">
+  <columnConstraints>
+        <ColumnConstraints percentWidth="20" />
+        <ColumnConstraints percentWidth="60" />
+        <ColumnConstraints percentWidth="20" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints percentHeight="10" />
+        <RowConstraints percentHeight="10" />
+        <RowConstraints percentHeight="70" />
+        <RowConstraints percentHeight="10" />
+    </rowConstraints>
+
+    <children>
+          <!-- Top buttons -->
+        <HBox spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="0">
+          
+                <Button text="Return to Game Lounge" onAction="#returnToGameLounge" />
+                <Button text="Logout" onAction="#logout" />
+        
+        </HBox>
+
+         <!-- Player info -->
+        <HBox GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="3">
+            
+                   
+                        <Label fx:id="usernameLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="42.0" prefWidth="102.0" text="Player 1" textAlignment="CENTER">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
                         </Label>
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="250.0" prefWidth="282.0" />
-               </children>
-            </VBox>
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" prefHeight="40.0" prefWidth="900.0">
-         <children>
-            <Pane prefHeight="40.0" prefWidth="695.0">
-               <children>
-                  <ButtonBar layoutX="219.0" prefHeight="40.0" prefWidth="500.0">
-                    <buttons>
-                        <Button mnemonicParsing="false" text="Place an order " />
-                      <Button mnemonicParsing="false" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: Violet;" text="Submit all orders" />
-                    </buttons>
-                  </ButtonBar>
-               </children>
-            </Pane>
-         </children>
-      </HBox>
-   </children>
-</VBox>
+                        <Label alignment="CENTER" fx:id="gameStatusLabel" prefHeight="53.0" prefWidth="238.0" style="-fx-border-color: Turquoise;" text="Status: PLACE_UNITS">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+ 
+                        <Label fx:id="techLevelLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="237.0" text="Maximum tech level: 0" textAlignment="CENTER">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="foodResourcesLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="36.0" prefWidth="234.0" text="Food resources: 0 (units)" textAlignment="CENTER">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="techResourcesLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="45.0" prefWidth="226.0" text="Tech resources:0 (units)" textAlignment="CENTER">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+               
+        </HBox>
+
+        <!-- Order menu -->
+        <HBox GridPane.rowIndex="2" GridPane.columnIndex="2">
+       
+                    <children>
+                        <ChoiceBox fx:id="orderMenu" />
+ 
+                    </children>
+         
+        </HBox>
+
+        <!-- Map -->
+        <AnchorPane fx:id="mapPane">
+        </AnchorPane>
+        <!-- Buttons -->
+        <HBox alignment="CENTER" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="2">
+            <children>
+                <Pane prefHeight="40.0" prefWidth="695.0">
+                    <children>
+                        <ButtonBar>
+                          <buttons>
+                            <Button
+                                mnemonicParsing="false"
+                                fx:id="resetCommitButton"
+                                text="Reset orders"
+                                styleClass="expandable,resetbtn"
+                                onAction="#resetOrders" />
+                            <Button
+                                mnemonicParsing="false"
+                                fx:id="placeOrderButton"
+                                text="Place an order"
+                                styleClass="expandable,commitbtn"
+                                onAction="#placeAnOrder" />
+                                <Button
+                                    mnemonicParsing="false"
+                                    fx:id="submitOrdersButton"
+                                    prefHeight="30.0"
+                                    prefWidth="200.0"
+                                    text="Submit all orders"
+                                    styleClass="expandable,commitbtn"
+                                    onAction="#submitOrders"/>
+                                <Button
+                                    mnemonicParsing="false"
+                                    fx:id="exitGame"
+                                    prefHeight="30.0"
+                                    prefWidth="200.0"
+                                    text="Exit"
+                                    styleClass="expandable,exitbtn"
+                                    onAction="#exit"/>
+                            </buttons>
+                        </ButtonBar>
+                    </children>
+                </Pane>
+            </children>
+        </HBox>
+      </children>
+</GridPane>
+

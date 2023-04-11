@@ -14,7 +14,7 @@ public class App {
   SocketHandler client;
 
   TextGame game;
-
+  
   /**
    * Construct an app with 2 params
    * 

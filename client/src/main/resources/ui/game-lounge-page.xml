@@ -13,8 +13,8 @@
           fx:controller="edu.duke.ece651.team6.client.controller.GameLoungeController">
   <columnConstraints>
         <ColumnConstraints percentWidth="20" />
-        <ColumnConstraints percentWidth="60" />
-        <ColumnConstraints percentWidth="10" />
+        <ColumnConstraints percentWidth="30" />
+        <ColumnConstraints percentWidth="40" />
         <ColumnConstraints percentWidth="10" />
     </columnConstraints>
     <rowConstraints>
@@ -23,18 +23,25 @@
         <RowConstraints percentHeight="10" />
     </rowConstraints>
     <children>
-    <ListView fx:id="gameLoungeList" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-    <Button fx:id="newGame"
-            text="New game"
+       <Button fx:id="newGame"
+            text="${'New Game \n Select a number of players'}"
             GridPane.rowIndex="0"
-            GridPane.columnIndex="2"
-            styleClass="expandable,newgamebtn"
+            GridPane.columnIndex="0"
+            styleClass="expandable,gameloungebtn"
             onAction="#onNewGameButton"/>
+        <ListView fx:id="numPlayer" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+
+      <ListView fx:id="gameLoungeList" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
      <Button fx:id="switchPageButton"
             text="Switch to game"
             GridPane.rowIndex="0"
-            GridPane.columnIndex="3"
-            styleClass="expandable,newgamebtn"
+            GridPane.columnIndex="2"
+            styleClass="expandable,gameloungebtn"
             onAction="#onSwitchPageButton"/>
+     <Button fx:id="logoutButton"
+            text="Logout"
+            GridPane.rowIndex="0"
+            GridPane.columnIndex="3"
+            onAction="#onLogoutButton"/>
   </children>
 </GridPane>

@@ -222,8 +222,8 @@ public class SocketHandler {
    * @param numPlayer
    * @throws IOException, {@link ClassNotFoundException}
    */
-  public void sendNumPlayer(int numPlayer) throws IOException, ClassNotFoundException {
-    sendObject(numPlayer);
+  public void sendUserNameAndNumPlayer(String userNameAndNumPlayer) throws IOException, ClassNotFoundException {
+    sendObject(userNameAndNumPlayer);
   }
 
   /**

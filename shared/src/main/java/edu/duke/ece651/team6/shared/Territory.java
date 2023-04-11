@@ -121,11 +121,9 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Absorb an army.
-   * If the owner of this territory is the same as the owner of army, the numUnits
-   * will update;
-   * If not, an IllegalArgumentException will be thrown.
-   * If this territory has no Unit, the owner of the Army will become this
+   * Absorb an army. If the owner of this territory is the same as the owner of
+   * army, the numUnits will update; If not, an IllegalArgumentException will be
+   * thrown. If this territory has no Unit, the owner of the Army will become this
    * territory's owner.
    * 
    * @param army to join this territory
@@ -154,10 +152,9 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Move numUnits Units to dest.
-   * Pre: dest territory has the same owner as this territory, numUnits is less
-   * than numUnits of this territory.
-   * Post: Move action done.
+   * Move numUnits Units to dest. Pre: dest territory has the same owner as this
+   * territory, numUnits is less than numUnits of this territory. Post: Move
+   * action done.
    * 
    * @param dest
    * @param numUnits
@@ -178,7 +175,8 @@ public class Territory implements java.io.Serializable, Cloneable {
   public void moveTo(Territory dest, int[] numUnits) {
     for (int i = 0; i < numLevel; i++) {
       if (numUnits[i] > units.get(i).size() || numUnits[i] < 0) {
-        throw new IllegalArgumentException("Invalid move number: " + numUnits[i] + " in level: " + i + " Currently has " + units.get(i).size() + " units");
+        throw new IllegalArgumentException("Invalid move number: " + numUnits[i] + " in level: " + i + " Currently has "
+            + units.get(i).size() + " units");
       }
     }
     if (ownerId != dest.getOwnerId()) {
@@ -188,10 +186,9 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Make an Army of size numUnits to attack target.
-   * Pre: target is adjacent to this territory, numUnits is less than numUnits of
-   * this territory.
-   * Post: attack is registered.
+   * Make an Army of size numUnits to attack target. Pre: target is adjacent to
+   * this territory, numUnits is less than numUnits of this territory. Post:
+   * attack is registered.
    * 
    * @param target   the territory to attack.
    * @param numUnits number of Units of this attack.
@@ -215,7 +212,8 @@ public class Territory implements java.io.Serializable, Cloneable {
     }
     for (int i = 0; i < numLevel; i++) {
       if (numUnits[i] > units.get(i).size() || numUnits[i] < 0) {
-        throw new IllegalArgumentException("Invalid attack number: " + numUnits[i] + " in level: " + i + " Currently has " + units.get(i).size() + " units");
+        throw new IllegalArgumentException("Invalid attack number: " + numUnits[i] + " in level: " + i
+            + " Currently has " + units.get(i).size() + " units");
       }
     }
     target.attackedBy(dispatchArmy(numUnits));
@@ -226,8 +224,8 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Notify the territory to run the war, update the status of territory.
-   * Post: all attacks done.
+   * Notify the territory to run the war, update the status of territory. Post:
+   * all attacks done.
    */
   public void update() {
     if (underWar) {
@@ -277,6 +275,7 @@ public class Territory implements java.io.Serializable, Cloneable {
 
   /**
    * Set the amount of food produced by this territory
+   * 
    * @param food the amount of food
    */
   public void setFood(int food) {
@@ -290,6 +289,7 @@ public class Territory implements java.io.Serializable, Cloneable {
 
   /**
    * Set the amount of technology produced by this territory
+   * 
    * @param technology the amount of technology
    */
   public void setTechnology(int technology) {
@@ -302,7 +302,8 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Get the total number of unit levels 
+   * Get the total number of unit levels
+   * 
    * @return this.numLevel
    */
   public int getNumLevels() {
@@ -464,5 +465,4 @@ public class Territory implements java.io.Serializable, Cloneable {
     }
     return color;
   }
-
 }

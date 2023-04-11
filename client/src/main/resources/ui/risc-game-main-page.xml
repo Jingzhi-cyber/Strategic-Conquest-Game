@@ -10,7 +10,7 @@
 <?import java.lang.Double?>
 
 <GridPane xmlns:fx="http://javafx.com/fxml"
-          fx:controller="edu.duke.ece651.team6.client.controller.RiscController">
+          fx:controller="edu.duke.ece651.team6.client.controller.MainPageController">
   <columnConstraints>
         <ColumnConstraints percentWidth="60" />
         <ColumnConstraints percentWidth="40" />
@@ -33,7 +33,7 @@
                 GridPane.rowIndex="1"
                 GridPane.columnIndex="0"
                 GridPane.rowSpan="2"/>
-    <ChoiceBox fx:id="orderMenu" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    <ChoiceBox fx:id="orderMenu" GridPane.rowIndex="2" GridPane.columnIndex="1" />
      <fx:include source="risc-buttons.xml"
                 fx:id="buttons"
                 GridPane.rowIndex="4"
