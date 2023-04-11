@@ -12,6 +12,7 @@ import edu.duke.ece651.team6.client.controller.UnitPlacementController;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -156,7 +157,7 @@ public class Client {
     gameThread.start();
   }
 
-  private static class GameHandler implements Runnable {
+  private static class GameHandler extends Task<Void> {
     // int gameId;
     // SocketHandler socketHandler;
     UIGame game;
@@ -167,17 +168,16 @@ public class Client {
     }
 
     @Override
-    public void run() {
+    public Void call() {
       System.out.println("Enter the game - Client.java");
-      Platform.runLater(() -> {
-        try {
-          game.entryPoint();
-        } catch (IOException | ClassNotFoundException e) {
-          e.printStackTrace();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      });
+      try {
+        game.entryPoint();
+      } catch (IOException | ClassNotFoundException e) {
+        e.printStackTrace();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      return null;
     }
   }
 }
