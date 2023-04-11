@@ -16,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -58,6 +59,8 @@ public class MainPageController extends Controller implements Initializable {
 
   private UIGame uiGame;
 
+  private Scene mainPageScene;
+
   @FXML
   Button resetCommitButton;
 
@@ -77,6 +80,10 @@ public class MainPageController extends Controller implements Initializable {
 
   public void setUiGame(UIGame uiGame) {
     this.uiGame = uiGame;
+  }
+
+  public Scene getScene() {
+    return this.mainPageScene;
   }
 
   @FXML
@@ -143,6 +150,9 @@ public class MainPageController extends Controller implements Initializable {
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
+
+    // this.mainPageScene = resetCommitButton.getScene();
+
     ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
@@ -167,8 +177,12 @@ public class MainPageController extends Controller implements Initializable {
     HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
     // System.out.print(this.usernameField.getText());
     // client.getGameLoungeController().gameLoungeList.refresh();
-    //  System.out.println("In mainPageController, Game Lounge List refreshed, size is  "
-    //     + client.getGameLoungeController().gameLoungeList.getItems().size());
+    // System.out.println("In mainPageController, Game Lounge List refreshed, size
+    // is "
+    // + client.getGameLoungeController().gameLoungeList.getItems().size());
+    this.mainPageScene = resetCommitButton.getScene();
+    uiGame.setScene(mainPageScene);
+
 
     controllers.put(GameLoungeController.class, client.getGameLoungeController());
     switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", client.getStage());

@@ -64,6 +64,10 @@ public class UIGame extends Game {
     this.scene = scene;
   }
 
+  public Scene getScene() {
+    return this.scene;
+  }
+
   public GAME_STATUS getStatus() {
     return this.gameStatus;
   }
@@ -167,8 +171,11 @@ public class UIGame extends Game {
       if (!territoryIterator.hasNext()) { // Check if the current territory is the last territory
         territoryToNumUnitMapping.put(currentTerritory, setting.getRemainingNumUnits());
 
-        mainPageController.showSuccess("The remaining " + setting.getRemainingNumUnits()
-            + " units have been automatically placed onto territory " + currentTerritory.getName());
+        Platform.runLater(() -> {
+
+          mainPageController.showSuccess("The remaining " + setting.getRemainingNumUnits()
+              + " units have been automatically placed onto territory " + currentTerritory.getName());
+        });
 
         // Finish the placement phase and send the updated data to the server
       } else {
@@ -178,12 +185,17 @@ public class UIGame extends Game {
 
         Integer numUnits = null;
         while (numUnits == null) {
-          numUnits = showSelectionDialog(Integer.class, remainingUnits, "No items available for selection.", "Unit Placement",
+
+          numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player" + this.playerId + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)");
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+
           if (numUnits == null) {
-            mainPageController.showError("Must specify unit number to place on " + currentTerritory.getName());
+            Platform.runLater(() -> {
+              mainPageController.showError("Must specify unit number to place on " + currentTerritory.getName());
+            });
           }
+
         }
         try {
           setting.decreaseUnitsBy(numUnits);
@@ -212,6 +224,7 @@ public class UIGame extends Game {
    * display UI to the user so that user interact to input units information
    */
   public void entryPoint() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
+    System.out.println("Game status: " + gameStatus);
     if (this.gameStatus == GAME_STATUS.PLACE_UNITS) {
       System.out.print("Placing units\n");
       System.out.println((String) socketHandler.recvObject());
@@ -334,7 +347,12 @@ public class UIGame extends Game {
     if (confirmOrder.isPresent() && confirmOrder.get() == ButtonType.OK) {
       // Send commit to the server if the user confirms
 
-      this.socketHandler.sendCommit(this.currentCommit);
+      try {
+        this.socketHandler.sendCommit(this.currentCommit);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
       System.out.println("Successfully sent a commit to the server");
       updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
 
@@ -678,12 +696,12 @@ public class UIGame extends Game {
     return future;
   }
 
-  private <T> T showSelectionDialog(Class<T> clazz, List<T> list, String promptIfEmptyList, String title,
+  private <T> CompletableFuture<T> showSelectionDialog(List<T> list, String promptIfEmptyList, String title,
       String contentText) {
     if (list.isEmpty()) {
       mainPageController.showError(promptIfEmptyList);
     }
-    final T[] userInput = (T[]) Array.newInstance(clazz, 1);
+    CompletableFuture<T> future = new CompletableFuture<>();
     Platform.runLater(() -> {
       ChoiceDialog<T> dialog = new ChoiceDialog<>(list.get(0), list);
       dialog.setTitle(title);
@@ -692,18 +710,43 @@ public class UIGame extends Game {
 
       Optional<T> result = dialog.showAndWait();
 
-      result.ifPresent(input -> userInput[0] = input);
+      if (result.isPresent()) {
+        future.complete(result.get());
+      } else {
+        future.complete(null);
+      }
     });
 
-    while (userInput[0] == null) {
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return userInput[0];
+    return future;
   }
+
+  // private <T> T showSelectionDialog(Class<T> clazz, List<T> list, String
+  // promptIfEmptyList, String title,
+  // String contentText) {
+  // if (list.isEmpty()) {
+  // mainPageController.showError(promptIfEmptyList);
+  // }
+  // final T[] userInput = (T[]) Array.newInstance(clazz, 1);
+  // Platform.runLater(() -> {
+  // ChoiceDialog<T> dialog = new ChoiceDialog<>(list.get(0), list);
+  // dialog.setTitle(title);
+  // dialog.setHeaderText(null);
+  // dialog.setContentText(contentText);
+
+  // Optional<T> result = dialog.showAndWait();
+
+  // result.ifPresent(input -> userInput[0] = input);
+  // });
+
+  // while (userInput[0] == null) {
+  // try {
+  // Thread.sleep(100);
+  // } catch (InterruptedException e) {
+  // throw new RuntimeException(e);
+  // }
+  // }
+  // return userInput[0];
+  // }
 
   private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
       String title) {

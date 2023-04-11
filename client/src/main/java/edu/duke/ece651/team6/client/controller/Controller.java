@@ -82,6 +82,7 @@ public class Controller {
 
   public void switchToPage(String url, String cssUrl, HashMap<Class<?>, Object> controllers, String title, Stage stage)
       throws Exception {
+
     Scene scene = getNewScene(url, cssUrl, controllers, title);
 
     // Set the new scene on the stage
