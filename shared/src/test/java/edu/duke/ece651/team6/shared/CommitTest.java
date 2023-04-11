@@ -238,7 +238,8 @@ public class CommitTest {
     resources.put(0, resource);
     gm.updateResource(resources);
     gm.initMaxTechLevel();
-    Territory Narnia = new Territory("Narnia", 0, 10);
+    Territory Narnia = gm.getTerritoryByName("Narnia");
+    Narnia.initNumUnits(10);
 
     Commit commit = new Commit(0, gm, resource);
     commit.addResearch(new ResearchOrder(0));

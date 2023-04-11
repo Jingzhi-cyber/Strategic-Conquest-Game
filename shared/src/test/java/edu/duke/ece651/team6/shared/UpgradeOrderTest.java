@@ -20,6 +20,7 @@ public class UpgradeOrderTest {
         gameMap.initMaxTechLevel();
 
         Territory narnia = gameMap.getTerritoryByName("Narnia");
+        narnia.initNumUnits(10);
         UpgradeOrder upgradeOrder = new UpgradeOrder(narnia, 0, 1, 1);
         assertEquals(narnia, upgradeOrder.getTerritory());
         assertEquals(0, upgradeOrder.getNowLevel());

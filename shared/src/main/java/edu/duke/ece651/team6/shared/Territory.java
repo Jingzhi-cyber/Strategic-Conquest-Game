@@ -257,7 +257,7 @@ public class Territory implements java.io.Serializable, Cloneable {
    */
   @Override
   public String toString() {
-    return "(name: " + name + ", ownerId: " + ownerId + ", units: " + units.get(0).size() + ")";
+    return "(name: " + name + ", ownerId: " + ownerId + ")";
   }
 
   /**
