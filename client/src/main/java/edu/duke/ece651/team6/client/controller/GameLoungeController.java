@@ -58,7 +58,7 @@ public class GameLoungeController extends Controller implements Initializable {
     // TODO client.joinStartedGame(this.gameId);
 
     try {
-      switchToGameMainPage(this.gameId);
+      switchToGameMainPage(this.gameId, true);
     } catch (Exception e) {
       e.printStackTrace();
       showError(e.getMessage());
@@ -99,7 +99,7 @@ public class GameLoungeController extends Controller implements Initializable {
       // gameLoungeList.getAccessibleText() + " size: " + gameLounge.size());
 
       System.out.println("Switching to Game Main Page");
-      switchToGameMainPage(newGameId);
+      switchToGameMainPage(newGameId, false);
 
       // TODO
       // client.getUIGameById(newGameId).placeUnit();
@@ -116,7 +116,7 @@ public class GameLoungeController extends Controller implements Initializable {
   }
 
   @Override
-  //@SuppressWarnings("unchecked")
+  // @SuppressWarnings("unchecked")
   public void initialize(URL location, ResourceBundle resources) {
     // // This line will look up the ListView in the current scene
     // ListView<String> tmp = (ListView<String>)
@@ -155,15 +155,22 @@ public class GameLoungeController extends Controller implements Initializable {
 
   }
 
-  private void switchToGameMainPage(int gameId) throws Exception {
+  private void switchToGameMainPage(int gameId, boolean returnToGame) throws Exception {
+
+    if (returnToGame) {
+      Scene scene = client.getUIGameById(gameId).getScene();
+      client.getStage().setScene(scene);
+      return;
+    }
 
     HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
     // System.out.print(this.usernameField.getText());
     UIGame game = client.getUIGameById(gameId);
 
     MainPageController mainPageController = game.getMainPageController();
+
     mainPageController.setGameLounge(gameLounge);
-    //// mainPageController.setUiGame(game);
+    mainPageController.setUiGame(game);
     //// game.setMainPageController(mainPageController);
 
     controllers.put(MainPageController.class, mainPageController);
@@ -173,9 +180,12 @@ public class GameLoungeController extends Controller implements Initializable {
     // game.getUnitPlacementController();
 
     // controllers.put(UnitPlacementController.class, unitPlacementController);
+
     switchToPage("/ui/mainPage.xml", "/ui/buttonstyle.css", controllers, "Main Page", client.getStage());
 
-    // FXMLLoader loader = new FXMLLoader(getClass().getResource("ui/mainPage.xml"));
+    // FXMLLoader loader = new
+    // FXMLLoader(getClass().getResource("ui/mainPage.xml"));
+
     // Parent root = loader.load();
     // MainPageController controller = loader.getController();
   }
