@@ -10,15 +10,15 @@ public class SampleMap {
 
     public SampleMap() {
         adjList = new HashMap<Territory, Set<Territory>>();
-        Territory Narnia = new Territory("Narnia", 0, 10);
-        Territory Midkemia = new Territory("Midkemia", 0, 10);
-        Territory Oz = new Territory("Oz", 0, 10);
-        Territory Elantris = new Territory("Elantris", 1, 10);
-        Territory Scadrial = new Territory("Scadrial", 1, 10);
-        Territory Roshar = new Territory("Roshar", 1, 10);
-        Territory Gondor = new Territory("Gondor", 2, 10);
-        Territory Mordor = new Territory("Mordor", 2, 10);
-        Territory Hogwarts = new Territory("Hogwarts", 2, 10);
+        Territory Narnia = new Territory("Narnia", 0, 0);
+        Territory Midkemia = new Territory("Midkemia", 0, 0);
+        Territory Oz = new Territory("Oz", 0, 0);
+        Territory Elantris = new Territory("Elantris", 1, 0);
+        Territory Scadrial = new Territory("Scadrial", 1, 0);
+        Territory Roshar = new Territory("Roshar", 1, 0);
+        Territory Gondor = new Territory("Gondor", 2, 0);
+        Territory Mordor = new Territory("Mordor", 2, 0);
+        Territory Hogwarts = new Territory("Hogwarts", 2, 0);
 
         Set<Territory> NarniaNeighbor = new HashSet<Territory>();
         NarniaNeighbor.add(Midkemia);

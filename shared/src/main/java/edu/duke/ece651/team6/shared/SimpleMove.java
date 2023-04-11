@@ -45,7 +45,11 @@ public abstract class SimpleMove extends Order {
 
   @Override
   public String toString() {
-    return getName() + "{ from: " + src.toString() + ", to: " + dest.toString() + ", numUnits: " + numUnitsByLevel[0]
-        + " }";
+    String str = getName() + "{ from: " + src.toString() + ", to: " + dest.toString() + "\n";
+    for (int i = 0; i < numUnitsByLevel.length; i++) {
+      str += "level: " + i + " units: " + numUnitsByLevel[i] + "\n";
+    }
+    str += "}";
+    return str;
   }
 }

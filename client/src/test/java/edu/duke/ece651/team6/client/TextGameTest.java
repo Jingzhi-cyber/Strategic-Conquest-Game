@@ -222,7 +222,7 @@ public class TextGameTest {
 
     player.displayGameSetting();
 
-    String expected = "From server: Welcome to RISC, you are assigned to be Player 1. \nThere are 2 players in total. These territories are assigned to you: \n[(name: A, ownerId: 1, units: 0), (name: B, ownerId: 1, units: 0)], and you have 10 units in total.\n";
+    String expected = "From server: Welcome to RISC, you are assigned to be Player 1. \nThere are 2 players in total. These territories are assigned to you: \n[(name: A, ownerId: 1), (name: B, ownerId: 1)], and you have 10 units in total.\n";
     assertEquals(expected, bytes.toString());
   }
 
