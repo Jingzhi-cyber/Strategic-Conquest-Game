@@ -2,14 +2,19 @@ package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
+import edu.duke.ece651.team6.shared.Territory;
 
 /**
  * An interface representing a player in the risc game
  */
 public abstract class Game {
   protected final SocketHandler socketHandler;
+  protected boolean hasLost = false;
+  protected int playerId = -1;
 
   public Game(SocketHandler socketHandler) {
     this.socketHandler = socketHandler;
@@ -25,7 +30,7 @@ public abstract class Game {
   /**
    * At the beginning of the game, Player needs to place units to the territories
    */
-  abstract public void placeUnit() throws IOException, ClassNotFoundException;
+  // abstract public void placeUnit() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException;
 
   /**
    * Player's one turn of game includes: 1. Receive playerinfo from master 2. Make
@@ -43,7 +48,23 @@ public abstract class Game {
    * @throws exceptions, {@link IOException}, {@link UnknownHostException},
    *                     {@link ClassNotFoundException}
    */
-  abstract public void playGame() throws IOException, UnknownHostException, ClassNotFoundException;
+  // abstract public void playGame() throws IOException, UnknownHostException,
+  // ClassNotFoundException;
+
+  abstract protected Territory findTerritory(Territory src, String message) throws IOException;
+
+  abstract protected Set<Territory> findEnemyTerritories();
+
+  // abstract public MoveOrder constructMoveOrder() throws IOException;
+
+  // abstract public AttackOrder constructAttackOrder() throws IOException;
+
+  // abstract public ResearchOrder constructResearchOrder();
+
+  // abstract public UpgradeOrder constructUpgradeOrder() throws IOException;
+
+  // abstract public Commit constructCommit() throws IOException,
+  // ClassNotFoundException;
 
   /**
    * Receive updated map information and display it to player
@@ -51,5 +72,5 @@ public abstract class Game {
    * @return received GlobalMapInfo
    * @throws IOException, {@link ClassNotFoundException}
    */
-  abstract public GlobalMapInfo updateAndDisplayMapInfo() throws IOException, ClassNotFoundException;
+  abstract public GlobalMapInfo refreshMap() throws IOException, ClassNotFoundException;
 }

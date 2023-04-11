@@ -28,6 +28,8 @@ public class LoginRegisterController extends Controller {
   @FXML
   private TextField usernameField;
 
+  // private String username;
+
   @FXML
   private PasswordField passwordField;
 
@@ -43,18 +45,23 @@ public class LoginRegisterController extends Controller {
   @FXML
   private Button registerButton;
 
-  public LoginRegisterController(SocketHandler client) {
+  private GameLounge gameLounge;
+
+  public LoginRegisterController(Client client) {
     super(client);
   }
 
   public String getUserName() {
+    // TODO
     return this.usernameField.getText();
   }
 
   private void loginOrRegister(boolean result) throws IOException, ClassNotFoundException {
     if (result) {
       try {
+        // client.setUserName(getUserName());
         // switchToGameMainPage();
+        // client.sendLogin();
         switchToGameLoungePage();
       } catch (Exception e) {
         // Show an error message if the window fails to load
@@ -74,7 +81,10 @@ public class LoginRegisterController extends Controller {
       String password = passwordField.getText();
 
       try {
+        // this.username = username;
+        client.setUserName(username);
         loginOrRegister(loginUser(username, password));
+        // client.setUserName(username);
       } catch (ClassNotFoundException | IOException e) {
         e.printStackTrace();
         showError(e.getMessage());
@@ -87,6 +97,7 @@ public class LoginRegisterController extends Controller {
       String password = registerPasswordField.getText();
 
       try {
+        // this.username = username;
         loginOrRegister(registerUser(username, password));
       } catch (ClassNotFoundException | IOException e) {
         e.printStackTrace();
@@ -127,7 +138,8 @@ public class LoginRegisterController extends Controller {
     // ...
     HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
     // System.out.print(this.usernameField.getText());
-    controllers.put(GameLoungeController.class, new GameLoungeController(client, new GameLounge()));
+    controllers.put(GameLoungeController.class, new GameLoungeController(client, gameLounge));
+    System.out.println("username ready -> switching game lounge");
     switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", tabPane);
   }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextField?>
+<?import java.lang.Double?>
+
+<VBox fx:controller="edu.duke.ece651.team6.client.controller.UnitPlacementController" xmlns:fx="http://javafx.com/fxml">
+    <children>
+      <TextField fx:id="unitsTextField" promptText="Enter your input here" />
+      <Button fx:id="ackButton" text="Acknowledge unit number" />
+    </children>
+</VBox>

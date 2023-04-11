@@ -1,54 +1,154 @@
 package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+
+import edu.duke.ece651.team6.client.controller.GameLoungeController;
+import edu.duke.ece651.team6.client.controller.LoginRegisterController;
+import edu.duke.ece651.team6.client.controller.MainPageController;
+import edu.duke.ece651.team6.client.controller.UnitPlacementController;
+import edu.duke.ece651.team6.client.model.GameLounge;
+import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 // a class handling threads for a user
 public class Client {
   // private final Integer playerId;
-  private final String username;
+  private String username;
   private final String serverHostName;
   private final int serverPort;
-  private int gameId = 0;
+  private Integer gameId;
+  private Scene scene = null;
 
-  public Client(String username) {
+  LoginRegisterController loginRegisterController;
+  GameLoungeController gameLoungeController;
+  MainPageController mainPageController;
+  // UnitPlacementController unitPlacementController;
+
+  // Integer currentGameId = null;
+
+  GameLounge gameLounge;
+  Stage stage;
+
+  UIGame currentGame;
+  Map<Integer, UIGame> uiGames;
+
+  public void setScene(Scene scene) {
+    this.scene = scene;
+  }
+
+  public Scene getScene() {
+    return this.scene;
+  }
+
+  public Stage getStage() {
+    return stage;
+  }
+
+  public Client(String username, Stage stage) {
     // this.playerId = playerId;
     this.username = username;
     this.serverHostName = "localhost";
     this.serverPort = 8000;
+    this.gameLounge = new GameLounge();
+    this.stage = stage;
+    this.uiGames = new ConcurrentHashMap<>();
+    this.gameId = 0;
+    // this.loginRegisterController = new LoginRegisterController(this);
+    this.gameLoungeController = new GameLoungeController(this, gameLounge);
   }
 
-  public Client(String username, String serverHostName, int serverPort) {
+  public Client(String serverHostName, int serverPort, Stage stage) {
     // this.playerId = playerId;
-    this.username = username;
     this.serverHostName = serverHostName;
     this.serverPort = serverPort;
+    this.gameLounge = new GameLounge();
+    this.stage = stage;
+    this.uiGames = new ConcurrentHashMap<>();
+    this.gameId = 0;
+    // this.loginRegisterController = new LoginRegisterController(this);
+    this.gameLoungeController = new GameLoungeController(this, gameLounge);
   }
 
-  Map<Integer, UIGame> uiGames;
+  // TODO to remove
+  public Client(Stage stage) {
+    this.username = "test player";
+    this.serverHostName = "localhost";
+    this.serverPort = 12345;
+    this.gameLounge = new GameLounge();
+    this.stage = stage;
+    this.uiGames = new ConcurrentHashMap<>();
+    this.gameId = 0;
+    // this.loginRegisterController = new LoginRegisterController(this);
+    this.gameLoungeController = new GameLoungeController(this, gameLounge);
+  }
+
+  public LoginRegisterController getLoginRegisterController() {
+    return this.loginRegisterController;
+  }
+
+  public GameLoungeController getGameLoungeController() {
+    return this.gameLoungeController;
+  }
+
+  public void setUserName(String userName) {
+    this.username = userName;
+  }
+
+  public UIGame getUIGameById(Integer id) {
+    if (!uiGames.containsKey(id)) {
+      throw new IllegalArgumentException("invalid game id");
+    }
+    return uiGames.get(id);
+  }
+
+  public void setCurrentGame(Integer gameId) {
+    if (!uiGames.containsKey(gameId)) {
+      throw new IllegalArgumentException("invalid game id");
+    }
+    this.currentGame = uiGames.get(gameId);
+  }
+
+  // public void playCurrentGame() throws ClassNotFoundException, IOException {
+  // if (currentGame == null) {
+  // return;
+  // }
+  // if (currentGame.gameStatus == GAME_STATUS.PLACE_UNITS) {
+  // currentGame.placeUnit();
+  // } else {
+  // currentGame.playGame();
+  // }
+  // }
 
   // Map<Integer, SocketHandler> gameIdToSocketHandler; // to socket/thread
-  void createNewGame(int numPlayer) throws IOException, ClassNotFoundException {
+  public Integer createNewGame(int numPlayer) throws IOException, ClassNotFoundException {
     // create game id and update game list
-
+    int newGameId = this.gameId++;
     // create socket for connection with the server and wait for server ACK
     SocketHandler newSocketHandler = new SocketHandler(serverHostName, serverPort);
-    UIGame newGame = new UIGame(this.gameId, username, newSocketHandler);
-    uiGames.put(this.gameId, newGame);
-    newSocketHandler.sendNumPlayer(numPlayer); // TODO send username + numPlayer or only numPlayer
-
+    UIGame newGame = new UIGame(newGameId, username, newSocketHandler, new MainPageController(this));
+    System.out.println("New game has been created");
+    uiGames.put(newGameId, newGame);
+    newSocketHandler.sendUserNameAndNumPlayer(username + " " + numPlayer); // TODO send username + numPlayer or only
+                                                                           // numPlayer
     // create a thread to handle the game logic
-    Thread gameThread = new Thread(new GameHandler(newGame, true));
-    this.gameId++;
+
+    Thread gameThread = new Thread(new GameHandler(newGame));
+    gameThread.setDaemon(true); // TODO
     gameThread.start();
+
+    return newGameId;
   }
 
-  void joinStartedGame(Integer gameId) {
+  public void joinStartedGame(Integer gameId) {
     if (!uiGames.containsKey(gameId)) {
       throw new IllegalArgumentException("Game id not found");
     }
-    Thread gameThread = new Thread(new GameHandler(uiGames.get(gameId), false));
+    Thread gameThread = new Thread(new GameHandler(uiGames.get(gameId)));
     gameThread.start();
   }
 
@@ -57,25 +157,37 @@ public class Client {
     // SocketHandler socketHandler;
     UIGame game;
 
-    boolean isNewGame;
-
-    public GameHandler(UIGame game, boolean isNewGame) {
+    public GameHandler(UIGame game) {
       // this.gameId = gameId;
       this.game = game;
-      this.isNewGame = isNewGame;
     }
 
     @Override
     public void run() {
-      // TODO Auto-generated method stub
-      try {
-        if (isNewGame) {
-          game.placeUnit();
+      if (game.gameStatus == GAME_STATUS.PLACE_UNITS) {
+        System.out.println("Placing units - Client.java");
+        Platform.runLater(() -> {
+          try {
+            game.placeUnit();
+          } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        });
+      } else {
+        System.out.println("Play game - Client.java");
+        try {
+          game.playGame();
+        } catch (IOException | ClassNotFoundException e) {
+          e.printStackTrace();
+        } catch (Exception e) {
+          e.printStackTrace();
         }
-        game.playGame();
-      } catch (IOException | ClassNotFoundException e) {
-        e.printStackTrace();
+
       }
+
     }
+
   }
 }

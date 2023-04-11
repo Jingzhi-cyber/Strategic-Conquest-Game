@@ -1,8 +1,8 @@
 package edu.duke.ece651.team6.shared;
 
 /**
- * Represents a simple move order
- * It contains src and dest territory information and number of units to move
+ * Represents a simple move order It contains src and dest territory information
+ * and number of units to move
  */
 public abstract class SimpleMove extends Order {
   final Territory src;
@@ -25,6 +25,7 @@ public abstract class SimpleMove extends Order {
 
   /**
    * Get total number of units of all levels
+   * 
    * @return total
    */
   public int getTotalUnits() {
@@ -44,6 +45,7 @@ public abstract class SimpleMove extends Order {
 
   @Override
   public String toString() {
-    return "{ from: " + src.toString() + ", to: " + dest.toString() + ", numUnits: " + numUnitsByLevel[0] + " }";
+    return getName() + "{ from: " + src.toString() + ", to: " + dest.toString() + ", numUnits: " + numUnitsByLevel[0]
+        + " }";
   }
 }

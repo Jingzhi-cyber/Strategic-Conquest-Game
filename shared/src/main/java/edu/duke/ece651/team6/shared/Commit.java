@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.binding.StringBinding;
+
 /* A structure contains all orders from one player, which will be sent back to server for */
 public class Commit implements java.io.Serializable {
   int playerId;
@@ -40,10 +42,13 @@ public class Commit implements java.io.Serializable {
     this.attacks = new ArrayList<>();
     this.research = null;
     this.upgrades = new ArrayList<>();
-    this.moveChecker = new SrcOwerIdRuleChecker(new SamePlayerPathRuleChecker(new MoveCostRuleChecker(new MoveUnitsRuleChecker(null), resource)), playerId);
-    this.attackChecker = new SrcOwerIdRuleChecker(new EnemyNeighborRuleChecker(new AttackCostRuleChecker(new AttackUnitsRuleChecker(null), resource)), playerId);
+    this.moveChecker = new SrcOwerIdRuleChecker(
+        new SamePlayerPathRuleChecker(new MoveCostRuleChecker(new MoveUnitsRuleChecker(null), resource)), playerId);
+    this.attackChecker = new SrcOwerIdRuleChecker(
+        new EnemyNeighborRuleChecker(new AttackCostRuleChecker(new AttackUnitsRuleChecker(null), resource)), playerId);
     this.researchChecker = new ResearchCostRuleChecker(null, resource);
-    this.upgradeChecker = new UpgradeLevelRuleChecker(new UpgradeUnitRuleChecker(new UpgradeCostRuleChecker(null, resource)));
+    this.upgradeChecker = new UpgradeLevelRuleChecker(
+        new UpgradeUnitRuleChecker(new UpgradeCostRuleChecker(null, resource)));
   }
 
   /* -------------- For client side usage --------------- */
@@ -95,6 +100,7 @@ public class Commit implements java.io.Serializable {
 
   /**
    * Add a Research order into the commit
+   * 
    * @param research
    * @propogates IllegalArgumentException if rules are violated
    */
@@ -108,6 +114,7 @@ public class Commit implements java.io.Serializable {
 
   /**
    * Add an Upgrade order into the commit
+   * 
    * @param upgrade
    * @propogates IllegalArgumentException if rules are violated
    */
@@ -116,52 +123,60 @@ public class Commit implements java.io.Serializable {
     upgrades.add(upgrade);
   }
 
-  // private String constructPrompt(String orderName, SimpleMove move, int remainingUnits) {
-  //   return orderName + move.toString() + " cannot be performed, with " + remainingUnits + " remaining units";
+  // private String constructPrompt(String orderName, SimpleMove move, int
+  // remainingUnits) {
+  // return orderName + move.toString() + " cannot be performed, with " +
+  // remainingUnits + " remaining units";
   // }
 
   /*
-   * Deprecated check method
-   * Now all the rule checks are based on the cloned GameMap, the results of moves and attacks will be reflected immediately after it is added
+   * Deprecated check method Now all the rule checks are based on the cloned
+   * GameMap, the results of moves and attacks will be reflected immediately after
+   * it is added
    */
   // public void checkUsableUnitsAfterAllOrdersAreCollected() {
-  //   // only check remaining units (not check > 0 here, check it with rule checker)
-  //   Map<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
-  //   for (MoveOrder move : moves) {
-  //     if (!remainingUnits.containsKey(move.src)) {
-  //       remainingUnits.put(move.src, move.src.getNumUnits());
-  //     }
+  // // only check remaining units (not check > 0 here, check it with rule
+  // checker)
+  // Map<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
+  // for (MoveOrder move : moves) {
+  // if (!remainingUnits.containsKey(move.src)) {
+  // remainingUnits.put(move.src, move.src.getNumUnits());
+  // }
 
-  //     if (remainingUnits.get(move.src) < move.numUnits) {
-  //       throw new IllegalArgumentException(constructPrompt("Move", move, remainingUnits.get(move.src)));
-  //     }
-  //     remainingUnits.put(move.src, remainingUnits.get(move.src) - move.numUnits);
-  //     remainingUnits.put(move.dest, remainingUnits.getOrDefault(move.dest, move.dest.getNumUnits()) + move.numUnits);
-  //   }
+  // if (remainingUnits.get(move.src) < move.numUnits) {
+  // throw new IllegalArgumentException(constructPrompt("Move", move,
+  // remainingUnits.get(move.src)));
+  // }
+  // remainingUnits.put(move.src, remainingUnits.get(move.src) - move.numUnits);
+  // remainingUnits.put(move.dest, remainingUnits.getOrDefault(move.dest,
+  // move.dest.getNumUnits()) + move.numUnits);
+  // }
 
-  //   for (AttackOrder attack : attacks) {
-  //     if (!remainingUnits.containsKey(attack.src)) {
-  //       remainingUnits.put(attack.src, attack.src.getNumUnits());
-  //     }
+  // for (AttackOrder attack : attacks) {
+  // if (!remainingUnits.containsKey(attack.src)) {
+  // remainingUnits.put(attack.src, attack.src.getNumUnits());
+  // }
 
-  //     if (remainingUnits.get(attack.src) < attack.numUnits) {
-  //       throw new IllegalArgumentException(constructPrompt("Attack", attack, remainingUnits.get(attack.src)));
-  //     }
-  //     remainingUnits.put(attack.src, remainingUnits.get(attack.src) - attack.numUnits);
-  //     // fixed a bug here: incorrect: as units attacked out are not reflected on the
-  //     // dest units (are only updated after a war)
-  //     // remainingUnits.put(attack.dest,remainingUnits.getOrDefault(attack.dest,
-  //     // attack.dest.getNumUnits()) + attack.numUnits);
-  //   }
+  // if (remainingUnits.get(attack.src) < attack.numUnits) {
+  // throw new IllegalArgumentException(constructPrompt("Attack", attack,
+  // remainingUnits.get(attack.src)));
+  // }
+  // remainingUnits.put(attack.src, remainingUnits.get(attack.src) -
+  // attack.numUnits);
+  // // fixed a bug here: incorrect: as units attacked out are not reflected on
+  // the
+  // // dest units (are only updated after a war)
+  // // remainingUnits.put(attack.dest,remainingUnits.getOrDefault(attack.dest,
+  // // attack.dest.getNumUnits()) + attack.numUnits);
+  // }
   // }
 
   /* ---------------- For server side usage ----------------- */
 
   /**
-   * Perform all checkings at one time.
-   * - Do not perform any actual action
-   * - Used by the server to ensure validity of commit in case of any possible
-   * change before data arrives at the server end
+   * Perform all checkings at one time. - Do not perform any actual action - Used
+   * by the server to ensure validity of commit in case of any possible change
+   * before data arrives at the server end
    * 
    * @param gameMap is the map where orders are performed on
    */
@@ -177,7 +192,7 @@ public class Commit implements java.io.Serializable {
     if (research != null) {
       checkRules(researchChecker, research, gameMap);
     }
-    
+
     for (UpgradeOrder upgrade : upgrades) {
       checkRules(upgradeChecker, upgrade, gameMap);
     }
@@ -211,6 +226,7 @@ public class Commit implements java.io.Serializable {
 
   /**
    * Perform research order
+   * 
    * @param gameMap
    */
   public void performResearch(GameMap gameMap) {
@@ -221,12 +237,34 @@ public class Commit implements java.io.Serializable {
 
   /**
    * Perform upgrade order
+   * 
    * @param gameMap
    */
   public void performUpgrade(GameMap gameMap) {
     for (UpgradeOrder upgrade : upgrades) {
       upgrade.takeAction(gameMap);
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    for (MoveOrder o : moves) {
+      builder.append(o.toString() + "\n");
+    }
+
+    for (AttackOrder o : attacks) {
+      builder.append(o.toString() + "\n");
+    }
+
+    if (research != null) {
+      builder.append(research.toString() + "\n");
+    }
+
+    for (UpgradeOrder o : upgrades) {
+      builder.append(o.toString() + "\n");
+    }
+    return builder.toString();
   }
 
 }

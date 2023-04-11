@@ -64,8 +64,7 @@ public class TextGameTest {
     when(this.client.recvGameResult()).thenReturn(new Result());
   }
 
-  private TextGame createTextGame(String inputData, OutputStream bytes, Set<Territory> territories)
-      throws IOException {
+  private TextGame createTextGame(String inputData, OutputStream bytes, Set<Territory> territories) throws IOException {
     BufferedReader reader = new BufferedReader(new StringReader(inputData));
     PrintStream printStream = new PrintStream(bytes, true); // ps is a PrintStream (looks like System.out) which
                                                             // writes its data into bytes instead of to the screen.
@@ -241,7 +240,7 @@ public class TextGameTest {
     // of
     // random
     // order
-    player.updateAndDisplayMapInfo();
+    player.refreshMap();
     assertTrue(bytes.toString().length() > 0);
   }
 
@@ -298,16 +297,14 @@ public class TextGameTest {
     when(client.recvGlobalMapInfo()).thenReturn(mapInfo);
 
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    TextGame player = createTextGame("M\n1\n2\n0\n1\nY\nD\n", bytes,
-        createAssignedTerritories_withUnitsPlaced());
+    TextGame player = createTextGame("M\n1\n2\n0\n1\nY\nD\n", bytes, createAssignedTerritories_withUnitsPlaced());
     player.playOneTurn();
   }
 
   @Test
   public void test_playOneTurn_withAttack() throws IOException, ClassNotFoundException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    TextGame player = createTextGame("A\n1\n1\n0\n1\nY\nD\n", bytes,
-        createAssignedTerritories_withUnitsPlaced());
+    TextGame player = createTextGame("A\n1\n1\n0\n1\nY\nD\n", bytes, createAssignedTerritories_withUnitsPlaced());
     // player.placeUnit("place units");
     player.playOneTurn();
   }
@@ -349,120 +346,133 @@ public class TextGameTest {
     mapInfo.addPlayerMapInfo(playerMapInfo);
 
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    TextGame player = createTextGame("R\nU\n1\n-1\n0\n-1\n0\n1\n1\nD\n", bytes, createAssignedTerritories_withUnitsPlaced());
-    // TextPlayer player = createTextPlayer("R\nD\n", bytes, createAssignedTerritories_withUnitsPlaced());
+    TextGame player = createTextGame("R\nU\n1\n-1\n0\n-1\n0\n1\n1\nD\n", bytes,
+        createAssignedTerritories_withUnitsPlaced());
+    // TextPlayer player = createTextPlayer("R\nD\n", bytes,
+    // createAssignedTerritories_withUnitsPlaced());
     // player.placeUnit("place units");
     player.playOneTurn();
   }
 
-//   @Test
-//   public void test_playOneTurn_invalidCase() throws IOException, ClassNotFoundException {
-//     /* Assumptions for case1 and case2 */
-//     // GlobalMapInfo mapInfo = createGlobalMapInfo_withUnitsPlaced(createGameMap_withMissingSelfNeighbors());
-//     GlobalMapInfo mapInfo = createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement());
-//     when(client.recvGlobalMapInfo()).thenReturn(mapInfo);
+  // @Test
+  // public void test_playOneTurn_invalidCase() throws IOException,
+  // ClassNotFoundException {
+  // /* Assumptions for case1 and case2 */
+  // // GlobalMapInfo mapInfo =
+  // createGlobalMapInfo_withUnitsPlaced(createGameMap_withMissingSelfNeighbors());
+  // GlobalMapInfo mapInfo =
+  // createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement());
+  // when(client.recvGlobalMapInfo()).thenReturn(mapInfo);
 
-//     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+  // ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
-//     /*
-//      * Case 1. catched exception: Invalid move action: there isn't a connected path
-//      * through src to dest where all territories belong to the same player.
-//      */
-//     TextPlayer player = createTextPlayer("M\n1\n2\n0\n1\nY\nD\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player.playOneTurn();
+  // /*
+  // * Case 1. catched exception: Invalid move action: there isn't a connected
+  // path
+  // * through src to dest where all territories belong to the same player.
+  // */
+  // TextPlayer player = createTextPlayer("M\n1\n2\n0\n1\nY\nD\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player.playOneTurn();
 
-//     /*
-//      * Case 2. catched exception: No suitable territory can be found. Please change
-//      * and action to perform.
-//      */
-//     bytes.reset();
-//     TextPlayer player2 = createTextPlayer("3\n14\n7\nA\n1\n2\n0\n1\nY\nD\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player2.playOneTurn();
+  // /*
+  // * Case 2. catched exception: No suitable territory can be found. Please
+  // change
+  // * and action to perform.
+  // */
+  // bytes.reset();
+  // TextPlayer player2 = createTextPlayer("3\n14\n7\nA\n1\n2\n0\n1\nY\nD\n",
+  // bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player2.playOneTurn();
 
-//     /* Assumptions for case3 and case4 */
-//     GlobalMapInfo mapInfo2 = createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement());
-//     when(client.recvGlobalMapInfo()).thenReturn(mapInfo2);
+  // /* Assumptions for case3 and case4 */
+  // GlobalMapInfo mapInfo2 =
+  // createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement());
+  // when(client.recvGlobalMapInfo()).thenReturn(mapInfo2);
 
-//     /* Case 3. catched exception: Invalid territory. */
-//     bytes.reset();
-//     TextPlayer player3 = createTextPlayer("M\n3\n2\n0\n1\nY\nM\n2\n2\n0\nY\nD\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player3.playOneTurn();
+  // /* Case 3. catched exception: Invalid territory. */
+  // bytes.reset();
+  // TextPlayer player3 = createTextPlayer("M\n3\n2\n0\n1\nY\nM\n2\n2\n0\nY\nD\n",
+  // bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player3.playOneTurn();
 
-//     /* Case 4. catched exception: invalid commit */
-//     bytes.reset();
-//     TextPlayer player4 = createTextPlayer("A\n1\n1\n0\n1\nY\nM\n1\n2\n0\nY\nM\n1\n2\n0\n3\nY\nD\nA\n1\n1\n0\n1\nY\nM\n1\n2\n0\n1\nY\nD\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player4.playOneTurn();
-//   }
+  // /* Case 4. catched exception: invalid commit */
+  // bytes.reset();
+  // TextPlayer player4 =
+  // createTextPlayer("A\n1\n1\n0\n1\nY\nM\n1\n2\n0\nY\nM\n1\n2\n0\n3\nY\nD\nA\n1\n1\n0\n1\nY\nM\n1\n2\n0\n1\nY\nD\n",
+  // bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player4.playOneTurn();
+  // }
 
-//   @Test
-//   public void test_checkGameResult() throws IOException, ClassNotFoundException {
-//     // Assumptions1
-//     when(this.client.recvGameResult()).thenReturn(new Result() {
-//       {
-//         addLoser(1);
-//       }
-//     });
+  // @Test
+  // public void test_checkGameResult() throws IOException, ClassNotFoundException
+  // {
+  // // Assumptions1
+  // when(this.client.recvGameResult()).thenReturn(new Result() {
+  // {
+  // addLoser(1);
+  // }
+  // });
 
-//     // Case 1: Exit
-//     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//     TextPlayer player = createTextPlayer("M\n1\n2\n0\n1\nY\nD\nE\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
+  // // Case 1: Exit
+  // ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+  // TextPlayer player = createTextPlayer("M\n1\n2\n0\n1\nY\nD\nE\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
 
-//     assertEquals("Exit", player.playOneTurn());
+  // assertEquals("Exit", player.playOneTurn());
 
-//     // Case 2: Keep watching
-//     bytes.reset();
-//     // Cover the case when input cmd is invalid (the "Q")
-//     TextPlayer player2 = createTextPlayer("M\n1\n2\n1\nD\nQ\nW\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
+  // // Case 2: Keep watching
+  // bytes.reset();
+  // // Cover the case when input cmd is invalid (the "Q")
+  // TextPlayer player2 = createTextPlayer("M\n1\n2\n1\nD\nQ\nW\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
 
-//     assertEquals(null, player2.playOneTurn());
+  // assertEquals(null, player2.playOneTurn());
 
-//     // Case 3: Some player wins
-//     when(this.client.recvGameResult()).thenReturn(new Result() {
-//       {
-//         addWinner(2); // some other player wins other than player1
-//       }
-//     });
-//     TextPlayer player3 = createTextPlayer("M\n1\n2\n1\nD\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
+  // // Case 3: Some player wins
+  // when(this.client.recvGameResult()).thenReturn(new Result() {
+  // {
+  // addWinner(2); // some other player wins other than player1
+  // }
+  // });
+  // TextPlayer player3 = createTextPlayer("M\n1\n2\n1\nD\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
 
-//     assertEquals("Game Over", player3.playOneTurn());
+  // assertEquals("Game Over", player3.playOneTurn());
 
-//   }
+  // }
 
-//   @Test
-//   public void test_playGame() throws IOException, ClassNotFoundException {
-//     // Lose the game and exit
-//     when(this.client.recvGameResult()).thenReturn(new Result() {
-//       {
-//         addLoser(1);
-//       }
-//     });
-//     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//     TextPlayer player = createTextPlayer("M\n1\n2\n1\nD\nE\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player.playGame();
+  // @Test
+  // public void test_playGame() throws IOException, ClassNotFoundException {
+  // // Lose the game and exit
+  // when(this.client.recvGameResult()).thenReturn(new Result() {
+  // {
+  // addLoser(1);
+  // }
+  // });
+  // ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+  // TextPlayer player = createTextPlayer("M\n1\n2\n1\nD\nE\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player.playGame();
 
-//     // Lose the game but keep watching
-//     bytes.reset();
-//     TextPlayer player2 = createTextPlayer("M\n1\n2\n1\nD\nW\nD\nE\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player2.playGame();
+  // // Lose the game but keep watching
+  // bytes.reset();
+  // TextPlayer player2 = createTextPlayer("M\n1\n2\n1\nD\nW\nD\nE\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player2.playGame();
 
-//     // Winner has created
-//     when(this.client.recvGameResult()).thenReturn(new Result() {
-//       {
-//         addWinner(2); // some other player wins other than player1
-//       }
-//     });
-//     bytes.reset();
-//     TextPlayer player3 = createTextPlayer("D\n", bytes,
-//         createAssignedTerritories_withUnitsPlaced());
-//     player3.playGame();
-//   }
+  // // Winner has created
+  // when(this.client.recvGameResult()).thenReturn(new Result() {
+  // {
+  // addWinner(2); // some other player wins other than player1
+  // }
+  // });
+  // bytes.reset();
+  // TextPlayer player3 = createTextPlayer("D\n", bytes,
+  // createAssignedTerritories_withUnitsPlaced());
+  // player3.playGame();
+  // }
 }

@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/"  xmlns:fx="http://javafx.com/fxml/" fx:controller="edu.duke.ece651.team6.client.controller.LoginRegisterController">
+<TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml/" fx:controller="edu.duke.ece651.team6.client.controller.LoginRegisterController">
     <tabs>
         <Tab fx:id="loginTab" text="Login">
             <content>
