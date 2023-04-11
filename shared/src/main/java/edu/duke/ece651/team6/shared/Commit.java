@@ -10,9 +10,9 @@ import javafx.beans.binding.StringBinding;
 /* A structure contains all orders from one player, which will be sent back to server for */
 public class Commit implements java.io.Serializable {
   int playerId;
-  GameMap gameMap;
+  transient GameMap gameMap;
   Map<String, Integer> resource;
-  GameMap gameMapBak;
+  transient GameMap gameMapBak;
   Map<String, Integer> resourceBak;
   List<MoveOrder> moves;
   List<AttackOrder> attacks;

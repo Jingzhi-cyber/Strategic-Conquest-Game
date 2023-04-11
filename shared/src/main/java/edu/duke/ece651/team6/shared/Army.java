@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * This class represents a unit that can move or attack. It consists of a group of Units, and belongs to a Player.
  */
-public class Army {
+public class Army implements java.io.Serializable {
     private final int ownerId;
     private LinkedList<Unit> units;
 
