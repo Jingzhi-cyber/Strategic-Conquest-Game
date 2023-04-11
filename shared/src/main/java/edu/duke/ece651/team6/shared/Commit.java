@@ -250,19 +250,21 @@ public class Commit implements java.io.Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (MoveOrder o : moves) {
-      builder.append(o.toString() + "\n");
+      builder.append(o.toString() + " (Cost: " + CostCalculator.calculateMoveCost(o, gameMap) + ")" + "\n");
     }
 
     for (AttackOrder o : attacks) {
-      builder.append(o.toString() + "\n");
+      builder.append(o.toString() + " (Cost: " + CostCalculator.calculateAttackCost(o, gameMap) + ")" + "\n");
     }
 
     if (research != null) {
-      builder.append(research.toString() + "\n");
+      builder.append(research.toString() + " (Cost: " + Constants.researchCosts.get(gameMap.getMaxTechLevel(playerId))
+          + ")" + "\n");
     }
 
     for (UpgradeOrder o : upgrades) {
-      builder.append(o.toString() + "\n");
+      builder.append(o.toString() + " (Cost: "
+          + UnitManager.costToUpgrade(o.getNowLevel(), o.getTargetLevel()) * o.getNumUnits() + ")" + "\n");
     }
     return builder.toString();
   }

@@ -87,6 +87,10 @@ public class Client {
     this.gameLoungeController = new GameLoungeController(this, gameLounge);
   }
 
+  public GameLounge getGameLounge() {
+    return this.gameLounge;
+  }
+
   public LoginRegisterController getLoginRegisterController() {
     return this.loginRegisterController;
   }
@@ -164,30 +168,16 @@ public class Client {
 
     @Override
     public void run() {
-      if (game.gameStatus == GAME_STATUS.PLACE_UNITS) {
-        System.out.println("Placing units - Client.java");
-        Platform.runLater(() -> {
-          try {
-            game.placeUnit();
-          } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        });
-      } else {
-        System.out.println("Play game - Client.java");
+      System.out.println("Enter the game - Client.java");
+      Platform.runLater(() -> {
         try {
-          game.playGame();
+          game.entryPoint();
         } catch (IOException | ClassNotFoundException e) {
           e.printStackTrace();
         } catch (Exception e) {
           e.printStackTrace();
         }
-
-      }
-
+      });
     }
-
   }
 }

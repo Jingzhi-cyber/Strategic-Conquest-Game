@@ -210,18 +210,20 @@ public class UIGame extends Game {
    * This method receives initial Territory information from the server And
    * display UI to the user so that user interact to input units information
    */
-  public void placeUnit() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
-    System.out.print("Placing units\n");
-    System.out.println((String) socketHandler.recvObject());
-    setting = socketHandler.recvGameBasicSetting();
+  public void entryPoint() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
+    if (this.gameStatus == GAME_STATUS.PLACE_UNITS) {
+      System.out.print("Placing units\n");
+      System.out.println((String) socketHandler.recvObject());
+      setting = socketHandler.recvGameBasicSetting();
 
-    // territoryToNumUnitMapping = new HashMap<>();
+      // territoryToNumUnitMapping = new HashMap<>();
 
-    Set<Territory> territories = setting.getAssignedTerritories();
-    territoryIterator = territories.iterator();
+      Set<Territory> territories = setting.getAssignedTerritories();
+      territoryIterator = territories.iterator();
 
-    while (gameStatus == GAME_STATUS.PLACE_UNITS) {
-      nextUnitPlacementPrompt();
+      while (gameStatus == GAME_STATUS.PLACE_UNITS) {
+        nextUnitPlacementPrompt();
+      }
     }
 
     refreshMap();
@@ -397,6 +399,7 @@ public class UIGame extends Game {
 
       mainPageController.setPlayTurnsButtonsDisabled(false);
     });
+    initiateCommit();
 
     // TODO Update Map!
 
@@ -424,27 +427,31 @@ public class UIGame extends Game {
       initiateCommit();
     }
 
-    Territory src = showTerritorySelectionDialog(null, true, "Select the territory you want to move units from").get();
+    Territory src = showTerritorySelectionDialog(null, true, "Move Order",
+        "Which territory do you want to move units from?").get();
 
     if (src == null) {
       mainPageController.showError("Must specify a territory to move units from");
       return null; // User cancelled the dialog
     }
 
-    Territory dest = showTerritorySelectionDialog(src, true, "Select the territory you want to move units to").get();
+    Territory dest = showTerritorySelectionDialog(src, true, "Move Order",
+        "Which territory do you want to move units to?").get();
 
     if (dest == null) {
       mainPageController.showError("Must specify a territory to move units to");
       return null; // User cancelled the dialog
     }
 
-    int[] numUnitsByLevel = new int[src.getNumLevels()];
-    Integer selectedLevel = showUnitLevelSelectionDialog(true, 0, src, "Select the level of units you want to move").get();
+    int[] numUnitsByLevel = new int[Constants.MAX_LEVEL + 1];
+    Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "Move Order",
+        "Which level of units do you want to move?").get();
     if (selectedLevel == null) {
       mainPageController.showError("Must specify a level to move");
       return null; // User cancelled the dialog
     }
-    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "Enter the number of units to move").get();
+    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them do you want to move?")
+        .get();
 
     if (numUnits == null) {
       mainPageController.showError("Must specify the number of units to move");
@@ -476,27 +483,32 @@ public class UIGame extends Game {
       initiateCommit();
     }
 
-    Territory src = showTerritorySelectionDialog(null, true, "Select the territory you want to attack from").get();
+    Territory src = showTerritorySelectionDialog(null, true, "Attack Order",
+        "Which territory do you want to attack units from").get();
 
     if (src == null) {
       mainPageController.showError("Must specify a territory to attack from");
       return null; // User cancelled the dialog
     }
 
-    Territory dest = showTerritorySelectionDialog(src, false, "Select the territory you want to attack units to").get();
+    Territory dest = showTerritorySelectionDialog(src, false, "Attack Order",
+        "Which territory do you want to attack units to").get();
 
     if (dest == null) {
       mainPageController.showError("Must specify a territory to attack units to");
       return null; // User cancelled the dialog
     }
 
-    int[] numUnitsByLevel = new int[src.getNumLevels()];
-    Integer selectedLevel = showUnitLevelSelectionDialog(true, 0, src, "Select the level of units you want to move").get();
+    int[] numUnitsByLevel = new int[Constants.MAX_LEVEL + 1];
+
+    Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "Attack Order",
+        "Which level of units do you want to attack?").get();
     if (selectedLevel == null) {
       mainPageController.showError("Must specify a level to attack");
       return null; // User cancelled the dialog
     }
-    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "Enter the number of units to move").get();
+    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them are used to attack")
+        .get();
 
     if (numUnits == null) {
       mainPageController.showError("Must specify the number of units to attack");
@@ -531,6 +543,7 @@ public class UIGame extends Game {
     ResearchOrder research = new ResearchOrder(playerId);
     try {
       currentCommit.addResearch(research);
+      mainPageController.showSuccess("Successfully added a research order");
     } catch (IllegalArgumentException e) {
 
       // Platform.runLater(() -> {
@@ -551,7 +564,8 @@ public class UIGame extends Game {
     }
 
     // Show a dialog to get the source territory from the user
-    Territory src = showTerritorySelectionDialog(null, true, "Select the territory to upgrade units").get(); // true/false
+    Territory src = showTerritorySelectionDialog(null, true, "On which territory do you want to upgrade units?",
+        "Choose a territory").get(); // true/false
     // both okay if
     // src is null
     if (src == null) {
@@ -560,24 +574,24 @@ public class UIGame extends Game {
     }
 
     // Show a dialog to get the current unit level from the user
-    Integer selectedNowLevel = showUnitLevelSelectionDialog(true, 0, src,
-        "Select the current level of units to upgrade").get();
+    Integer selectedNowLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL - 1, src, "Upgrade Order",
+        "From which level do you want to upgrade units?").get();
     if (selectedNowLevel == null) {
       mainPageController.showError("Must specify a level to upgrade");
       return null; // User cancelled the dialog
     }
 
     // Show a dialog to get the target unit level from the user
-    Integer selectedTargetLevel = showUnitLevelSelectionDialog(false, selectedNowLevel, src,
-        "Select the target level to upgrade units to").get();
+    Integer selectedTargetLevel = showUnitLevelSelectionDialog(selectedNowLevel + 1, Constants.MAX_LEVEL, src,
+        "Upgrade Order", "To which level do you want to upgrade units?").get();
     if (selectedTargetLevel == null) {
       mainPageController.showError("Must specify a target level");
       return null;
     }
 
     // Show a dialog to get the number of units to upgrade from the user
-    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedNowLevel, src, "Enter the number of units to upgrade")
-        .get();
+    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedNowLevel, src,
+        "How many of them do you want to upgrade?").get();
     if (numUnits == null) {
       mainPageController.showError("Must specify the number of units to upgrade");
       return null;
@@ -596,7 +610,8 @@ public class UIGame extends Game {
     return upgrade;
   }
 
-  private CompletableFuture<Territory> showTerritorySelectionDialog(Territory src, boolean isMove, String title) {
+  private CompletableFuture<Territory> showTerritorySelectionDialog(Territory src, boolean isMove, String title,
+      String context) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
     // Platform.runLater(() -> {
@@ -610,7 +625,7 @@ public class UIGame extends Game {
       ChoiceDialog<String> dialog = new ChoiceDialog<>(territoryNames.get(0), territoryNames);
       dialog.setTitle(title);
       dialog.setHeaderText(null);
-      dialog.setContentText("Choose a territory:");
+      dialog.setContentText(context);
 
       Optional<String> result = dialog.showAndWait();
 
@@ -628,22 +643,15 @@ public class UIGame extends Game {
     return future;
   }
 
-  private CompletableFuture<Integer> showUnitLevelSelectionDialog(boolean currentLevel, int selectedLevel,
-      Territory src, String title) {
+  private CompletableFuture<Integer> showUnitLevelSelectionDialog(int inclusiveLowerLevel, int inclusiveUpperLevel,
+      Territory src, String title, String content) {
     CompletableFuture<Integer> future = new CompletableFuture<>();
 
     // Platform.runLater(() -> {
     List<Integer> levels = new ArrayList<>();
-    if (currentLevel) {
-      // TODO <=
-      for (int i = 0; i <= Constants.MAX_LEVEL - 1; i++) {
-        levels.add(i);
-      }
-    } else {
-      // TODO <=
-      for (int i = selectedLevel + 1; i <= Constants.MAX_LEVEL; i++) {
-        levels.add(i);
-      }
+    // TODO <=
+    for (int i = inclusiveLowerLevel; i <= inclusiveUpperLevel; i++) {
+      levels.add(i);
     }
 
     if (levels.isEmpty()) {
@@ -654,7 +662,7 @@ public class UIGame extends Game {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(levels.get(0), levels);
       dialog.setTitle(title);
       dialog.setHeaderText(null);
-      dialog.setContentText("Choose a level:");
+      dialog.setContentText(content);
 
       Optional<Integer> result = dialog.showAndWait();
 

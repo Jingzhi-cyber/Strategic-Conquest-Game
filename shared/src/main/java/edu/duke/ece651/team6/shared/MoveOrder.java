@@ -3,7 +3,7 @@ package edu.duke.ece651.team6.shared;
 public class MoveOrder extends SimpleMove {
 
   public MoveOrder(Territory src, Territory dest, int[] numUnitsByLevel) {
-    super("Move",src, dest, numUnitsByLevel);
+    super("Move", src, dest, numUnitsByLevel);
   }
 
   /**
