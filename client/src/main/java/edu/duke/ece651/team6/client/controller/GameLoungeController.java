@@ -65,6 +65,10 @@ public class GameLoungeController extends Controller implements Initializable {
     }
   }
 
+  public void updateGameList() {
+    gameLoungeList.setItems(gameLounge.getList());
+  }
+
   @FXML
   public void onNewGameButton(ActionEvent ae) throws ClassNotFoundException, IOException, Exception {
     // Create a new game
@@ -85,6 +89,15 @@ public class GameLoungeController extends Controller implements Initializable {
       this.gameLoungeList.getItems().add(String.valueOf(newGameId));
       gameLoungeList.refresh();
 
+      // System.out.println("In Game Lounge Controller: Game Lounge updated, size is "
+      // + gameLounge.size());
+
+      System.out
+          .println("In Game Lounge Controller: Game Lounge List updated, size is  " + gameLoungeList.getItems().size());
+
+      // System.out.println("Game Lounge updated: " +
+      // gameLoungeList.getAccessibleText() + " size: " + gameLounge.size());
+
       System.out.println("Switching to Game Main Page");
       switchToGameMainPage(newGameId);
 
@@ -103,15 +116,21 @@ public class GameLoungeController extends Controller implements Initializable {
   }
 
   @Override
+  //@SuppressWarnings("unchecked")
   public void initialize(URL location, ResourceBundle resources) {
-    // @SuppressWarnings("unchecked")
-    // ListView<String> tmp = (ListView<String>) scene.lookup("#gameLoungeList");
-    // tmp.setItems(gameLounge.getList());
+    // // This line will look up the ListView in the current scene
+    // ListView<String> tmp = (ListView<String>)
+    // client.getStage().getScene().lookup("#gameLoungeList");
 
-    // this.operands = tmp;
-    // gameLoungeList.getItems().add("1");
-    // gameLoungeList.getItems().add("2");
-    // gameLoungeList.getItems().add("3");
+    // if (tmp != null) {
+    // tmp.setItems(gameLounge.getList());
+    // this.gameLoungeList = tmp;
+    // } else {
+    // System.err.println("Error: gameLoungeList is null.");
+    // }
+
+    gameLoungeList.setItems(client.getGameLounge().getList());
+
     this.id = 0;
 
     numPlayer.getItems().add(2);
@@ -155,5 +174,9 @@ public class GameLoungeController extends Controller implements Initializable {
 
     // controllers.put(UnitPlacementController.class, unitPlacementController);
     switchToPage("/ui/mainPage.xml", "/ui/buttonstyle.css", controllers, "Main Page", client.getStage());
+
+    // FXMLLoader loader = new FXMLLoader(getClass().getResource("ui/mainPage.xml"));
+    // Parent root = loader.load();
+    // MainPageController controller = loader.getController();
   }
 }

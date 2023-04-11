@@ -30,6 +30,11 @@ public class MainPageController extends Controller implements Initializable {
   // public void setUser(String user) {
   // this.user = user;
   // }
+  @FXML
+  Button returnToGameLounge;
+
+  @FXML
+  Button logout;
 
   @FXML
   Label usernameLabel;
@@ -161,12 +166,25 @@ public class MainPageController extends Controller implements Initializable {
 
     HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
     // System.out.print(this.usernameField.getText());
+    // client.getGameLoungeController().gameLoungeList.refresh();
+    //  System.out.println("In mainPageController, Game Lounge List refreshed, size is  "
+    //     + client.getGameLoungeController().gameLoungeList.getItems().size());
+
     controllers.put(GameLoungeController.class, client.getGameLoungeController());
     switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", client.getStage());
+    // Update the gameLoungeList display
+
+    // System.out.println("In mainPageController, gameLounge size " +
+    // client.getGameLoungeController().gameLounge.size());
+
+    System.out.println("In mainPageController, Game Lounge List , size is  "
+        + client.getGameLoungeController().gameLoungeList.getItems().size());
+
+    client.getGameLoungeController().gameLoungeList.refresh();
   }
 
   @FXML
-  public void logout(ActionEvent ae) {
+  public void logOut(ActionEvent ae) {
     try {
       logOut();
     } catch (Exception e) {

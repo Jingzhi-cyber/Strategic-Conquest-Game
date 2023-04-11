@@ -33,11 +33,19 @@
 
     <children>
           <!-- Top buttons -->
-        <HBox spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="0">
-          
-                <Button text="Return to Game Lounge" onAction="#returnToGameLounge" />
-                <Button text="Logout" onAction="#logout" />
-        
+          <HBox alignment="CENTER"  GridPane.rowIndex="0" GridPane.columnIndex="0">
+            <children>
+                <Pane prefHeight="40.0" prefWidth="400.0">
+                    <children>
+                        <ButtonBar>
+                          <buttons>
+                           
+                            
+                            </buttons>
+                        </ButtonBar>
+                    </children>
+                </Pane>
+            </children> 
         </HBox>
 
          <!-- Player info -->
@@ -74,14 +82,41 @@
         </HBox>
 
         <!-- Order menu -->
-        <HBox GridPane.rowIndex="2" GridPane.columnIndex="2">
+        <VBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="2">
        
-                    <children>
-                        <ChoiceBox fx:id="orderMenu" />
- 
+          <children>
+             <Button
+                                mnemonicParsing="false"
+                                fx:id="resetCommitButton"
+                                 prefHeight="30.0"
+                                 prefWidth="150.0"
+                                text="Reset orders"
+                                styleClass="resetbtn"
+                                onAction="#resetOrders" />
+             <ChoiceBox
+                 fx:id="orderMenu"
+                  prefHeight="30.0"
+                                    prefWidth="150.0"/>
+                       <Button
+                                mnemonicParsing="false"
+                                fx:id="placeOrderButton"
+                                 prefHeight="30.0"
+                                  prefWidth="150.0"
+                                text="Place an order"
+                                styleClass="commitbtn"
+                                onAction="#placeAnOrder" />
+                                <Button
+                                    mnemonicParsing="false"
+                                    fx:id="submitOrdersButton"
+                                    style="-fx-background-color: Violet;"
+                                    prefHeight="30.0"
+                                    prefWidth="150.0"
+                                    text="Submit all orders"
+                                    styleClass="commitbtn"
+                                    onAction="#submitOrders"/>
                     </children>
          
-        </HBox>
+        </VBox>
 
         <!-- Map -->
         <AnchorPane fx:id="mapPane">
@@ -95,24 +130,16 @@
                           <buttons>
                             <Button
                                 mnemonicParsing="false"
-                                fx:id="resetCommitButton"
-                                text="Reset orders"
-                                styleClass="expandable,resetbtn"
-                                onAction="#resetOrders" />
+                                fx:id="returnToGameLounge"
+              text="Return to Game Lounge"
+              styleClass="expandable,exitbtn"
+              onAction="#returnToGameLounge" />
                             <Button
-                                mnemonicParsing="false"
-                                fx:id="placeOrderButton"
-                                text="Place an order"
-                                styleClass="expandable,commitbtn"
-                                onAction="#placeAnOrder" />
-                                <Button
-                                    mnemonicParsing="false"
-                                    fx:id="submitOrdersButton"
-                                    prefHeight="30.0"
-                                    prefWidth="200.0"
-                                    text="Submit all orders"
-                                    styleClass="expandable,commitbtn"
-                                    onAction="#submitOrders"/>
+                                 mnemonicParsing="false"
+              fx:id="logout"
+              text="Logout"
+               styleClass="expandable,exitbtn"
+              onAction="#logOut" />
                                 <Button
                                     mnemonicParsing="false"
                                     fx:id="exitGame"
