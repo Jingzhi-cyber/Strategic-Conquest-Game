@@ -1,6 +1,7 @@
 package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,9 +178,9 @@ public class UIGame extends Game {
 
         Integer numUnits = null;
         while (numUnits == null) {
-          numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
+          numUnits = showSelectionDialog(Integer.class, remainingUnits, "No items available for selection.", "Unit Placement",
               "Player" + this.playerId + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)");
           if (numUnits == null) {
             mainPageController.showError("Must specify unit number to place on " + currentTerritory.getName());
           }
@@ -677,26 +678,31 @@ public class UIGame extends Game {
     return future;
   }
 
-  private <T> CompletableFuture<T> showSelectionDialog(List<T> list, String promptIfEmptyList, String title,
+  private <T> T showSelectionDialog(Class<T> clazz, List<T> list, String promptIfEmptyList, String title,
       String contentText) {
     if (list.isEmpty()) {
       mainPageController.showError(promptIfEmptyList);
     }
-    CompletableFuture<T> future = new CompletableFuture<>();
-    ChoiceDialog<T> dialog = new ChoiceDialog<>(list.get(0), list);
-    dialog.setTitle(title);
-    dialog.setHeaderText(null);
-    dialog.setContentText(contentText);
+    final T[] userInput = (T[]) Array.newInstance(clazz, 1);
+    Platform.runLater(() -> {
+      ChoiceDialog<T> dialog = new ChoiceDialog<>(list.get(0), list);
+      dialog.setTitle(title);
+      dialog.setHeaderText(null);
+      dialog.setContentText(contentText);
 
-    Optional<T> result = dialog.showAndWait();
+      Optional<T> result = dialog.showAndWait();
 
-    if (result.isPresent()) {
-      future.complete(result.get());
-    } else {
-      future.complete(null);
+      result.ifPresent(input -> userInput[0] = input);
+    });
+
+    while (userInput[0] == null) {
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
     }
-
-    return future;
+    return userInput[0];
   }
 
   private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,

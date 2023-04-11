@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.Client;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -98,15 +99,19 @@ public class Controller {
   }
 
   public void showSuccess(String message) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setContentText(message);
-    alert.showAndWait();
+    Platform.runLater(() -> {
+      Alert alert = new Alert(Alert.AlertType.INFORMATION);
+      alert.setContentText(message);
+      alert.showAndWait();
+    });
   }
 
   public void showError(String message) {
-    Alert alert = new Alert(Alert.AlertType.ERROR);
-    alert.setContentText(message);
-    alert.showAndWait();
+    Platform.runLater(() -> {
+      Alert alert = new Alert(Alert.AlertType.ERROR);
+      alert.setContentText(message);
+      alert.showAndWait();
+    });
   }
 
   protected void logOut() throws Exception {
