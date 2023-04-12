@@ -181,8 +181,7 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
-              .get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
@@ -539,6 +538,7 @@ public class UIGame extends Game {
     }
     this.thisView = new UIGameView(mapInfo);
     this.gameMap = mapInfo.getGameMap();
+    this.unChangedGameMap = mapInfo.getGameMap();
     System.out.println("GameMap - UIGame.java" + gameMap.toString());
 
     Platform.runLater(() -> updateMap(mainPageController.getMapPane(), this.gameMap.getTerritorySet()));
@@ -981,6 +981,7 @@ public class UIGame extends Game {
   }
 
   private Commit currentCommit = null;
+  private GameMap unChangedGameMap = null;
 
   public void initiateCommit() {
     this.gameStatus = GAME_STATUS.ISSUE_ORDER;
@@ -988,7 +989,7 @@ public class UIGame extends Game {
     Map<String, Integer> copiedResource = new HashMap<>();
     copiedResource.putAll(this.resource);
     System.out.println("Initiating Commit");
-    currentCommit = new Commit(this.playerId, (GameMap) this.gameMap.clone(), copiedResource);
+    currentCommit = new Commit(this.playerId, (GameMap) this.unChangedGameMap.clone(), copiedResource);
     // System.out.println("Finished initiating a new commit");
   }
 
