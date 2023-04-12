@@ -40,7 +40,8 @@ public abstract class Game {
    * 
    * @return a String indicating the exit info of the player of the turn
    */
-  // abstract public String playOneTurn() throws IOException, ClassNotFoundException;
+  // abstract public String playOneTurn() throws IOException,
+  // ClassNotFoundException;
 
   /**
    * Play the game by repeatedly calling playOneTurn, and properly handle result
@@ -55,7 +56,7 @@ public abstract class Game {
   // abstract protected Territory findTerritory(Territory src, String message)
   // throws IOException;
 
-  abstract protected Set<Territory> findEnemyTerritories();
+  // abstract protected Set<Territory> findEnemyTerritories();
 
   // abstract public MoveOrder constructMoveOrder() throws IOException;
 

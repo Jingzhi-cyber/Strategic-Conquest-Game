@@ -141,7 +141,6 @@ public class TextGame extends Game {
    *
    * @return HashSet<Territory> enemyTerritories
    */
-  @Override
   protected Set<Territory> findEnemyTerritories() {
     Set<Territory> set = new HashSet<>();
     Map<Integer, PlayerMapInfo> globalInfo = mapTextView.globalMapInfo.getGlobalMap();
