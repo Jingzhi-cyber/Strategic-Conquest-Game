@@ -45,7 +45,7 @@ public class RiscMasterTest {
 
     @Test
     public void testSetUpGameBasicSettings() throws ClassNotFoundException, IOException {
-        GameBasicSetting gameBasicSetting = new GameBasicSetting(0, 2, new HashSet<Territory>(), 2);
+        GameBasicSetting gameBasicSetting = new GameBasicSetting(0, 2, null, new HashSet<Territory>(), 2);
         Territory t = gameMap.getTerritoryByName("Narnia");
         Map<Territory, Integer> map = new HashMap<>();
         map.put(t, 1);

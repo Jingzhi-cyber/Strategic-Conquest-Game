@@ -89,7 +89,7 @@ public class RiscMaster implements Master {
       for (Territory t : assignedTerritories) {
         t.setOwnerId(playerId);
       }
-      GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, assignedTerritories,
+      GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, this.gameMap, assignedTerritories,
           availableUnits);
       safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
     }

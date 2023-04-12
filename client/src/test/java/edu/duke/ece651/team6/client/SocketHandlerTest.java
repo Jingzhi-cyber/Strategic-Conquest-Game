@@ -144,7 +144,7 @@ public class SocketHandlerTest {
     assertExpectedRecvObject(receivedObject, Commit.class);
 
     /* Test recv GameBasicSetting */
-    setOutputStreamAndAssumption_recvSpecifiedObject(new GameBasicSetting(1, 2, null, 3));
+    setOutputStreamAndAssumption_recvSpecifiedObject(new GameBasicSetting(1, 2, null, null, 3));
     GameBasicSetting receivedObject2 = client.recvGameBasicSetting();
     assertExpectedRecvObject(receivedObject2, GameBasicSetting.class);
 
@@ -195,7 +195,7 @@ public class SocketHandlerTest {
     client.sendExitInfo(true);
 
     /* Send Game Basic Info */
-    client.sendUpdatedGameBasicSetting(new GameBasicSetting(1, 2, null, 3));
+    client.sendUpdatedGameBasicSetting(new GameBasicSetting(1, 2, null, null, 3));
 
     client.closeSocket();
   }
