@@ -25,7 +25,9 @@ Maintainer: ece651-spr23-team6
 ./gradlew installDist
 
 launch server: ./server/build/install/server/bin/server <server_port>
-launch client: ./client/build/install/client/bin/client <server_addr> <server_port> <user_name> <num_player>
+launch client: ./gradlew run-client -PappArgs="['vcm-30760.vm.duke.edu', '12345']"
+
+# Text version: ./client/build/install/client/bin/client <server_addr> <server_port> <user_name> <num_player>
 
 # e.g., vcm-30756.vm.duke.edu 12345
 ```
