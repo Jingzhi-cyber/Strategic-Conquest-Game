@@ -203,16 +203,19 @@ public class RiscMaster implements Master {
 
     losers.addAll(result.getLosers());
 
-    for (int playerId : losers) {
-      Boolean isExit = (Boolean) safeRecvObjectFromPlayer(playerId, "isExit");
-      if (isExit != null && isExit) {
-        try {
-          server.closeClientSocket(playerProfiles.get(playerId).getSocket());
-        } catch (IOException e) { // handle error occurs when closeClientSocket()
-          System.out.println("server.closeClientSocket() error: " + e.getMessage());
-        }
-      }
-    }
+    // For UIGame, does not receive isExit from player
+    // This is not compatible with text based game logic now
+    
+    // for (int playerId : losers) {
+    //   Boolean isExit = (Boolean) safeRecvObjectFromPlayer(playerId, "isExit");
+    //   if (isExit != null && isExit) {
+    //     try {
+    //       server.closeClientSocket(playerProfiles.get(playerId).getSocket());
+    //     } catch (IOException e) { // handle error occurs when closeClientSocket()
+    //       System.out.println("server.closeClientSocket() error: " + e.getMessage());
+    //     }
+    //   }
+    // }
 
     if (!result.getWinners().isEmpty()) {
       return true;

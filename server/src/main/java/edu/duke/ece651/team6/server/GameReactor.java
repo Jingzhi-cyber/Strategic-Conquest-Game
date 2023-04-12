@@ -13,7 +13,9 @@ import java.util.concurrent.Executors;
 
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.SampleMap;
+import edu.duke.ece651.team6.shared.SimpleMap;
 import edu.duke.ece651.team6.shared.SocketKey;
+import edu.duke.ece651.team6.shared.Territory;
 
 /**
  * This class is used to manage multiple games. It will group the incoming connections based on 
@@ -112,6 +114,8 @@ public class GameReactor {
         public void run() {
             // SampleMap sampleMap = new SampleMap();
             // GameMap gameMap = new GameMap(sampleMap.getAdjList());
+            // SimpleMap simpleMap = new SimpleMap();
+            // GameMap gameMap = new GameMap(simpleMap.getAdjList());
             MapGenerator mapGenerator = new MapGenerator(24);
             GameMap gameMap = new GameMap(mapGenerator.getDistanceMap(), false);
             Server server = new Server(clientSockets);
