@@ -28,7 +28,7 @@ public class TextGame extends Game {
 
   /**
    * Constructs TextPlayer with 4 params
-   * 
+   *
    * @param client      deals with connection with server
    * @param inputReader
    * @param out
@@ -50,7 +50,7 @@ public class TextGame extends Game {
 
   /**
    * Place units and send the updated game setting to the server.
-   * 
+   *
    * @throws IOException, ClassNotFoundException
    */
   public void placeUnit() throws IOException, ClassNotFoundException {
@@ -87,7 +87,7 @@ public class TextGame extends Game {
 
   /**
    * Get a set of notations of possible commands
-   * 
+   *
    * @return Set<String> with the first letters of available commands
    */
   private Set<String> getPossibleCommandChars() {
@@ -104,7 +104,7 @@ public class TextGame extends Game {
 
   /**
    * Read a command
-   * 
+   *
    * @param prompt
    * @return a Character of the command
    * @throws IOException, {@link IllegalArgumentException}
@@ -119,7 +119,7 @@ public class TextGame extends Game {
 
   /**
    * Construct, display and return self-owned territories with serial numbers
-   * 
+   *
    * @return a Map<Integer, Territory> mapping from serial number to the territory
    */
   private Map<Integer, Territory> displayOrderedTerritoriesSelf() {
@@ -138,7 +138,7 @@ public class TextGame extends Game {
 
   /**
    * Construct a list of all enemy territories
-   * 
+   *
    * @return HashSet<Territory> enemyTerritories
    */
   @Override
@@ -160,7 +160,7 @@ public class TextGame extends Game {
    * Construct and display a list of possible enemy territories with serial
    * numbers to attack by checking if the enemy territory is directly connected
    * with the source territory
-   * 
+   *
    * @param src is the source self-owned territory of the player
    * @return Map<Integer, Territory> a map from the serial number to a territory
    */
@@ -181,7 +181,7 @@ public class TextGame extends Game {
 
   /**
    * A method to display self or enemy territories with serial numbers
-   * 
+   *
    * @param src is the source territory owned by the current player. If it's null,
    *            it will display enemy territories
    * @return Map<Integer, Territory> is a mapping from serial number to a
@@ -197,7 +197,7 @@ public class TextGame extends Game {
 
   /**
    * A method to find a territory based on the user input
-   * 
+   *
    * @param src     is the source territory to construct a set of self or enemy
    *                territories
    * @param message is the prompt to the player to input a choice (an integer that
@@ -221,7 +221,7 @@ public class TextGame extends Game {
 
   /**
    * Constructs a Move order
-   * 
+   *
    * @return {@link MoveOrder}
    * @throws IOException
    * @propogates {@link IllegalArgumentException} from findTerritory and
@@ -236,7 +236,7 @@ public class TextGame extends Game {
 
   /**
    * Display different level of units on the territory
-   * 
+   *
    * @param territory
    */
   protected void displayUnitsInDifferentLevels(Territory territory) {
@@ -248,7 +248,7 @@ public class TextGame extends Game {
   }
 
   /**
-   * 
+   *
    * @param src
    * @return
    * @throws IOException
@@ -291,7 +291,7 @@ public class TextGame extends Game {
 
   /**
    * Constructs an attack order
-   * 
+   *
    * @return an {@link AttackOrder}
    * @throws IOException
    * @throws {@link      IllegalArgumentException} from readAnInteger
@@ -305,7 +305,7 @@ public class TextGame extends Game {
 
   /**
    * Constructs a research order
-   * 
+   *
    * @return an {@link ResearchOrder}
    */
   public ResearchOrder constructResearchOrder() {
@@ -343,7 +343,7 @@ public class TextGame extends Game {
 
   /**
    * Construct a commit
-   * 
+   *
    * @return Commit
    * @throws IOException, {@link ClassNotFoundException}
    * @catch {@link IllegalArgumentException}
@@ -392,19 +392,18 @@ public class TextGame extends Game {
    * MoveOrder(s); each MoveOrder extends SimpleMove) and List (has 0-N
    * AttackOrder(s); each AttackOrder extends SimpleMove)? after user input and
    * before sending it to server?
-   * 
+   *
    * - Rules of Move: territories throughout the path from src to dest belong to
    * the current player; Number of units for moving belongs to [0,
    * numberOfUnits(src)] - Rules of Attack: src must belong to the current player;
    * dest must belong to another player; Number of units for moving belongs to [1,
    * numberOfUnits(src)]
-   * 
-   * 
+   *
+   *
    * 5. Issue orders: Commit (Has-A List; Has-A List)
-   * 
+   *
    * @throws IOException, {@link ClassNotFoundException}
    */
-  @Override
   public String playOneTurn() throws IOException, ClassNotFoundException {
     /* -------- 1. Receive and display the map --------- */
     refreshMap(); // will update local variables: mapTextView and gameMap
@@ -447,7 +446,7 @@ public class TextGame extends Game {
   /**
    * In each turn, receive game result, decide whether to exit if having lost the
    * game and return player's choice based on game result
-   * 
+   *
    * @return String is player's choice based on game status
    * @throws IOException, {@link ClassNotFoundException}
    * @catch {@link IllegalArgumentException}
@@ -483,7 +482,7 @@ public class TextGame extends Game {
 
   /**
    * Get a set of exit commands
-   * 
+   *
    * @return HashSet<String> of exit related commands
    */
   private Set<String> getExitCommands() {
@@ -497,7 +496,7 @@ public class TextGame extends Game {
 
   /**
    * Display exit message
-   * 
+   *
    * @return String
    */
   private String displayExitInfo() {
@@ -508,7 +507,7 @@ public class TextGame extends Game {
   /**
    * Play the game by repeatedly calling playOneTurn, and properly handle result
    * of each turn
-   * 
+   *
    * @throws exceptions, {@link IOException}, {@link UnknownHostException},
    *                     {@link ClassNotFoundException}
    */
@@ -523,7 +522,7 @@ public class TextGame extends Game {
 
   /**
    * Print a string to the OutputStream of the player
-   * 
+   *
    * @param str the string to print
    */
   private void printLine(String str) {
@@ -545,7 +544,7 @@ public class TextGame extends Game {
 
   /**
    * Read a line
-   * 
+   *
    * @param prompt is the message to display
    * @return a string of the input line
    * @throws IOException
@@ -557,7 +556,7 @@ public class TextGame extends Game {
 
   /**
    * Read an integer
-   * 
+   *
    * @param prompt
    * @return Integer the read Integer
    * @throws NumberFormatException (can be caught by IllegalArgumentException)
@@ -568,7 +567,7 @@ public class TextGame extends Game {
 
   /**
    * Read units for placement
-   * 
+   *
    * @param prompt
    * @return Integer
    * @throws IOException
@@ -591,7 +590,7 @@ public class TextGame extends Game {
 
   /**
    * Update and display the global map information
-   * 
+   *
    * @return {@link GlobalMapInfo}
    * @throws InvalidObjectException
    */

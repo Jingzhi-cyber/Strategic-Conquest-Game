@@ -28,7 +28,7 @@ public class EntryPoint extends Application {
 
   @Override
   public void start(Stage stage) throws Exception {
-    Thread.setDefaultUncaughtExceptionHandler(new ErrorReporter());
+    // Thread.setDefaultUncaughtExceptionHandler(new ErrorReporter());
 
     // XML
     // URL xmlResource = getClass().getResource("/ui/risc-game-main-page.xml");

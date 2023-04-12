@@ -204,11 +204,17 @@ public class MainPageController extends Controller implements Initializable {
   @FXML
   public void exit(ActionEvent ae) {
     try {
+      int gameId = uiGame.getGameId();
       uiGame.exit();
+
+      // gameLounge.removeGame(gameId);
+      GameLoungeController gameLoungeController = client.getGameLoungeController();
+      gameLoungeController.gameLounge.removeGame(gameId);
+      // gameLoungeController.updateGameList(gameLounge);
       // ...
       HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
       // System.out.print(this.usernameField.getText());
-      controllers.put(GameLoungeController.class, client.getGameLoungeController());
+      controllers.put(GameLoungeController.class, gameLoungeController);
       switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", client.getStage());
 
     } catch (Exception e) {
