@@ -119,7 +119,7 @@
         </VBox>
 
         <!-- Map -->
-        <AnchorPane fx:id="mapPane">
+        <AnchorPane fx:id="mapPane" prefHeight="0.0" prefWidth="0.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
         </AnchorPane>
         <!-- Buttons -->
         <HBox alignment="CENTER" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="2">

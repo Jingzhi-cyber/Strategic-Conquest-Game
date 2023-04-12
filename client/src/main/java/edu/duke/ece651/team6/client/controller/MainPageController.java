@@ -87,6 +87,11 @@ public class MainPageController extends Controller implements Initializable {
   }
 
   @FXML
+  public AnchorPane getMapPane() {
+    return this.mapPane;
+  }
+
+  @FXML
   public void placeAnOrder() throws IOException, InterruptedException, ExecutionException {
     String selectedOrder = orderMenu.getValue();
     switch (selectedOrder) {

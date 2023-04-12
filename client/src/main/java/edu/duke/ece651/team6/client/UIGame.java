@@ -3,6 +3,7 @@ package edu.duke.ece651.team6.client;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,17 +26,29 @@ import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.MoveOrder;
 import edu.duke.ece651.team6.shared.PlayerMapInfo;
+import edu.duke.ece651.team6.shared.PolygonGetter;
 import edu.duke.ece651.team6.shared.ResearchOrder;
 import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.Territory;
 import edu.duke.ece651.team6.shared.UpgradeOrder;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.paint.Color;
+import javafx.scene.text.FontWeight;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Tooltip;
 
 public class UIGame extends Game {
 
@@ -59,6 +72,12 @@ public class UIGame extends Game {
   Map<String, Integer> resource;
 
   GameLounge gameLounge;
+
+  PolygonGetter polygonGetter;
+
+  Map<Integer, Color> playerColor;
+
+  ArrayList<Color> colors;
 
   public void setScene(Scene scene) {
     this.scene = scene;
@@ -108,6 +127,9 @@ public class UIGame extends Game {
     // this.unitPlacementController.setUIGame(this);
     this.mainPageController = mainPageController;
     this.mainPageController.setUiGame(this);
+    this.polygonGetter = new PolygonGetter();
+    this.playerColor = new HashMap<>();
+    this.colors = new ArrayList<>(Arrays.asList(Color.AQUAMARINE, Color.AZURE, Color.VIOLET, Color.LIGHTCORAL));
     // this.mainPageController.setUsername(username);
   }
 
@@ -159,7 +181,8 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
+              .get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
@@ -216,6 +239,8 @@ public class UIGame extends Game {
       // territoryToNumUnitMapping = new HashMap<>();
 
       Set<Territory> territories = setting.getAssignedTerritories();
+
+      Platform.runLater(() -> updateMap(mainPageController.getMapPane(), setting.getGameMap().getTerritorySet()));
       territoryIterator = territories.iterator();
 
       while (gameStatus == GAME_STATUS.PLACE_UNITS) {
@@ -404,6 +429,100 @@ public class UIGame extends Game {
   // }
   // }
 
+  protected void setPolygonColor(Polygon polygon, int ownerID) {
+    polygon.setFill(this.playerColor.get(ownerID));
+  }
+
+  protected void performPolygonAnimation(Polygon polygon) {
+    Color color = (Color) polygon.getFill();
+    polygon.setFill(Color.LIGHTGRAY);
+
+    new Thread(() -> {
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      polygon.setFill(color);
+    }).start();
+  }
+
+  protected void setPolygonMouseClick(Polygon polygon) {
+    polygon.setOnMouseClicked((MouseEvent click_event) -> {
+      performPolygonAnimation(polygon);
+    });
+  }
+
+  protected Text setPolygonText(Pane mapPane, Polygon polygon, String text) {
+    for (Node node : mapPane.getChildren()) {
+      if (node.getId().equals(polygon.getId() + "Text")) {
+        Text territoryInfo = (Text) node;
+        territoryInfo.setText(text);
+        return territoryInfo;
+      }
+    }
+    Text territoryInfo = new Text(text);
+    territoryInfo.setId(polygon.getId() + "Text");
+    territoryInfo.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+    territoryInfo.setFill(Color.BLACK);
+    double centerX = polygon.getBoundsInLocal().getWidth() / 2;
+    double centerY = polygon.getBoundsInLocal().getHeight() / 2;
+    territoryInfo.setLayoutX(polygon.getLayoutX() + polygon.getBoundsInLocal().getMinX() + centerX
+        - territoryInfo.getBoundsInLocal().getWidth() / 2);
+    territoryInfo.setLayoutY(polygon.getLayoutY() + polygon.getBoundsInLocal().getMinY() + centerY
+        + territoryInfo.getBoundsInLocal().getHeight() / 2);
+    mapPane.getChildren().add(territoryInfo);
+    return territoryInfo;
+  }
+
+  protected void setPolygonTooltip(Polygon polygon, String text) {
+    Tooltip tooltip = new Tooltip(text);
+    Tooltip.install(polygon, tooltip);
+  }
+
+  protected void setMap(Pane mapPane, Set<Territory> territories) {
+    for (Territory currTerritory : territories) {
+      int ownerID = currTerritory.getOwnerId();
+      if (!playerColor.containsKey(ownerID)) {
+        this.playerColor.put(ownerID, this.colors.remove(0));
+      }
+      String name = currTerritory.getName();
+      int units = currTerritory.getNumUnits();
+      Polygon currPolygon = this.polygonGetter.getPolygon(currTerritory);
+      currPolygon.setId(name);
+      setPolygonColor(currPolygon, ownerID);
+      setPolygonTooltip(currPolygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\nNumber of units: " + units);
+      setPolygonMouseClick(currPolygon);
+      Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " > " + ownerID);
+      mapPane.getChildren().add(currPolygon);
+      polygonInfo.toFront();
+    }
+
+  }
+
+  protected void updateMap(Pane mapPane, Set<Territory> territories) {
+
+    if (mapPane.getChildren().isEmpty()) {
+      setMap(mapPane, territories);
+    } else {
+      for (Territory currTerritory : territories) {
+        int ownerID = currTerritory.getOwnerId();
+        String name = currTerritory.getName();
+        int units = currTerritory.getNumUnits();
+        for (Node node : mapPane.getChildren()) {
+          if (node.getId() != null && node.getId().equals(name)) {
+            Polygon polygon = (Polygon) node;
+            setPolygonColor(polygon, ownerID);
+            setPolygonText(mapPane, polygon, name + " > " + ownerID + "\n   " + units);
+            Tooltip.uninstall(polygon, null);
+            setPolygonTooltip(polygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\nNumber of units: " + units);
+          }
+        }
+      }
+    }
+
+  }
+
   /**
    * This method receives a updated GameMap from the server and display the new
    * scene to the user
@@ -417,6 +536,8 @@ public class UIGame extends Game {
     this.thisView = new UIGameView(mapInfo);
     this.gameMap = mapInfo.getGameMap();
     System.out.println("GameMap - UIGame.java" + gameMap.toString());
+
+    Platform.runLater(() -> updateMap(mainPageController.getMapPane(), this.gameMap.getTerritorySet()));
 
     this.resource.put(Constants.RESOURCE_FOOD,
         this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
