@@ -595,7 +595,6 @@ public class TextGame extends Game {
    * @return {@link GlobalMapInfo}
    * @throws InvalidObjectException
    */
-  @Override
   public GlobalMapInfo refreshMap() throws IOException, ClassNotFoundException {
     GlobalMapInfo mapInfo = this.socketHandler.recvGlobalMapInfo();
     if (mapInfo.playerId != -1) {

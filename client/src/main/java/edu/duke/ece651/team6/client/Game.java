@@ -74,5 +74,6 @@ public abstract class Game {
    * @return received GlobalMapInfo
    * @throws IOException, {@link ClassNotFoundException}
    */
-  abstract public GlobalMapInfo refreshMap() throws IOException, ClassNotFoundException;
+  // abstract public GlobalMapInfo refreshMap() throws IOException,
+  // ClassNotFoundException;
 }

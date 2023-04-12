@@ -227,6 +227,11 @@ public class UIGame extends Game {
   private String receiveGameResult() throws IOException, ClassNotFoundException {
     Result result = this.socketHandler.recvGameResult();
 
+    if (this.hasLost) {
+      refreshMap();
+      return Constants.GAME_OVER;
+    }
+
     if (result.getWinners().size() > 0) {
       this.gameStatus = GAME_STATUS.GAME_OVER;
 
@@ -349,7 +354,6 @@ public class UIGame extends Game {
           e.printStackTrace();
           mainPageController.showError(e.getMessage());
         }
-
       } else {
         // Handle the case when the user cancels the confirmation dialog
         return;
@@ -376,8 +380,7 @@ public class UIGame extends Game {
    * This method receives a updated GameMap from the server and display the new
    * scene to the user
    */
-  @Override
-  public GlobalMapInfo refreshMap() throws IOException, ClassNotFoundException {
+  public void refreshMap() throws IOException, ClassNotFoundException {
 
     GlobalMapInfo mapInfo = socketHandler.recvGlobalMapInfo();
     if (mapInfo.playerId != -1) {
@@ -402,6 +405,15 @@ public class UIGame extends Game {
       mainPageController.setPlayTurnsButtonsDisabled(false);
     });
 
+    if (this.hasLost) {
+
+      Platform.runLater(() -> {
+        mainPageController.setPlayTurnsButtonsDisabled(true);
+      });
+      receiveGameResult();
+      return;
+    }
+
     initiateCommit();
 
     // TODO Update Map!
@@ -414,7 +426,7 @@ public class UIGame extends Game {
     // SelectableTerritories(territoriesMap);
 
     // TODO display the globalMap on UI
-    return mapInfo;
+    return;
   }
 
   public MoveOrder constructMoveOrder() throws IOException, InterruptedException, ExecutionException {
@@ -824,11 +836,7 @@ public class UIGame extends Game {
     copiedResource.putAll(this.resource);
     System.out.println("Initiating Commit");
     currentCommit = new Commit(this.playerId, (GameMap) this.gameMap.clone(), copiedResource);
-    System.out.println("Finished initiating a new commit");
+    // System.out.println("Finished initiating a new commit");
   }
-
-  // TODO protected ResearchOrder constructResearch() throws IOException;
-
-  // TODO protected UpgradeOrder constructUpgrade() throws IOException;
 
 }
