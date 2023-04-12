@@ -266,11 +266,6 @@ public class UIGame extends Game {
   private String receiveGameResult() throws IOException, ClassNotFoundException {
     Result result = this.socketHandler.recvGameResult();
 
-    if (this.hasLost) {
-      refreshMap();
-      return Constants.GAME_OVER;
-    }
-
     if (result.getWinners().size() > 0) {
       this.gameStatus = GAME_STATUS.GAME_OVER;
 
@@ -299,6 +294,11 @@ public class UIGame extends Game {
       return Constants.GAME_OVER;
     }
 
+    if (this.hasLost) {
+      refreshMap();
+      return Constants.GAME_LOST;
+    }
+
     if (result.getLosers().contains(this.playerId)) {
       this.hasLost = true;
       this.gameStatus = GAME_STATUS.GAME_OVER;
@@ -306,7 +306,7 @@ public class UIGame extends Game {
         mainPageController.updateGameStatus(gameStatus);
       });
 
-      return Constants.GAME_OVER;
+      return Constants.GAME_LOST;
     }
 
     return null;
