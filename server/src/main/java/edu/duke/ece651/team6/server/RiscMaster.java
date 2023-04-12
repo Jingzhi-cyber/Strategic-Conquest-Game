@@ -84,11 +84,16 @@ public class RiscMaster implements Master {
      * placement to players
      */
     LinkedList<Set<Territory>> assignedTerritoryList = new LinkedList<>(generateRandomTerritoryAssignment());
+    Map<Integer, Set<Territory>> assignedTerritoryMap = new HashMap<>();
     for (int playerId = 0; playerId < playerNum; playerId++) {
       Set<Territory> assignedTerritories = assignedTerritoryList.poll();
+      assignedTerritoryMap.put(playerId, assignedTerritories);
       for (Territory t : assignedTerritories) {
         t.setOwnerId(playerId);
       }
+    }
+    for (int playerId = 0; playerId < playerNum; playerId++) {
+      Set<Territory> assignedTerritories = assignedTerritoryMap.get(playerId);
       GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, this.gameMap, assignedTerritories,
           availableUnits);
       safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
