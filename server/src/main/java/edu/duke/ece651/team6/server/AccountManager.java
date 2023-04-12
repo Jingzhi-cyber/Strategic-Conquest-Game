@@ -22,10 +22,13 @@ public class AccountManager {
     private Map<SocketKey, String> keyToUser;
     private Map<String, Set<SocketKey>> userList;
 
+    private Map<String, String> password;
+
     private AccountManager() {
         sockets = new HashMap<>();
         keyToUser = new HashMap<>();
         userList = new HashMap<>();
+        password = new HashMap<>();
     }
 
     public static AccountManager getInstance() {
@@ -93,6 +96,22 @@ public class AccountManager {
         }
         sockets.put(keyToChange, socket);
         return true;
+    }
+
+    public boolean register(String username, String password) {
+        if (this.password.containsKey(username)) {
+            return false;
+        }
+        this.password.put(username, password);
+        return true;
+    }
+
+    public boolean login(String username, String password) {
+        if (!this.password.containsKey(username)) {
+            return false;
+        }
+        String actualPassword = this.password.get(username);
+        return actualPassword.equals(password);
     }
     
 }

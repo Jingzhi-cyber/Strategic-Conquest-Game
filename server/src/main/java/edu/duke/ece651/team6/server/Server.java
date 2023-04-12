@@ -277,7 +277,7 @@ public class Server {
    * 
    * If this socket has an associated channel then the channel is closed as well.
    * 
-   * @param clientSocket is the socket for one client that is to be closed.
+   * @param key is the socket for one client that is to be closed.
    * @throws IOException if an I/O error occurs when closing this socket.
    */
   public void closeClientSocket(SocketKey key) throws IOException {
