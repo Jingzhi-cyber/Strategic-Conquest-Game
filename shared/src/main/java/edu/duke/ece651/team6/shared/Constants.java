@@ -8,6 +8,8 @@ public class Constants {
 
   public static final String GAME_OVER = "Game Over";
 
+  public static final String GAME_LOST = "Game Lost";
+
   public static final int UNITS_PER_PLAYER = 12;
 
   public enum GAME_STATUS {
