@@ -258,7 +258,7 @@ public class Commit implements java.io.Serializable {
     }
 
     if (research != null) {
-      builder.append(research.toString() + " (Cost: " + Constants.researchCosts.get(gameMap.getMaxTechLevel(playerId))
+      builder.append(research.toString() + " (Cost: " + Constants.researchCosts.get(gameMap.getMaxTechLevel(playerId) - 1) // here the max tech level has already been upgraded
           + ")" + "\n");
     }
 

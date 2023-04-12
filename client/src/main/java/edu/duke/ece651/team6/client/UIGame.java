@@ -397,8 +397,12 @@ public class UIGame extends Game {
 
         // TODO
         try {
-          socketHandler.recvGameResult();
+          // socketHandler.recvGameResult();
+          String status = receiveGameResult();
           System.out.println("Successfully received game result");
+          if (status == Constants.GAME_OVER) {
+            return;
+          }
 
           refreshMap();
           System.out.println("Successfully refreshed map");
