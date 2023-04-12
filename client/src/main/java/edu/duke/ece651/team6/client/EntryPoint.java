@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 
 import edu.duke.ece651.team6.client.controller.LoginRegisterController;
-import edu.duke.ece651.team6.client.controller.MainPageController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 public class EntryPoint extends Application {
@@ -23,20 +22,34 @@ public class EntryPoint extends Application {
   }
 
   public EntryPoint() {
-
   }
 
   @Override
   public void start(Stage stage) throws Exception {
-    // Thread.setDefaultUncaughtExceptionHandler(new ErrorReporter());
 
-    // XML
-    // URL xmlResource = getClass().getResource("/ui/risc-game-main-page.xml");
+    Parameters params = getParameters();
+    List<String> args = params.getRaw();
+
+    String hostname = null;
+    int port = 12345;
+
+    // Use the command line arguments as needed
+    try {
+      hostname = args.size() > 0 ? args.get(0) : "localhost";
+      port = args.size() > 1 ? Integer.parseInt(args.get(1)) : 12345;
+    } catch (Exception e) {
+      System.out.println("./gradlew run-client -PappArgs=\"['vcm-30760.vm.duke.edu', '12345']\"");
+      e.printStackTrace();
+      return;
+    }
+
+    Client client = new Client(hostname, port, stage);
+
     URL xmlResource = getClass().getResource("/ui/login-register-page.xml");
     FXMLLoader loader = new FXMLLoader(xmlResource);
 
     HashMap<Class<?>, Object> controllers = new HashMap<>();
-    Client client = new Client("localhost", 12345, stage);
+    // Client client = new Client("localhost", 12345, stage);
     System.out.println("New client");
     controllers.put(LoginRegisterController.class, new LoginRegisterController(client));
     // controllers.put(MainPageController.class, new MainPageController(client));
