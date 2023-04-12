@@ -41,26 +41,48 @@ public class GameReactor {
      * @throws ClassNotFoundException
      */
     public void run() throws IOException, ClassNotFoundException {
-        AccountManager m = AccountManager.getInstance();
+        AccountManager accountManager = AccountManager.getInstance();
         while (true) {
             Socket socket = serverSocket.accept();
             ObjectInputStream oos = new ObjectInputStream(socket.getInputStream());
             String info = (String) oos.readObject();
             System.out.println(info);
             String[] args = info.split(" ");
-            String username = args[0];
-            int numPlayer = 0;
-            if (args.length > 1) {
-                numPlayer = Integer.parseInt(args[1]);
+            if (args.length != 3) {
+                socket.close();
+                continue;
             }
+            String username = args[0];
+            String password = args[1];
+            int numPlayer = Integer.parseInt(args[2]);
             System.out.println(numPlayer);
-            SocketKey key = null;
+            // Register
+            if (numPlayer == -2) {
+                if (accountManager.register(username, password)) {
+                    socket.getOutputStream().write(0);
+                }
+                socket.close();
+                continue;
+            }
+            // Login
+            if (!accountManager.login(username, password)) {
+                socket.close();
+                continue;
+            } else {
+                if (numPlayer == -1) {
+                    socket.getOutputStream().write(0);
+                    socket.close();
+                    continue;
+                }
+            }
+            // Return to a game.
             if (numPlayer == 0) {
-                if (!m.update(username, socket)) {
+                if (!accountManager.update(username, socket)) {
                     socket.close();
                 }
+            // Join a new game.
             } else {
-                key = m.add(username, socket);
+                SocketKey key = accountManager.add(username, socket);
                 playerManager.get(numPlayer).add(key);
                 if (playerManager.get(numPlayer).size() == numPlayer) {
                     GameStarter gs = new GameStarter(new ArrayList<>(playerManager.get(numPlayer)));
@@ -78,7 +100,7 @@ public class GameReactor {
     /**
      * Start a game.
      */
-    private class GameStarter implements Runnable {
+    protected class GameStarter implements Runnable {
 
         private final List<SocketKey> clientSockets;
 

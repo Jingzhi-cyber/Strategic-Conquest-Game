@@ -1,12 +1,15 @@
 package edu.duke.ece651.team6.client.controller;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.Client;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import edu.duke.ece651.team6.client.SocketHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -56,72 +59,68 @@ public class LoginRegisterController extends Controller {
     return this.usernameField.getText();
   }
 
-  private void loginOrRegister(boolean result) throws IOException, ClassNotFoundException {
-    if (result) {
-      try {
-        // client.setUserName(getUserName());
-        // switchToGameMainPage();
-        // client.sendLogin();
-        switchToGameLoungePage();
-      } catch (Exception e) {
-        // Show an error message if the window fails to load
-        e.printStackTrace();
-        showError("Failed to load next window.");
-      }
-    } else {
-      // Show an error message
-      showError("Invalid username or password.");
-    }
-  }
-
   public void initialize() {
     // Set up the login button event handler
     loginButton.setOnAction(event -> {
       String username = usernameField.getText();
       String password = passwordField.getText();
-
       try {
-        // this.username = username;
+        loginUser(username, password);
         client.setUserName(username);
-        loginOrRegister(loginUser(username, password));
-        // client.setUserName(username);
-      } catch (ClassNotFoundException | IOException e) {
+        client.setPassword(password);
+        switchToGameLoungePage();
+      } catch (IllegalArgumentException e) {
         e.printStackTrace();
         showError(e.getMessage());
+      } catch (Exception e) {
+        e.printStackTrace();
+        showError("Failed to load next window.");
       }
     });
 
     // Set up the register button event handler
     registerButton.setOnAction(event -> {
-      String username = registerUsernameField.getText();
-      String password = registerPasswordField.getText();
-
+      String username = registerUsernameField.getText().trim();
+      String password = registerPasswordField.getText().trim();
       try {
-        // this.username = username;
-        loginOrRegister(registerUser(username, password));
-      } catch (ClassNotFoundException | IOException e) {
-        e.printStackTrace();
+        registerUser(username, password);
+        showSuccess("User has been registered successfully! Now you can login.");
+      } catch (IllegalArgumentException e) {
         showError(e.getMessage());
       }
     });
   }
 
-  private boolean loginUser(String username, String password) throws IOException, ClassNotFoundException {
-    // Check if the username and password match an existing user in the database
-    // Return true if the user is successfully authenticated, false otherwise
-    // TODO
-    // username is empty / null
-    // TODO
-    // client.sendLoginInfo(username);
-    return true;
+  private void loginUser(String username, String password) {
+    if (username.isEmpty() || password.isEmpty()) {
+      throw new IllegalArgumentException("username and password cannot be empty!");
+    }
+    try (Socket socket = new Socket(client.serverHostName, client.serverPort)) {
+      ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+      oos.writeObject(username + " " + password + " -1");
+      if (socket.getInputStream().read() == -1) {
+        throw new IOException();
+      }
+      oos.close();
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Invalid username and password!");
+    }
   }
 
-  private boolean registerUser(String username, String password) throws IOException, ClassNotFoundException {
-    // Add the new user to the database
-    // Return true if the user was successfully registered, false otherwise
-    // TODO
-    // client.sendLoginInfo(username);
-    return true;
+  private void registerUser(String username, String password) {
+    if (username.isEmpty() || password.isEmpty()) {
+      throw new IllegalArgumentException("username and password can't be empty!");
+    }
+    try (Socket socket = new Socket(client.serverHostName, client.serverPort)) {
+      ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+      oos.writeObject(username + " " + password + " -2");
+      if (socket.getInputStream().read() == -1) {
+        throw new IOException();
+      }
+      oos.close();
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Invalid username and password!");
+    }
   }
 
   private void switchToGameMainPage() throws Exception {
@@ -136,7 +135,7 @@ public class LoginRegisterController extends Controller {
   private void switchToGameLoungePage() throws Exception {
     // Load the main game window
     // ...
-    HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
+    HashMap<Class<?>, Object> controllers = new HashMap<>();
     // System.out.print(this.usernameField.getText());
     controllers.put(GameLoungeController.class, new GameLoungeController(client, gameLounge));
     System.out.println("username ready -> switching game lounge");

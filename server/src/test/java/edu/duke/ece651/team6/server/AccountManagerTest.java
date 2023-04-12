@@ -34,6 +34,11 @@ public class AccountManagerTest {
         }
         assertTrue(m.update("a", s1));
         assertSame(s1, m.getSocket(key2));
+        assertTrue(m.register("hello", "hello"));
+        assertFalse(m.register("hello", "hello"));
+        assertFalse(m.login("user", "hello"));
+        assertFalse(m.login("hello", "user"));
+        assertTrue(m.login("hello", "hello"));
     }
     
 }

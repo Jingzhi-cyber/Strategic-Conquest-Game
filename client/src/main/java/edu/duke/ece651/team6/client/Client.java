@@ -20,8 +20,9 @@ import javafx.stage.Stage;
 public class Client {
   // private final Integer playerId;
   private String username;
-  private final String serverHostName;
-  private final int serverPort;
+  private String password;
+  public final String serverHostName;
+  public final int serverPort;
   private Integer gameId;
   private Scene scene = null;
 
@@ -104,6 +105,8 @@ public class Client {
     this.username = userName;
   }
 
+  public void setPassword(String password) { this.password = password; }
+
   public UIGame getUIGameById(Integer id) {
     if (!uiGames.containsKey(id)) {
       throw new IllegalArgumentException("invalid game id");
@@ -142,7 +145,7 @@ public class Client {
     UIGame newGame = new UIGame(newGameId, username, newSocketHandler, mainPageController);
     System.out.println("New game has been created");
     uiGames.put(newGameId, newGame);
-    newSocketHandler.sendUserNameAndNumPlayer(username + " " + numPlayer); // TODO send username + numPlayer or only
+    newSocketHandler.sendUserNameAndNumPlayer(username + " " + password + " " + numPlayer); // send username + numPlayer or only
                                                                            // numPlayer
     // create a thread to handle the game logic
 
