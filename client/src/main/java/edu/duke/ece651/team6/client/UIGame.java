@@ -153,7 +153,7 @@ public class UIGame extends Game {
         while (numUnits == null) {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
-              "Player" + this.playerId + ", how many units do you want to place on the " + currentTerritory.getName()
+              "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
                   + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
 
           if (numUnits == null) {
@@ -679,8 +679,8 @@ public class UIGame extends Game {
     }
 
     if (levels.isEmpty()) {
-      mainPageController.showError(
-          "Cannot " + title + " to upgrade level for units on " + src.getName() + " because of level upper limit");
+      mainPageController
+          .showError(title + " Cannot upgrade level for units on " + src.getName() + " because of level upper limit. ");
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(levels.get(0), levels);
