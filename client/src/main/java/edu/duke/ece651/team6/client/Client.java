@@ -135,7 +135,11 @@ public class Client {
     int newGameId = this.gameId++;
     // create socket for connection with the server and wait for server ACK
     SocketHandler newSocketHandler = new SocketHandler(serverHostName, serverPort);
-    UIGame newGame = new UIGame(newGameId, username, newSocketHandler, new MainPageController(this));
+    MainPageController mainPageController = new MainPageController(this);
+    Platform.runLater(() -> {
+      mainPageController.setUsername(username);
+    });
+    UIGame newGame = new UIGame(newGameId, username, newSocketHandler, mainPageController);
     System.out.println("New game has been created");
     uiGames.put(newGameId, newGame);
     newSocketHandler.sendUserNameAndNumPlayer(username + " " + numPlayer); // TODO send username + numPlayer or only
