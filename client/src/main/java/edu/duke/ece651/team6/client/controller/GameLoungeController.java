@@ -160,6 +160,8 @@ public class GameLoungeController extends Controller implements Initializable {
     if (returnToGame) {
       Scene scene = client.getUIGameById(gameId).getScene();
       client.getStage().setScene(scene);
+      client.getStage().setTitle("Main Page");
+      client.getStage().show();
       return;
     }
 

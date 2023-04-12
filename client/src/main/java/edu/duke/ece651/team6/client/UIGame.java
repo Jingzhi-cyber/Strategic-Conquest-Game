@@ -1,7 +1,6 @@
 package edu.duke.ece651.team6.client;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -107,25 +105,6 @@ public class UIGame extends Game {
     // this.mainPageController.setUsername(username);
   }
 
-  // private Client client = null;
-
-  // public UIGame(Client client, int gameId, String username, SocketHandler
-  // socketHandler,
-  // MainPageController mainPageController) {
-  // super(socketHandler);
-  // this.client = client;
-  // this.gameId = gameId;
-  // this.username = username;
-  // this.gameStatus = GAME_STATUS.PLACE_UNITS;
-  // this.resource = new HashMap<>();
-  // // Initialize the controller, e.g., by loading the FXML file
-  // // this.unitPlacementController = unitPlacementController;// TODO
-  // // this.unitPlacementController.setUIGame(this);
-  // this.mainPageController = mainPageController;
-  // this.mainPageController.setUiGame(this);
-  // // this.mainPageController.setUsername(username);
-  // }
-
   public void exit() throws IOException {
     socketHandler.socket.close();
   }
@@ -139,22 +118,7 @@ public class UIGame extends Game {
   private Iterator<Territory> territoryIterator;
   private Territory currentTerritory;
 
-  // public String receiveUnitsFromUI(Integer numUnits)
-  // throws IOException, ClassNotFoundException, InterruptedException,
-  // ExecutionException {
-  // try {
-  // setting.decreaseUnitsBy(numUnits);
-  // territoryToNumUnitMapping.put(currentTerritory, numUnits);
-  // nextUnitPlacementPrompt();
-  // } catch (IllegalArgumentException e) {
-  // return e.getMessage();
-  // } catch (ClassNotFoundException | IOException e) {
-  // return e.getMessage();
-  // }
-  // return null;
-  // }
-
-  List<Integer> construcIntegersFrom0UpTo(int maxInteger) {
+  List<Integer> constructIntegersFrom0UpTo(int maxInteger) {
     List<Integer> intList = new ArrayList<>();
     // TODO <=
     for (int i = 0; i <= maxInteger; i++) {
@@ -181,7 +145,7 @@ public class UIGame extends Game {
       } else {
         int maxAvailUnits = setting.getRemainingNumUnits();
 
-        List<Integer> remainingUnits = construcIntegersFrom0UpTo(maxAvailUnits);
+        List<Integer> remainingUnits = constructIntegersFrom0UpTo(maxAvailUnits);
 
         Integer numUnits = null;
         while (numUnits == null) {
@@ -200,7 +164,12 @@ public class UIGame extends Game {
         try {
           setting.decreaseUnitsBy(numUnits);
         } catch (IllegalArgumentException e) {
-          mainPageController.showError(e.getMessage());
+
+          System.out.println("*** added runLater");
+          Platform.runLater(() -> {
+            mainPageController.showError(e.getMessage());
+          });
+
           e.printStackTrace();
         }
         territoryToNumUnitMapping.put(currentTerritory, numUnits);
@@ -241,10 +210,10 @@ public class UIGame extends Game {
     }
 
     refreshMap();
-    // client.joinStartedGame(gameId);
-    // TODO
-    // playGame();
-    // nextUnitPlacementPrompt();
+
+    Platform.runLater(() -> {
+      mainPageController.setPlayTurnsButtonsDisabled(false);
+    });
   }
 
   /**
@@ -260,20 +229,28 @@ public class UIGame extends Game {
 
     if (result.getWinners().size() > 0) {
       this.gameStatus = GAME_STATUS.GAME_OVER;
-      mainPageController.updateGameStatus(gameStatus);
+
+      System.out.println("*** added runLater");
+      Platform.runLater(() -> {
+        mainPageController.updateGameStatus(gameStatus);
+      });
+
       // TODO printLine("Player " + result.getWinners().toString() + " wins!");
 
       // Show an Alert with the game result
-      Alert gameOverAlert = new Alert(Alert.AlertType.INFORMATION);
-      gameOverAlert.setTitle("Game Over");
-      gameOverAlert.setHeaderText("The game has ended.");
+      System.out.println("*** added runLater");
+      Platform.runLater(() -> {
+        Alert gameOverAlert = new Alert(Alert.AlertType.INFORMATION);
+        gameOverAlert.setTitle("Game Over");
+        gameOverAlert.setHeaderText("The game has ended.");
 
-      if (result.getWinners().contains(this.playerId)) {
-        gameOverAlert.setContentText("Congratulations! You have won the game.");
-      } else {
-        gameOverAlert.setContentText("Player " + result.getWinners().toString() + " won the game.");
-      }
-      gameOverAlert.showAndWait();
+        if (result.getWinners().contains(this.playerId)) {
+          gameOverAlert.setContentText("Congratulations! You have won the game.");
+        } else {
+          gameOverAlert.setContentText("Player " + result.getWinners().toString() + " won the game.");
+        }
+        gameOverAlert.showAndWait();
+      });
 
       return Constants.GAME_OVER;
     }
@@ -335,44 +312,50 @@ public class UIGame extends Game {
     return result;
   }
 
-  public void submitCommit() throws IOException, ClassNotFoundException {
+  public void submitCommit() {
     /* -------- Show a confirmation dialog with the orders-------- */
     String ordersString = this.currentCommit.toString();
-    Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
-    confirmationDialog.setTitle("Confirm Orders");
-    confirmationDialog.setHeaderText("Please confirm your orders:");
-    confirmationDialog.setContentText(ordersString);
 
-    Optional<ButtonType> confirmOrder = confirmationDialog.showAndWait();
-    if (confirmOrder.isPresent() && confirmOrder.get() == ButtonType.OK) {
-      // Send commit to the server if the user confirms
+    Platform.runLater(() -> {
+      Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
+      confirmationDialog.setTitle("Confirm Orders");
+      confirmationDialog.setHeaderText("Please confirm your orders:");
+      confirmationDialog.setContentText(ordersString);
 
-      try {
-        this.socketHandler.sendCommit(this.currentCommit);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      Optional<ButtonType> confirmOrder = confirmationDialog.showAndWait();
 
-      System.out.println("Successfully sent a commit to the server");
-      updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+      if (confirmOrder.isPresent() && confirmOrder.get() == ButtonType.OK) {
+        // Send commit to the server if the user confirms
 
-      Platform.runLater(() -> {
+        try {
+          this.socketHandler.sendCommit(this.currentCommit);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
+        System.out.println("Successfully sent a commit to the server");
+        updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+
         this.mainPageController.setPlayTurnsButtonsDisabled(true);
-        // this.mainPageController.setSubmitOrderDisabled(true);
-        // this.mainPageController.updateGameStatus(gameStatus);
-      });
 
-      // TODO
-      socketHandler.recvGameResult();
-      System.out.println("Successfully received game result");
+        // TODO
+        try {
+          socketHandler.recvGameResult();
+          System.out.println("Successfully received game result");
 
-      refreshMap();
-      System.out.println("Successfully refreshed map");
+          refreshMap();
+          System.out.println("Successfully refreshed map");
+        } catch (IOException | ClassNotFoundException e) {
+          e.printStackTrace();
+          mainPageController.showError(e.getMessage());
+        }
 
-    } else {
-      // Handle the case when the user cancels the confirmation dialog
-      return;
-    }
+      } else {
+        // Handle the case when the user cancels the confirmation dialog
+        return;
+      }
+    });
+
   }
 
   /**
@@ -418,6 +401,7 @@ public class UIGame extends Game {
 
       mainPageController.setPlayTurnsButtonsDisabled(false);
     });
+
     initiateCommit();
 
     // TODO Update Map!
@@ -431,12 +415,6 @@ public class UIGame extends Game {
 
     // TODO display the globalMap on UI
     return mapInfo;
-  }
-
-  @Override
-  protected Territory findTerritory(Territory src, String message) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   public MoveOrder constructMoveOrder() throws IOException, InterruptedException, ExecutionException {
@@ -720,34 +698,6 @@ public class UIGame extends Game {
     return future;
   }
 
-  // private <T> T showSelectionDialog(Class<T> clazz, List<T> list, String
-  // promptIfEmptyList, String title,
-  // String contentText) {
-  // if (list.isEmpty()) {
-  // mainPageController.showError(promptIfEmptyList);
-  // }
-  // final T[] userInput = (T[]) Array.newInstance(clazz, 1);
-  // Platform.runLater(() -> {
-  // ChoiceDialog<T> dialog = new ChoiceDialog<>(list.get(0), list);
-  // dialog.setTitle(title);
-  // dialog.setHeaderText(null);
-  // dialog.setContentText(contentText);
-
-  // Optional<T> result = dialog.showAndWait();
-
-  // result.ifPresent(input -> userInput[0] = input);
-  // });
-
-  // while (userInput[0] == null) {
-  // try {
-  // Thread.sleep(100);
-  // } catch (InterruptedException e) {
-  // throw new RuntimeException(e);
-  // }
-  // }
-  // return userInput[0];
-  // }
-
   private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
       String title) {
     CompletableFuture<Integer> future = new CompletableFuture<>();
@@ -854,7 +804,8 @@ public class UIGame extends Game {
 
   private Set<Territory> getTerritories(Territory src, boolean move) {
     if (src == null) {
-      return getSelfOwnedTerritories();
+      return getSelfOwnedTerritories().stream().filter(territory -> territory.getNumUnits() > 0)
+          .collect(Collectors.toSet()); // to ensure only display src territory that has more than 0 units
     } else {
       if (move) {
         return getHasPathSelfTerritories(src);
