@@ -34,6 +34,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 
 public class UIGame extends Game {
 
@@ -323,9 +325,22 @@ public class UIGame extends Game {
 
     Platform.runLater(() -> {
       Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
+
       confirmationDialog.setTitle("Confirm Orders");
       confirmationDialog.setHeaderText("Please confirm your orders:");
-      confirmationDialog.setContentText(ordersString);
+      // confirmationDialog.setContentText(ordersString);
+
+      TextArea textArea = new TextArea();
+      textArea.setEditable(false);
+      textArea.setWrapText(true);
+      textArea.setText(ordersString);
+
+      ScrollPane scrollPane = new ScrollPane(textArea);
+      scrollPane.setFitToWidth(true);
+      scrollPane.setFitToHeight(true);
+      scrollPane.setPrefSize(500, 300); // Set the size of the scroll pane
+
+      confirmationDialog.getDialogPane().setContent(scrollPane);
 
       Optional<ButtonType> confirmOrder = confirmationDialog.showAndWait();
 
