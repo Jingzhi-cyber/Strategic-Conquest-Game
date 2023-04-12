@@ -9,9 +9,11 @@ public class UpgradeLevelRuleChecker extends OrderRuleChecker {
     @Override
     protected String checkMyRule(Order order, GameMap theMap) {
         UpgradeOrder upgrade = (UpgradeOrder) order;
+        int playerId = upgrade.getTerritory().getOwnerId();
         int nowLevel = upgrade.getNowLevel();
         int targetLevel = upgrade.getTargetLevel();
         int maxLevel = 6;
+        int currTechLevel = theMap.getMaxTechLevel(playerId);
         if (nowLevel < 0 || nowLevel > maxLevel) {
             return "invalid upgrade: illegal nowLevel: " + nowLevel;
         }
@@ -20,6 +22,9 @@ public class UpgradeLevelRuleChecker extends OrderRuleChecker {
         }
         if (nowLevel > maxLevel) {
             return "invalid upgrade: target level must be greater than current level";
+        }
+        if (targetLevel > currTechLevel) {
+            return "invalid upgrade: target level is greater than current tech level: " + currTechLevel;
         }
         return null;
     }
