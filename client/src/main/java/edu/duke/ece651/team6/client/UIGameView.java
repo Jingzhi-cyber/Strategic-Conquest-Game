@@ -8,7 +8,7 @@ import javafx.scene.Scene;
  */
 public class UIGameView extends MapView {
 
-  Scene scene = null;
+  // Scene scene = null;
 
   public UIGameView(GlobalMapInfo map) {
     super(map);
@@ -20,7 +20,5 @@ public class UIGameView extends MapView {
     return null;
   }
 
-  public void updateScene(Scene scene) {
-    this.scene = scene;
-  }
+
 }

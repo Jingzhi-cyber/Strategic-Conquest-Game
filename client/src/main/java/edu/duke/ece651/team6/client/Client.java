@@ -3,14 +3,11 @@ package edu.duke.ece651.team6.client;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 import edu.duke.ece651.team6.client.controller.GameLoungeController;
 import edu.duke.ece651.team6.client.controller.LoginRegisterController;
 import edu.duke.ece651.team6.client.controller.MainPageController;
-import edu.duke.ece651.team6.client.controller.UnitPlacementController;
 import edu.duke.ece651.team6.client.model.GameLounge;
-import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;

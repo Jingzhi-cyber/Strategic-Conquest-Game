@@ -10,14 +10,11 @@ import edu.duke.ece651.team6.client.UIGame;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
 
 public class GameLoungeController extends Controller implements Initializable {
 
@@ -65,7 +62,8 @@ public class GameLoungeController extends Controller implements Initializable {
     }
   }
 
-  public void updateGameList() {
+  public void updateGameList(GameLounge gameLounge) {
+    this.gameLounge = gameLounge;
     gameLoungeList.setItems(gameLounge.getList());
   }
 

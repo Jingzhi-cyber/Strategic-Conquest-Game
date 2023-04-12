@@ -43,7 +43,7 @@ public class UIGame extends Game {
   private MainPageController mainPageController;
 
   int gameId; // unique for games that are of each player
-  // Integer playerId;
+  Integer playerId;
   String username;
 
   Scene scene;
@@ -72,6 +72,10 @@ public class UIGame extends Game {
     return this.gameStatus;
   }
 
+  public int getGameId() {
+    return this.gameId;
+  }
+
   public void setGameLounge(GameLounge gameLounge) {
     this.gameLounge = gameLounge;
   }
@@ -97,7 +101,7 @@ public class UIGame extends Game {
     super(socketHandler);
     this.gameId = gameId;
     this.username = username;
-    this.gameStatus = GAME_STATUS.PLACE_UNITS;
+    this.gameStatus = GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER;
     this.resource = new HashMap<>();
     // Initialize the controller, e.g., by loading the FXML file
     // this.unitPlacementController = unitPlacementController;// TODO
@@ -132,6 +136,7 @@ public class UIGame extends Game {
   public void nextUnitPlacementPrompt()
       throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
     if (territoryIterator.hasNext()) {
+      System.out.println("nextUnitPlacementPrompt");
       currentTerritory = territoryIterator.next();
 
       if (!territoryIterator.hasNext()) { // Check if the current territory is the last territory
@@ -196,10 +201,17 @@ public class UIGame extends Game {
    */
   public void entryPoint() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
     System.out.println("Game status: " + gameStatus);
-    if (this.gameStatus == GAME_STATUS.PLACE_UNITS) {
-      System.out.print("Placing units\n");
+    if (this.gameStatus == GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER) {
+      System.out.print("Waiting for other players to enter\n");
+
       System.out.println((String) socketHandler.recvObject());
       setting = socketHandler.recvGameBasicSetting();
+
+      this.gameStatus = GAME_STATUS.PLACE_UNITS;
+      Platform.runLater(() -> {
+        mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
+        mainPageController.updateGameStatus(this.gameStatus);
+      });
 
       // territoryToNumUnitMapping = new HashMap<>();
 
@@ -278,46 +290,46 @@ public class UIGame extends Game {
   /**
    * This method plays one turn in one game
    */
-  @Override
-  public String playOneTurn() throws IOException, ClassNotFoundException {
-    /* -------- 1. Receive and display the map --------- */
-    // will update local variables: mapTextView and gameMap
-    refreshMap();
+  // @Override
+  // public String playOneTurn() throws IOException, ClassNotFoundException {
+  // /* -------- 1. Receive and display the map --------- */
+  // // will update local variables: mapTextView and gameMap
+  // refreshMap();
 
-    System.out.println("Refreshed Map");
-    /*
-     * ---------2. Skip constructing a commit, and skip sending it to the server,
-     * instead, directly waiting for the game result. ----------
-     */
-    if (this.hasLost) {
-      receiveGameResult();
-    }
+  // System.out.println("Refreshed Map");
+  // /*
+  // * ---------2. Skip constructing a commit, and skip sending it to the server,
+  // * instead, directly waiting for the game result. ----------
+  // */
+  // if (this.hasLost) {
+  // receiveGameResult();
+  // }
 
-    /*
-     * ---------3. Set game status and initiate a commit -----------
-     */
-    initiateCommit();
-    // updateGameStatus(this.gameStatus);
+  // /*
+  // * ---------3. Set game status and initiate a commit -----------
+  // */
+  // initiateCommit();
+  // // updateGameStatus(this.gameStatus);
 
-    Platform.runLater(() -> {
-      this.mainPageController.setOrderMenuDisabled(false);
-      this.mainPageController.setSubmitOrderDisabled(false);
-    });
+  // Platform.runLater(() -> {
+  // this.mainPageController.setOrderMenuDisabled(false);
+  // this.mainPageController.setSubmitOrderDisabled(false);
+  // });
 
-    /* User interactions to place orders and sending commit */
+  // /* User interactions to place orders and sending commit */
 
-    /* -------- Handle game result of this turn -------- */
-    String result = receiveGameResult();
+  // /* -------- Handle game result of this turn -------- */
+  // String result = receiveGameResult();
 
-    initiateCommit();
+  // initiateCommit();
 
-    Platform.runLater(() -> {
-      this.mainPageController.setOrderMenuDisabled(false);
-      this.mainPageController.setSubmitOrderDisabled(false);
-    });
+  // Platform.runLater(() -> {
+  // this.mainPageController.setOrderMenuDisabled(false);
+  // this.mainPageController.setSubmitOrderDisabled(false);
+  // });
 
-    return result;
-  }
+  // return result;
+  // }
 
   public void submitCommit() {
     /* -------- Show a confirmation dialog with the orders-------- */
@@ -377,19 +389,20 @@ public class UIGame extends Game {
 
   }
 
-  /**
-   * This method handles a whole game for a user
-   */
-  public void playGame() throws IOException, UnknownHostException, ClassNotFoundException {
-    System.out.println("UIGame - playGame - GameStatus " + gameStatus);
-    while (gameStatus != GAME_STATUS.GAME_OVER) {
-      System.out.println("UIGame - playGame - GameStatus " + gameStatus);
-      String result = playOneTurn();
-      if (result != null) {
-        // System.exit(0);
-      }
-    }
-  }
+  // /**
+  // * This method handles a whole game for a user
+  // */
+  // public void playGame() throws IOException, UnknownHostException,
+  // ClassNotFoundException {
+  // System.out.println("UIGame - playGame - GameStatus " + gameStatus);
+  // while (gameStatus != GAME_STATUS.GAME_OVER) {
+  // System.out.println("UIGame - playGame - GameStatus " + gameStatus);
+  // String result = playOneTurn();
+  // if (result != null) {
+  // // System.exit(0);
+  // }
+  // }
+  // }
 
   /**
    * This method receives a updated GameMap from the server and display the new
@@ -643,7 +656,7 @@ public class UIGame extends Game {
     List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
 
     if (territories.isEmpty()) {
-      mainPageController.showError("Cannot " + title + " because there aren't available territories");
+      mainPageController.showError(title + " Cannot " + " because there aren't available territories");
       future.complete(null);
     } else {
       ChoiceDialog<String> dialog = new ChoiceDialog<>(territoryNames.get(0), territoryNames);
@@ -739,7 +752,7 @@ public class UIGame extends Game {
 
     if (nums.isEmpty()) {
       mainPageController.showError(
-          "Cannot " + title + " to upgrade level for units on " + src.getName() + " because units are not enough");
+          title + " Cannot " + " to upgrade level for units on " + src.getName() + " because units are not enough");
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);

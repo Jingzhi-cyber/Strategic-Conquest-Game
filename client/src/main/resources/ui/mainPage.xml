@@ -57,7 +57,7 @@
                                 <Font name="System Bold" size="16.0" />
                             </font>
                         </Label>
-                        <Label alignment="CENTER" fx:id="gameStatusLabel" prefHeight="53.0" prefWidth="238.0" style="-fx-border-color: Turquoise;" text="Status: PLACE_UNITS">
+                        <Label alignment="CENTER" fx:id="gameStatusLabel" prefHeight="53.0" prefWidth="238.0" style="-fx-border-color: Turquoise;" text="Status: WAIT_OTHER_PLAYERS_TO_ENTER">
                             <font>
                                 <Font name="System Bold" size="16.0" />
                             </font>

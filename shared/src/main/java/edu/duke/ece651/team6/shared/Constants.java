@@ -11,7 +11,7 @@ public class Constants {
   public static final int UNITS_PER_PLAYER = 12;
 
   public enum GAME_STATUS {
-    PLACE_UNITS, ISSUE_ORDER, WAITING_FOR_RESULT, GAME_OVER
+    WAIT_OTHER_PLAYERS_TO_ENTER, PLACE_UNITS, ISSUE_ORDER, WAITING_FOR_RESULT, GAME_OVER
   }
 
   public static final String RESOURCE_FOOD = "food";
