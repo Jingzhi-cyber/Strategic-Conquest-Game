@@ -19,7 +19,7 @@ public class GameBasicSettingTest {
         add(new Territory("B", 1));
       }
     };
-    GameBasicSetting setting = new GameBasicSetting(1, 3, territories, 10);
+    GameBasicSetting setting = new GameBasicSetting(1, 3, null, territories, 10);
     return setting;
   }
 

@@ -58,7 +58,7 @@ public class TextGameTest {
 
   @BeforeEach
   public void setUp() throws IOException, ClassNotFoundException {
-    setting = new GameBasicSetting(1, 2, createTerritories_withoutUnitsPlacement(), 10);
+    setting = new GameBasicSetting(1, 2, null, createTerritories_withoutUnitsPlacement(), 10);
     when(this.client.recvGlobalMapInfo())
         .thenReturn(createGlobalMapInfo_withUnitsPlaced(createGameMap_withUnitPlacement()));
     when(this.client.recvGameResult()).thenReturn(new Result());
@@ -68,7 +68,7 @@ public class TextGameTest {
     BufferedReader reader = new BufferedReader(new StringReader(inputData));
     PrintStream printStream = new PrintStream(bytes, true); // ps is a PrintStream (looks like System.out) which
                                                             // writes its data into bytes instead of to the screen.
-    setting = new GameBasicSetting(1, 2, territories, 10);
+    setting = new GameBasicSetting(1, 2, null, territories, 10);
     // gameMap = createGameMap();
     TextGame textPlayer = new TextGame(client, reader, printStream, setting);
     return textPlayer;

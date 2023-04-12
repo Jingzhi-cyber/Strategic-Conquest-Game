@@ -88,8 +88,10 @@ public class GameReactor {
 
         @Override
         public void run() {
-            SampleMap sampleMap = new SampleMap();
-            GameMap gameMap = new GameMap(sampleMap.getAdjList());
+            // SampleMap sampleMap = new SampleMap();
+            // GameMap gameMap = new GameMap(sampleMap.getAdjList());
+            MapGenerator mapGenerator = new MapGenerator(24);
+            GameMap gameMap = new GameMap(mapGenerator.getDistanceMap(), false);
             Server server = new Server(clientSockets);
             try {
                 for (SocketKey key : clientSockets) {

@@ -10,6 +10,8 @@ public class GameBasicSetting implements java.io.Serializable {
   final int playerId;
   final int numPlayers;
 
+  private GameMap gameMap;
+
   final Set<Territory> assignedTerritories; // assigned by the game master
   int remainingNumUnits;
 
@@ -24,10 +26,11 @@ public class GameBasicSetting implements java.io.Serializable {
    * @param territories    is a group of territories assigned to the player
    * @param availableUnits is the total number of units can be used on the board
    */
-  public GameBasicSetting(int playerId, int numPlayers, Set<Territory> territories, int availableUnits) {
+  public GameBasicSetting(int playerId, int numPlayers, GameMap gameMap, Set<Territory> territories, int availableUnits) {
     this.playerId = playerId;
     this.numPlayers = numPlayers;
     this.assignedTerritories = territories;
+    this.gameMap = gameMap;
     this.remainingNumUnits = availableUnits;
     this.unitPlacement = new HashMap<>();
   }
@@ -50,6 +53,10 @@ public class GameBasicSetting implements java.io.Serializable {
   /* Get remaining number of units */
   public int getRemainingNumUnits() {
     return remainingNumUnits;
+  }
+
+  public GameMap getGameMap() {
+    return this.gameMap;
   }
 
   /**

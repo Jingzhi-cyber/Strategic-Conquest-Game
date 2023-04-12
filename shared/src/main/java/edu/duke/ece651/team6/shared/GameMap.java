@@ -37,6 +37,25 @@ public class GameMap implements java.io.Serializable, Cloneable {
     this.maxTechLevel = new HashMap<>();
   }
 
+  public GameMap(Map<Territory, Map<Territory, Double>> distMap, boolean useDist) {
+    Map<Territory, Set<Territory>> adjList = new HashMap<>();
+    for (Territory t : distMap.keySet()) {
+      Set<Territory> neighbors = new HashSet<>();
+      for (Territory neighbor : distMap.get(t).keySet()) {
+        neighbors.add(neighbor);
+      }
+      adjList.put(t, neighbors);
+    }
+    this.weightedAdjList = generateWeightedAdjList(adjList);
+    this.nameToTerritory = new HashMap<String, Territory>();
+    for (Territory t : weightedAdjList.keySet()) {
+      nameToTerritory.put(t.getName(), t);
+    }
+    this.territoryNum = this.weightedAdjList.size();
+    this.resources = new HashMap<>();
+    this.maxTechLevel = new HashMap<>();
+  }
+
   @Override
   public Object clone() {
     GameMap gameMap = new GameMap(new HashMap<Territory, Set<Territory>>());
