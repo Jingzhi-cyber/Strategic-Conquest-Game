@@ -122,7 +122,8 @@ public class RiscMaster implements Master {
     for (PlayerProfile playerProfile : playerProfiles) {
       playerIds.add(playerProfile.getId());
     }
-    ResourceProduceCounter resourceProduceCounter = new ResourceProduceCounter(this.gameMap.getTerritorySet(), playerIds);
+    ResourceProduceCounter resourceProduceCounter = new ResourceProduceCounter(this.gameMap.getTerritorySet(),
+        playerIds);
     this.gameMap.updateResource(resourceProduceCounter.updateAndGetResult());
 
     /**
@@ -172,11 +173,11 @@ public class RiscMaster implements Master {
       Commit commit = (Commit) o;
       // // double-check the commit on Master side
       // try {
-      //   commit.checkAll(gameMap);
+      // commit.checkAll(gameMap);
       // } catch (IllegalArgumentException e) {
-      //   System.out.println("Receive Commit that is invalid, drop that commit");
-      //   System.out.println(e.getMessage());
-      //   continue;
+      // System.out.println("Receive Commit that is invalid, drop that commit");
+      // System.out.println(e.getMessage());
+      // continue;
       // }
       commits.add(commit);
     }
