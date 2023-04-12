@@ -122,11 +122,7 @@ public class MainPageController extends Controller implements Initializable {
 
   @FXML
   public void submitOrders() {
-    try {
-      uiGame.submitCommit();
-    } catch (IOException | ClassNotFoundException e) {
-      showError(e.getMessage());
-    }
+    uiGame.submitCommit();
   }
 
   public void setGameLounge(GameLounge gameLounge) {
@@ -158,7 +154,7 @@ public class MainPageController extends Controller implements Initializable {
     orderMenu.setValue("Move");
 
     if (uiGame.getStatus() != GAME_STATUS.ISSUE_ORDER) {
-      // orderMenu.setDisable(true);
+      setPlayTurnsButtonsDisabled(true);
     }
 
     techResourcesLabel.setText("Tech resources: 0 (units)");
@@ -182,7 +178,6 @@ public class MainPageController extends Controller implements Initializable {
     // + client.getGameLoungeController().gameLoungeList.getItems().size());
     this.mainPageScene = resetCommitButton.getScene();
     uiGame.setScene(mainPageScene);
-
 
     controllers.put(GameLoungeController.class, client.getGameLoungeController());
     switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", client.getStage());

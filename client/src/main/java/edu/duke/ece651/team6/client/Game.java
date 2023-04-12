@@ -30,7 +30,8 @@ public abstract class Game {
   /**
    * At the beginning of the game, Player needs to place units to the territories
    */
-  // abstract public void placeUnit() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException;
+  // abstract public void placeUnit() throws IOException, ClassNotFoundException,
+  // InterruptedException, ExecutionException;
 
   /**
    * Player's one turn of game includes: 1. Receive playerinfo from master 2. Make
@@ -51,7 +52,8 @@ public abstract class Game {
   // abstract public void playGame() throws IOException, UnknownHostException,
   // ClassNotFoundException;
 
-  abstract protected Territory findTerritory(Territory src, String message) throws IOException;
+  // abstract protected Territory findTerritory(Territory src, String message)
+  // throws IOException;
 
   abstract protected Set<Territory> findEnemyTerritories();
 
