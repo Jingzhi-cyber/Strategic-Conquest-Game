@@ -269,4 +269,8 @@ public class Commit implements java.io.Serializable {
     return builder.toString();
   }
 
+  public GameMap getCurrentGameMap() {
+    return this.gameMap;
+  }
+
 }

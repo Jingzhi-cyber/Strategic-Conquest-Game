@@ -101,6 +101,17 @@ public class GameMap implements java.io.Serializable, Cloneable {
     return weightedAdjList.keySet();
   }
 
+  public Set<Territory> getTerritorySetByPlayerId(int playerId) {
+    Set<Territory> territories = weightedAdjList.keySet();
+    Set<Territory> playerTerritories = new HashSet<Territory>();
+    for (Territory t : territories) {
+      if (t.getOwnerId() == playerId) {
+        playerTerritories.add(t);
+      }
+    }
+    return playerTerritories;
+  }
+
   /**
    * Get number of territories in the map
    * 
@@ -111,7 +122,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Get the distance to neighbors of a Territory
+   * Get the distance to all neighbors of a Territory
    * 
    * @param territory a territory
    * @return the Map that contains the distance to the neighbors
