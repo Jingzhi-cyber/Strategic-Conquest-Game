@@ -380,16 +380,16 @@ public class RiscMaster implements Master {
    */
   private void executeCommits(List<Commit> commits) {
     for (Commit c : commits) {
-      c.performMoves(this.gameMap);
-    }
-    for (Commit c : commits) {
-      c.performAttacks(this.gameMap);
+      c.performUpgrade(gameMap);
     }
     for (Commit c : commits) {
       c.performResearch(this.gameMap);
     }
     for (Commit c : commits) {
-      c.performUpgrade(gameMap);
+      c.performMoves(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performAttacks(this.gameMap);
     }
     Set<Territory> territories = this.gameMap.getTerritorySet();
     for (Territory territory : territories) {

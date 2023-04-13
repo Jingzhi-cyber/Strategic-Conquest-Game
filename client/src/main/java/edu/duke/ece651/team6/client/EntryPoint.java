@@ -27,8 +27,8 @@ public class EntryPoint extends Application {
   @Override
   public void start(Stage stage) throws Exception {
 
-    // Client client = new Client("vcm-30760.vm.duke.edu", 12345, stage);
-    Client client = new Client("localhost", 12345, stage);
+    Client client = new Client("vcm-30760.vm.duke.edu", 12345, stage);
+    // Client client = new Client("localhost", 12345, stage);
 
     URL xmlResource = getClass().getResource("/ui/login-register-page.xml");
     FXMLLoader loader = new FXMLLoader(xmlResource);
