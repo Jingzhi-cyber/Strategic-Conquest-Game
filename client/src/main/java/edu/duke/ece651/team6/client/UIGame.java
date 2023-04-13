@@ -255,7 +255,8 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
+              .get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
@@ -505,7 +506,8 @@ public class UIGame extends Game {
 
   protected void dispalyTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
       Territory territory) {
-    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n";
+    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
+        + territory.getFood() + "\nTech prod: " + territory.getTechnology();
     String info2 = getNeighborDistance(territory);
     String info3 = getUnitsNumberByLevel(territory);
     territoryInfoText1.setText(info1);
@@ -611,7 +613,8 @@ public class UIGame extends Game {
       currPolygon.setId(name);
       setPolygonColor(currPolygon, ownerID);
       setPolygonTooltip(currPolygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\n"
-          + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory));
+          + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory) + "Food prod: "
+          + currTerritory.getFood() + "\nTech prod: " + currTerritory.getTechnology());
       setPolygonMouseClick(currPolygon, currTerritory);
       Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
       mapPane.getChildren().add(currPolygon);
@@ -648,7 +651,8 @@ public class UIGame extends Game {
             setPolygonText(mapPane, polygon, name + " - " + ownerID);
             Tooltip.uninstall(polygon, null);
             setPolygonTooltip(polygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\n"
-                + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory));
+                + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory) + "Food prod: "
+                + currTerritory.getFood() + "\nTech prod: " + currTerritory.getTechnology());
           }
         }
       }
