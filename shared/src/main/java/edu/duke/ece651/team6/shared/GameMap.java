@@ -10,10 +10,9 @@ import java.util.Random;
 
 public class GameMap implements java.io.Serializable, Cloneable {
   /**
-   * Use adjacent list to store the weighted graph structure
-   * Key - Territory(use Territory.name as hashkey)
-   * Value - Key - the adjacent Territory
-   *         Value - the distance to the adjacent Territory
+   * Use adjacent list to store the weighted graph structure Key - Territory(use
+   * Territory.name as hashkey) Value - Key - the adjacent Territory Value - the
+   * distance to the adjacent Territory
    */
   private Map<Territory, Map<Territory, Integer>> weightedAdjList;
   private Map<String, Territory> nameToTerritory;
@@ -132,6 +131,50 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   /**
+   * 
+   * Finds all enemy territories that are directly connected to the given source
+   * territory. The result is a set of all enemy territories that are directly
+   * connected to the source territory.
+   *
+   * @param src the source territory for which to find connected enemy territories
+   * @return a set of all enemy territories that are directly connected to the
+   *         source territory
+   */
+  public Set<Territory> getEnemyNeighbors(Territory src) {
+    Set<Territory> enemyNeighs = new HashSet<>();
+    Set<Territory> allNeighs = getNeighborDist(src).keySet();
+    for (Territory neigh : allNeighs) {
+      if (neigh.getOwnerId() != src.getOwnerId()) {
+        enemyNeighs.add(neigh);
+      }
+    }
+    return enemyNeighs;
+  }
+
+  /**
+   * 
+   * Returns a set of self-owned territories that are reachable from the given
+   * source territory via a path owned by the same player. This method uses the
+   * hasSamePlayerPath() method to check if a path between the source and each
+   * potential territory exists and is owned by the same player as the source. If
+   * a reachable territory is found, it is added to the result set.
+   *
+   * @param src the source territory
+   * @return a set of self-owned territories reachable from the source territory
+   */
+  public Set<Territory> getHasPathSelfTerritories(Territory src) {
+    Set<Territory> hasPathSelfTerritories = new HashSet<>();
+    Set<Territory> selfTerritories = getTerritorySetByPlayerId(src.getOwnerId());
+    for (Territory self : selfTerritories) {
+      if (hasSamePlayerPath(src, self)) {
+        hasPathSelfTerritories.add(self);
+      }
+    }
+    return hasPathSelfTerritories;
+
+  }
+
+  /**
    * Initialize maximum technology level for all players (start for 1)
    */
   public void initMaxTechLevel() {
@@ -146,6 +189,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
 
   /**
    * Upgrade the max tech level by 1 for player with playerId
+   * 
    * @param playerId
    */
   public void upgradeMaxTechLevel(int playerId) {
@@ -154,6 +198,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
 
   /**
    * Get the max tech level for player with playerId
+   * 
    * @param playerId
    * @return max tech level
    */
@@ -163,8 +208,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
 
   /**
    * Check if there is a path consists of Territories that owned by the same owner
-   * of territoryFrom and territoryTo
-   * Apply BFS to search the path
+   * of territoryFrom and territoryTo Apply BFS to search the path
    * 
    * @param territoryFrom
    * @param territoryTo
@@ -206,9 +250,9 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Convert an adjacent list to a weighted adjacent list
-   * The distance between two Territories are either 1 or 2
-   * distance(t1, t2) = distance(t2, t1)
+   * Convert an adjacent list to a weighted adjacent list The distance between two
+   * Territories are either 1 or 2 distance(t1, t2) = distance(t2, t1)
+   * 
    * @param adjList
    * @return weightedAdjList
    */
@@ -234,6 +278,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
 
   /**
    * Calculate the minimum cost of the path between src and dest
+   * 
    * @param src
    * @param dest
    * @return minimum cost
@@ -245,6 +290,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
 
   /**
    * Update players' resource
+   * 
    * @param newResources
    */
   public void updateResource(Map<Integer, Map<String, Integer>> newResources) {
@@ -255,23 +301,28 @@ public class GameMap implements java.io.Serializable, Cloneable {
     for (int playerId : resources.keySet()) {
       Map<String, Integer> resource = resources.get(playerId);
       Map<String, Integer> newResource = newResources.get(playerId);
-      resource.put(Constants.RESOURCE_FOOD, resource.get(Constants.RESOURCE_FOOD) + newResource.get(Constants.RESOURCE_FOOD));
-      resource.put(Constants.RESOURCE_TECH, resource.get(Constants.RESOURCE_TECH) + newResource.get(Constants.RESOURCE_TECH));
+      resource.put(Constants.RESOURCE_FOOD,
+          resource.get(Constants.RESOURCE_FOOD) + newResource.get(Constants.RESOURCE_FOOD));
+      resource.put(Constants.RESOURCE_TECH,
+          resource.get(Constants.RESOURCE_TECH) + newResource.get(Constants.RESOURCE_TECH));
     }
   }
 
   /**
    * Deduct a specific resource by cost
+   * 
    * @param playerId
    * @param category
    * @param cost
    */
   public void consumeResource(int playerId, String category, int cost) {
-    this.resources.getOrDefault(playerId, new HashMap<>()).put(category, this.resources.getOrDefault(playerId, new HashMap<>()).getOrDefault(category, 0) - cost);
+    this.resources.getOrDefault(playerId, new HashMap<>()).put(category,
+        this.resources.getOrDefault(playerId, new HashMap<>()).getOrDefault(category, 0) - cost);
   }
 
   /**
    * Get resource by playerId
+   * 
    * @param playerId
    * @return resource of a player
    */
