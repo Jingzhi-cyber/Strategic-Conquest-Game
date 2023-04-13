@@ -22,7 +22,7 @@ public class ResearchCostRuleChecker extends OrderRuleChecker {
         if (cost > currTech) {
             return "Invalid research: the expected cost of this research is: " + cost + " but you have " + currTech + " tech left";
         }
-        theMap.upgradeMaxTechLevel(playerId);
+        // theMap.upgradeMaxTechLevel(playerId);
         resource.put(Constants.RESOURCE_TECH, currTech - cost);
         return null;
     }

@@ -38,8 +38,8 @@ public class Territory implements java.io.Serializable, Cloneable {
     unitsInit();
     warZone = null;
     underWar = false;
-    food = 1;
-    technology = 1;
+    food = 5;
+    technology = 5;
   }
 
   public Territory(String name, int ownerId) {
@@ -49,8 +49,8 @@ public class Territory implements java.io.Serializable, Cloneable {
     unitsInit();
     warZone = null;
     underWar = false;
-    food = 1;
-    technology = 1;
+    food = 5;
+    technology = 5;
   }
 
   /**
@@ -71,8 +71,8 @@ public class Territory implements java.io.Serializable, Cloneable {
     this.units.get(0).addAll(UnitManager.newUnits(units));
     warZone = null;
     underWar = false;
-    food = 1;
-    technology = 1;
+    food = 5;
+    technology = 5;
   }
 
   @Override

@@ -17,7 +17,7 @@ public class ResourceProduceCounterTest {
         playerIds.add(0);
         ResourceProduceCounter resourceProduceCounter = new ResourceProduceCounter(territories, playerIds);
         Map<Integer, Map<String, Integer>> result = resourceProduceCounter.updateAndGetResult();
-        assertEquals(1, result.get(0).get(Constants.RESOURCE_FOOD));
-        assertEquals(1, result.get(0).get(Constants.RESOURCE_TECH));
+        assertEquals(5, result.get(0).get(Constants.RESOURCE_FOOD));
+        assertEquals(5, result.get(0).get(Constants.RESOURCE_TECH));
     }
 }

@@ -26,7 +26,7 @@ public class ResearchCostRuleCheckerTest {
         for (int i = 0; i < 4; i++) {
             gameMap.upgradeMaxTechLevel(0);
         }
-        assertEquals(6, gameMap.getMaxTechLevel(0));
+        assertEquals(5, gameMap.getMaxTechLevel(0));
         researchCostRuleChecker.checkMyRule(researchOrder, gameMap);
     }
 }
