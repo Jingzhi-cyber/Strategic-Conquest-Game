@@ -27,23 +27,7 @@ public class EntryPoint extends Application {
   @Override
   public void start(Stage stage) throws Exception {
 
-    Parameters params = getParameters();
-    List<String> args = params.getRaw();
-
-    String hostname = null;
-    int port = 12345;
-
-    // Use the command line arguments as needed
-    try {
-      hostname = args.size() > 0 ? args.get(0) : "localhost";
-      port = args.size() > 1 ? Integer.parseInt(args.get(1)) : 12345;
-    } catch (Exception e) {
-      System.out.println("./gradlew run-client -PappArgs=\"['vcm-30760.vm.duke.edu', '12345']\"");
-      e.printStackTrace();
-      return;
-    }
-
-    Client client = new Client(hostname, port, stage);
+    Client client = new Client("localhost", 12345, stage);
 
     URL xmlResource = getClass().getResource("/ui/login-register-page.xml");
     FXMLLoader loader = new FXMLLoader(xmlResource);
