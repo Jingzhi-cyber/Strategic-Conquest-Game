@@ -21,6 +21,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 
 public class MainPageController extends Controller implements Initializable {
   // @FXML
@@ -54,6 +56,18 @@ public class MainPageController extends Controller implements Initializable {
 
   @FXML
   AnchorPane mapPane;
+
+  @FXML
+  HBox territoryInfoPane;
+
+  @FXML
+  Text territoryInfoText1;
+
+  @FXML
+  Text territoryInfoText2;
+
+  @FXML
+  Text territoryInfoText3;
 
   private GameLounge gameLounge;
 
@@ -89,6 +103,21 @@ public class MainPageController extends Controller implements Initializable {
   @FXML
   public AnchorPane getMapPane() {
     return this.mapPane;
+  }
+
+  @FXML
+  public Text getTerritoryInfoText1() {
+    return this.territoryInfoText1;
+  }
+
+  @FXML
+  public Text getTerritoryInfoText2() {
+    return this.territoryInfoText2;
+  }
+
+  @FXML
+  public Text getTerritoryInfoText3() {
+    return this.territoryInfoText3;
   }
 
   @FXML

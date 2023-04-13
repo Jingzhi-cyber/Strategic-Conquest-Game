@@ -38,6 +38,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
@@ -155,8 +156,8 @@ public class UIGame extends Game {
    *
    * Parameters
    *
-   * @param gameId                gameId: The unique identifier for the game session.
-   * @param username             username: The username of the player.
+   * @param gameId             gameId: The unique identifier for the game session.
+   * @param username           username: The username of the player.
    * @param socketHandler      socketHandler: An instance of the SocketHandler
    *                           class to manage communication with the server.
    * @param mainPageController mainPageController: The controller for the main
@@ -254,7 +255,8 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
+              .get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
@@ -301,7 +303,7 @@ public class UIGame extends Game {
 
       System.out.println((String) socketHandler.recvObject());
       setting = socketHandler.recvGameBasicSetting();
-
+      this.gameMap = setting.getGameMap();
       this.gameStatus = GAME_STATUS.PLACE_UNITS;
       Platform.runLater(() -> {
         mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
@@ -426,7 +428,11 @@ public class UIGame extends Game {
     class MyTask extends Task<Void> {
 
       final UIGame game;
-      MyTask(UIGame game) { this.game = game; }
+
+      MyTask(UIGame game) {
+        this.game = game;
+      }
+
       @Override
       protected Void call() throws Exception {
         while (!buttonOK.get()) {
@@ -498,15 +504,28 @@ public class UIGame extends Game {
     }).start();
   }
 
+  protected void dispalyTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
+      Territory territory) {
+    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + "\nNumber of units: "
+        + territory.getNumUnits() + " \n";
+    String info2 = getNeighborDistance(territory);
+    String info3 = getUnitsNumberByLevel(territory);
+    territoryInfoText1.setText(info1);
+    territoryInfoText2.setText(info2);
+    territoryInfoText3.setText(info3);
+  }
+
   /**
    * Sets a mouse click event on a given polygon that performs a polygon animation
    * when the polygon is clicked.
    *
    * @param polygon The polygon to set the mouse click event on.
    */
-  protected void setPolygonMouseClick(Polygon polygon) {
+  protected void setPolygonMouseClick(Polygon polygon, Territory territory) {
     polygon.setOnMouseClicked((MouseEvent click_event) -> {
       performPolygonAnimation(polygon);
+      dispalyTerritoryInfo(this.mainPageController.getTerritoryInfoText1(),
+          this.mainPageController.getTerritoryInfoText2(), this.mainPageController.getTerritoryInfoText3(), territory);
     });
   }
 
@@ -550,7 +569,26 @@ public class UIGame extends Game {
    */
   protected void setPolygonTooltip(Polygon polygon, String text) {
     Tooltip tooltip = new Tooltip(text);
+    Font font = Font.font("Arial", 18);
+    tooltip.setFont(font);
     Tooltip.install(polygon, tooltip);
+  }
+
+  protected String getNeighborDistance(Territory territory) {
+    Map<Territory, Integer> distanceMap = this.gameMap.getNeighborDist(territory);
+    String info = "Neighbot distance: \n";
+    for (Territory currTerritory : distanceMap.keySet()) {
+      info = info + currTerritory.getName() + " : " + distanceMap.get(currTerritory) + " \n";
+    }
+    return info;
+  }
+
+  protected String getUnitsNumberByLevel(Territory territory) {
+    String info = "Units number by level: \n";
+    for (int i = 0; i < territory.getNumLevels(); i++) {
+      info = info + "Level " + i + ": " + territory.getUnitsNumByLevel(i) + " \n";
+    }
+    return info;
   }
 
   /**
@@ -571,13 +609,13 @@ public class UIGame extends Game {
         this.playerColor.put(ownerID, this.colors.remove(0));
       }
       String name = currTerritory.getName();
-      int units = currTerritory.getNumUnits();
       Polygon currPolygon = this.polygonGetter.getPolygon(currTerritory);
       currPolygon.setId(name);
       setPolygonColor(currPolygon, ownerID);
-      setPolygonTooltip(currPolygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\nNumber of units: " + units);
-      setPolygonMouseClick(currPolygon);
-      Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " > " + ownerID);
+      setPolygonTooltip(currPolygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\n"
+          + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory));
+      setPolygonMouseClick(currPolygon, currTerritory);
+      Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
       mapPane.getChildren().add(currPolygon);
       polygonInfo.toFront();
     }
@@ -604,14 +642,15 @@ public class UIGame extends Game {
       for (Territory currTerritory : territories) {
         int ownerID = currTerritory.getOwnerId();
         String name = currTerritory.getName();
-        int units = currTerritory.getNumUnits();
         for (Node node : mapPane.getChildren()) {
           if (node.getId() != null && node.getId().equals(name)) {
             Polygon polygon = (Polygon) node;
             setPolygonColor(polygon, ownerID);
-            setPolygonText(mapPane, polygon, name + " > " + ownerID + "\n   " + units);
+            setPolygonMouseClick(polygon, currTerritory);
+            setPolygonText(mapPane, polygon, name + " - " + ownerID);
             Tooltip.uninstall(polygon, null);
-            setPolygonTooltip(polygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\nNumber of units: " + units);
+            setPolygonTooltip(polygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\n"
+                + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory));
           }
         }
       }
