@@ -13,6 +13,8 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import static edu.duke.ece651.team6.shared.Constants.GAME_STATUS.ISSUE_ORDER;
+
 // a class handling threads for a user
 public class Client {
   // private final Integer playerId;
@@ -151,6 +153,27 @@ public class Client {
     gameThread.start();
 
     return newGameId;
+  }
+
+  public int backToGame() throws IOException, ClassNotFoundException, InterruptedException {
+    SocketHandler socketHandler = new SocketHandler(serverHostName, serverPort);
+    socketHandler.sendUserNameAndNumPlayer(username + " " + password + " 0");
+    if (socketHandler.socket.getInputStream().read() == -1) {
+      throw new IOException("Request denied");
+    }
+    int gameId = this.gameId++;
+    MainPageController mainPageController = new MainPageController(this);
+    Platform.runLater(() -> {
+      mainPageController.setUsername(username);
+    });
+    UIGame newGame = new UIGame(gameId, username, socketHandler, mainPageController);
+    newGame.updateGameStatus(ISSUE_ORDER);
+    System.out.println("Back to a game successfully");
+    uiGames.put(gameId, newGame);
+    Thread gameThread = new Thread(new GameHandler(newGame));
+    gameThread.setDaemon(true);
+    gameThread.start();
+    return gameId;
   }
 
   public void joinStartedGame(Integer gameId) {

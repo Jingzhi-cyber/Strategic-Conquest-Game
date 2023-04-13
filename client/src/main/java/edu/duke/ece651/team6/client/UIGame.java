@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.MainPageController;
@@ -31,6 +32,7 @@ import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.Territory;
 import edu.duke.ece651.team6.shared.UpgradeOrder;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -86,7 +88,7 @@ public class UIGame extends Game {
   /**
    * This method sets the scene of the game. It takes a Scene object as a
    * parameter and assigns it to the scene field.
-   * 
+   *
    * @param scene
    */
   public void setScene(Scene scene) {
@@ -150,14 +152,14 @@ public class UIGame extends Game {
    * Constructor: UIGame(int gameId, String username, SocketHandler socketHandler,
    * MainPageController mainPageController) This constructor initializes a new
    * instance of the UIGame class.
-   * 
+   *
    * Parameters
-   * 
-   * @param int                gameId: The unique identifier for the game session.
-   * @param String             username: The username of the player.
-   * @param SocketHandler      socketHandler: An instance of the SocketHandler
+   *
+   * @param gameId                gameId: The unique identifier for the game session.
+   * @param username             username: The username of the player.
+   * @param socketHandler      socketHandler: An instance of the SocketHandler
    *                           class to manage communication with the server.
-   * @param MainPageController mainPageController: The controller for the main
+   * @param mainPageController mainPageController: The controller for the main
    *                           page of the application, which manages the user
    *                           interface for the game.
    */
@@ -199,56 +201,17 @@ public class UIGame extends Game {
   }
 
   /* ----------1. Handling Unit Placement ----------- */
-
-  private Map<Territory, Integer> territoryToNumUnitMapping = new HashMap<>();
+  private final Map<Territory, Integer> territoryToNumUnitMapping = new HashMap<>();
   private Iterator<Territory> territoryIterator;
   private Territory currentTerritory;
 
-  /**
-   * This method serves as the entry point for the game logic. It throws
-   * IOException, ClassNotFoundException, InterruptedException, and
-   * ExecutionException.
-   *
-   * @throws IOException            If an I/O error occurs while communicating
-   *                                with the server.
-   * @throws ClassNotFoundException If the class of a serialized object could not
-   *                                be found.
-   * @throws InterruptedException   If a thread is interrupted while waiting for
-   *                                an operation to complete.
-   * @throws ExecutionException     If an exception occurs while attempting to
-   *                                execute a Callable task.
-   */
-  public void entryPoint() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
-    System.out.println("Game status: " + gameStatus);
-    if (this.gameStatus == GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER) {
-      System.out.print("Waiting for other players to enter\n");
-
-      System.out.println((String) socketHandler.recvObject());
-      setting = socketHandler.recvGameBasicSetting();
-
-      this.gameStatus = GAME_STATUS.PLACE_UNITS;
-      Platform.runLater(() -> {
-        mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
-        mainPageController.updateGameStatus(this.gameStatus);
-      });
-
-      // territoryToNumUnitMapping = new HashMap<>();
-
-      Set<Territory> territories = setting.getAssignedTerritories();
-
-      Platform.runLater(() -> updateMap(mainPageController.getMapPane(), setting.getGameMap().getTerritorySet()));
-      territoryIterator = territories.iterator();
-
-      while (gameStatus == GAME_STATUS.PLACE_UNITS) {
-        nextUnitPlacementPrompt();
-      }
+  List<Integer> constructIntegersFrom0UpTo(int maxInteger) {
+    List<Integer> intList = new ArrayList<>();
+    // TODO <=
+    for (int i = 0; i <= maxInteger; i++) {
+      intList.add(i);
     }
-
-    refreshMap();
-
-    Platform.runLater(() -> {
-      mainPageController.setPlayTurnsButtonsDisabled(false);
-    });
+    return intList;
   }
 
   /**
@@ -328,79 +291,35 @@ public class UIGame extends Game {
   }
 
   /**
-   * This method constructs a list of integers from 0 up to the specified maximum
-   * integer.
-   *
-   * @param maxInteger The maximum integer value for the list.
-   * @return A list of integers from 0 up to the specified maximum integer.
+   * This method receives initial Territory information from the server And
+   * display UI to the user so that user interact to input units information
    */
-  List<Integer> constructIntegersFrom0UpTo(int maxInteger) {
-    List<Integer> intList = new ArrayList<>();
-    // TODO <=
-    for (int i = 0; i <= maxInteger; i++) {
-      intList.add(i);
-    }
-    return intList;
-  }
+  public void entryPoint() throws IOException, ClassNotFoundException, InterruptedException, ExecutionException {
+    System.out.println("Game status: " + gameStatus);
+    if (this.gameStatus == GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER) {
+      System.out.print("Waiting for other players to enter\n");
 
-  /**
-   * 
-   * Refreshes the game map and updates the UI with the new information. This
-   * method receives the updated game map information from the server via the
-   * socket connection and updates the game state accordingly. It also updates the
-   * UI to reflect the updated game state by calling the updateMap() method to
-   * update the territory colors and unit counts, and the updateTechLevel(),
-   * updateFoodResources(), and updateTechResources() methods to update the
-   * player's tech level and resource counts. If the player has lost the game,
-   * this method disables the play turn buttons and waits to receive the game
-   * result from the server via the receiveGameResult() method. If the player has
-   * not lost, this method initiates the commit phase by calling the
-   * initiateCommit() method.
-   * 
-   * @throws IOException            if there is an error in the socket connection
-   * @throws ClassNotFoundException if the received object is not of the expected
-   *                                class
-   */
-  public void refreshMap() throws IOException, ClassNotFoundException {
+      System.out.println((String) socketHandler.recvObject());
+      setting = socketHandler.recvGameBasicSetting();
 
-    GlobalMapInfo mapInfo = socketHandler.recvGlobalMapInfo();
-    if (mapInfo.playerId != -1) {
-      this.playerId = mapInfo.playerId;
-    }
-    this.thisView = new UIGameView(mapInfo);
-    this.gameMap = mapInfo.getGameMap();
-    this.unChangedGameMap = mapInfo.getGameMap();
-    System.out.println("GameMap - UIGame.java" + gameMap.toString());
-
-    Platform.runLater(() -> updateMap(mainPageController.getMapPane(), this.gameMap.getTerritorySet()));
-
-    this.resource.put(Constants.RESOURCE_FOOD,
-        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
-    this.resource.put(Constants.RESOURCE_TECH,
-        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
-
-    Platform.runLater(() -> {
-      mainPageController.updateTechLevel(gameMap.getMaxTechLevel(playerId));
-      mainPageController
-          .updateFoodResources(this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
-      mainPageController
-          .updateTechResources(this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
-
-      mainPageController.setPlayTurnsButtonsDisabled(false);
-    });
-
-    if (this.hasLost) {
-
+      this.gameStatus = GAME_STATUS.PLACE_UNITS;
       Platform.runLater(() -> {
-        mainPageController.setPlayTurnsButtonsDisabled(true);
+        mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
+        mainPageController.updateGameStatus(this.gameStatus);
       });
-      receiveGameResult();
-      return;
+
+      // territoryToNumUnitMapping = new HashMap<>();
+
+      Set<Territory> territories = setting.getAssignedTerritories();
+
+      Platform.runLater(() -> updateMap(mainPageController.getMapPane(), setting.getGameMap().getTerritorySet()));
+      territoryIterator = territories.iterator();
+
+      while (gameStatus == GAME_STATUS.PLACE_UNITS) {
+        nextUnitPlacementPrompt();
+      }
     }
-
-    initiateCommit();
-
-    return;
+    refreshMap();
   }
 
   /**
@@ -459,6 +378,7 @@ public class UIGame extends Game {
 
       return Constants.GAME_LOST;
     }
+    this.gameStatus = GAME_STATUS.ISSUE_ORDER;
 
     return null;
   }
@@ -477,7 +397,7 @@ public class UIGame extends Game {
   public void submitCommit() {
     /* -------- Show a confirmation dialog with the orders-------- */
     String ordersString = this.currentCommit.toString();
-
+    AtomicBoolean buttonOK = new AtomicBoolean(false);
     Platform.runLater(() -> {
       Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
 
@@ -500,37 +420,50 @@ public class UIGame extends Game {
       Optional<ButtonType> confirmOrder = confirmationDialog.showAndWait();
 
       if (confirmOrder.isPresent() && confirmOrder.get() == ButtonType.OK) {
+        buttonOK.set(true);
+      }
+    });
+    class MyTask extends Task<Void> {
 
+      final UIGame game;
+      MyTask(UIGame game) { this.game = game; }
+      @Override
+      protected Void call() throws Exception {
+        while (!buttonOK.get()) {
+          Thread.sleep(100);
+        }
         try {
-          // Send commit to the server if the user confirms
-          this.socketHandler.sendCommit(this.currentCommit);
+          game.socketHandler.sendCommit(game.currentCommit);
         } catch (Exception e) {
           e.printStackTrace();
         }
-
         System.out.println("Successfully sent a commit to the server");
-        updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
-
-        this.mainPageController.setPlayTurnsButtonsDisabled(true);
-
+        game.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+        Platform.runLater(() -> {
+          game.mainPageController.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+          game.mainPageController.setPlayTurnsButtonsDisabled(true);
+        });
         try {
-          String status = receiveGameResult();
+          // socketHandler.recvGameResult();
+          String status = game.receiveGameResult();
+          Platform.runLater(() -> {
+            game.mainPageController.updateGameStatus(game.gameStatus);
+          });
           System.out.println("Successfully received game result");
-          if (status == Constants.GAME_OVER) {
-            return;
-          }
 
-          refreshMap();
+          if (Constants.GAME_OVER.equals(status)) {
+            return null;
+          }
+          game.refreshMap();
           System.out.println("Successfully refreshed map");
         } catch (IOException | ClassNotFoundException e) {
           e.printStackTrace();
-          mainPageController.showError(e.getMessage());
+          game.mainPageController.showError(e.getMessage());
         }
-      } else {
-        // Handle the case when the user cancels the confirmation dialog
-        return;
+        return null;
       }
-    });
+    }
+    new Thread(new MyTask(this)).start();
   }
 
   /**
@@ -609,9 +542,9 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * This method sets the tooltip of a given Polygon with the specified text.
-   * 
+   *
    * @param polygon The Polygon to set the tooltip for.
    * @param text    The text to set as the tooltip for the Polygon.
    */
@@ -621,12 +554,12 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Sets the polygons representing the territories on the game map. For each
    * territory in the set, a polygon is created using the PolygonGetter object,
    * and the color, tooltip, mouse click event, and text of the polygon are set.
    * The polygon is then added to the mapPane along with its text representation.
-   * 
+   *
    * @param mapPane:     The pane representing the game map.
    * @param territories: A set of Territory objects representing the territories
    *                     on the game map.
@@ -652,14 +585,14 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * This method updates the game map UI by modifying the colors, text, and
    * tooltips of the polygons in the
-   * 
+   *
    * mapPane to reflect the current state of the game.
-   * 
+   *
    * @param mapPane     the Pane object representing the game map UI.
-   * 
+   *
    * @param territories a Set of Territory objects representing the territories in
    *                    the game.
    */
@@ -686,23 +619,65 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
-   * Constructs a MoveOrder object based on user input. This method first sets the
-   * game status to ISSUE_ORDER, and then prompts the user to select the source
-   * and destination territories and the number of units to move. The user is also
-   * prompted to select the level of the units to move. Once all necessary
-   * information is obtained, a MoveOrder object is constructed and added to the
-   * current commit. If any errors occur during the selection process, an error
-   * message is displayed and the method returns null.
-   * 
-   * @return the constructed MoveOrder object, or null if an error occurred during
-   *         the selection process
-   * @throws IOException          if there is an error in the socket connection
-   * @throws InterruptedException if the thread is interrupted while waiting for
-   *                              user input
-   * @throws ExecutionException   if an error occurs while waiting for user input
-   * 
+   * This method receives a updated GameMap from the server and display the new
+   * scene to the user
    */
+  public void refreshMap() throws IOException, ClassNotFoundException {
+
+    Platform.runLater(() -> {
+      mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
+    });
+
+    GlobalMapInfo mapInfo = socketHandler.recvGlobalMapInfo();
+    System.out.println("Mapinfo got");
+    if (mapInfo.playerId != -1) {
+      this.playerId = mapInfo.playerId;
+    }
+    this.thisView = new UIGameView(mapInfo);
+    this.gameMap = mapInfo.getGameMap();
+    this.unChangedGameMap = mapInfo.getGameMap();
+    System.out.println("GameMap - UIGame.java" + gameMap.toString());
+
+    Platform.runLater(() -> updateMap(mainPageController.getMapPane(), this.gameMap.getTerritorySet()));
+
+    this.resource.put(Constants.RESOURCE_FOOD,
+        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
+    this.resource.put(Constants.RESOURCE_TECH,
+        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
+
+    Platform.runLater(() -> {
+      mainPageController.updateTechLevel(gameMap.getMaxTechLevel(playerId));
+      mainPageController
+          .updateFoodResources(this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
+      mainPageController
+          .updateTechResources(this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
+
+      mainPageController.setPlayTurnsButtonsDisabled(false);
+    });
+
+    if (this.hasLost) {
+
+      Platform.runLater(() -> {
+        mainPageController.setPlayTurnsButtonsDisabled(true);
+      });
+      receiveGameResult();
+      return;
+    }
+
+    initiateCommit();
+
+    // TODO Update Map!
+
+    // thisView.updateScene();
+    // TODO Map<String, Territory> territoriesMap;
+    // populate the map with Territory objects
+
+    // TODO SelectableTerritories selectableTerritories = new
+    // SelectableTerritories(territoriesMap);
+
+    // TODO display the globalMap on UI
+  }
+
   public MoveOrder constructMoveOrder() throws IOException, InterruptedException, ExecutionException {
     this.gameStatus = GAME_STATUS.ISSUE_ORDER;
 
@@ -757,14 +732,14 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Constructs an attack order by prompting the player to select a territory to
    * attack from, a territory to attack, a unit level to use in the attack, and
    * the number of units to use in the attack. If the user cancels any of the
    * selection dialogs, this method returns null. Otherwise, it creates and
    * returns an AttackOrder object with the selected parameters and adds it to the
    * current commit.
-   * 
+   *
    * @return an AttackOrder object representing the player's attack order, or null
    *         if the user cancels the selection dialogs
    * @throws IOException          if there is an error in the socket connection
@@ -831,12 +806,12 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Constructs a research order and adds it to the current commit. If the current
    * commit is null, this method first initiates the commit phase. If the research
    * order is successfully added, this method displays a success message to the
    * player. Otherwise, it displays an error message.
-   * 
+   *
    * @return a ResearchOrder object representing the player's research order, or
    *         null if the order cannot be added to sql Copy code the current commit
    */
@@ -865,7 +840,7 @@ public class UIGame extends Game {
 
   /**
    **
-   * 
+   *
    * Constructs an UpgradeOrder object by getting input from the user via several
    * dialog boxes. The method shows a dialog to get the source territory from the
    * user. If the user cancels the dialog, the method returns null. The method
@@ -876,10 +851,10 @@ public class UIGame extends Game {
    * object and adds it to the current commit phase. If an illegal argument is
    * thrown, an error message is displayed to the user and the method returns
    * null.
-   * 
+   *
    * @return the constructed UpgradeOrder object, or null if the user cancels any
    *         of the dialog boxes or if an illegal argument is thrown
-   * 
+   *
    * @throws IOException          if there is an error in the socket connection
    * @throws InterruptedException if the thread is interrupted while waiting for
    *                              user input
@@ -940,7 +915,7 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Shows a dialog for the user to select a territory from a set of available
    * territories. The available territories are determined based on whether the
    * user is selecting a source territory for a move or an attack order. If the
@@ -950,7 +925,7 @@ public class UIGame extends Game {
    * the player and with at least one unit are available. If the user is selecting
    * a destination territory for either order, only adjacent territories that are
    * not owned by the player are available.
-   * 
+   *
    * @param src     the source territory, or null if the user is selecting a
    *                destination territory
    * @param isMove  a boolean indicating whether the user is selecting a territory
@@ -964,6 +939,7 @@ public class UIGame extends Game {
       String context) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
+    // Platform.runLater(() -> {
     Set<Territory> territories = getTerritories(src, isMove);
     List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
 
@@ -992,7 +968,7 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Displays a dialog box that allows the user to select the level of units to be
    * used in a certain order. The dialog box displays a list of levels that are
    * available for selection, based on the inclusive lower and upper limits of
@@ -1001,7 +977,7 @@ public class UIGame extends Game {
    * Otherwise, a ChoiceDialog is displayed to the user with the available levels
    * and the user's selection is returned via a CompletableFuture. If the user
    * cancels the dialog, the future is completed with a null value.
-   * 
+   *
    * @param inclusiveLowerLevel the lowest level of units that can be selected
    *                            (inclusive)
    * @param inclusiveUpperLevel the highest level of units that can be selected
@@ -1030,13 +1006,13 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Shows a selection dialog with the specified list of options. If the list is
    * empty, an error message is shown to the user. The user's selection is
    * returned as a CompletableFuture that completes when the user closes the
    * dialog. The dialog runs on the JavaFX application thread to avoid blocking
    * the main thread.
-   * 
+   *
    * @param list              the list of options to display in the dialog
    * @param promptIfEmptyList the error message to display if the list is empty
    * @param title             the title of the dialog window
@@ -1072,7 +1048,7 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Shows a dialog to select the number of units to move or upgrade from a
    * specified territory. The dialog presents the user with a list of integers
    * from 1 up to the maximum number of units available to move or upgrade. If
@@ -1080,7 +1056,7 @@ public class UIGame extends Game {
    * message is displayed and the method returns null. Otherwise, a
    * CompletableFuture is returned that completes with the selected number of
    * units.
-   * 
+   *
    * @param currentLevel the current level of units to move or upgrade
    * @param src          the source territory to move or upgrade units from
    * @param title        the title of the dialog
@@ -1119,7 +1095,7 @@ public class UIGame extends Game {
    * 
    * Finds all enemy territories on the current game map and returns them as a Set
    * of Territory objects.
-   * 
+   *
    * @return a Set of all enemy territories
    */
   protected Set<Territory> findEnemyTerritories() {
@@ -1143,7 +1119,7 @@ public class UIGame extends Game {
    * enemy territories, then checks the neighboring territories of the source
    * territory to see which ones are also enemy territories. The result is a set
    * of all enemy territories that are directly connected to the source territory.
-   * 
+   *
    * @param src the source territory for which to find connected enemy territories
    * @return a set of all enemy territories that are directly connected to the
    *         source territory
@@ -1168,7 +1144,7 @@ public class UIGame extends Game {
    * the source and each potential territory exists and is owned by the same
    * player as the source. If a reachable territory is found, it is added to the
    * result set.
-   * 
+   *
    * @param src the source territory
    * @return a set of self-owned territories reachable from the source territory
    */
@@ -1185,7 +1161,7 @@ public class UIGame extends Game {
   }
 
   /**
-   * 
+   *
    * Returns a set of territories that can be selected for issuing a move or
    * attack order, based on the given source territory and whether the order is a
    * move or attack. If the source territory is null, the method returns all
@@ -1194,7 +1170,7 @@ public class UIGame extends Game {
    * returns all territories that are owned by the current player and have a path
    * to the source territory. If the order is an attack, the method returns all
    * enemy territories that are adjacent to the source territory.
-   * 
+   *
    * @param src  the source territory for the order
    * @param move true if the order is a move, false if it is an attack
    * @return a set of territories that can be selected for issuing the order
@@ -1216,7 +1192,7 @@ public class UIGame extends Game {
   private GameMap unChangedGameMap = null;
 
   /**
-   * 
+   *
    * Initiates a new commit for the current player by creating a new Commit object
    * with a clone of the current game map and a copy of the player's resources.
    */

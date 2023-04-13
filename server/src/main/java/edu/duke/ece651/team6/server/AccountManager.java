@@ -18,11 +18,11 @@ public class AccountManager {
 
     private static volatile AccountManager instance;
 
-    private Map<SocketKey, Socket> sockets;
-    private Map<SocketKey, String> keyToUser;
-    private Map<String, Set<SocketKey>> userList;
+    private final Map<SocketKey, Socket> sockets;
+    private final Map<SocketKey, String> keyToUser;
+    private final Map<String, Set<SocketKey>> userList;
 
-    private Map<String, String> password;
+    private final Map<String, String> password;
 
     private AccountManager() {
         sockets = new HashMap<>();
@@ -85,6 +85,9 @@ public class AccountManager {
      */
     public boolean update(String username, Socket socket) {
         SocketKey keyToChange = null;
+        if (!userList.containsKey(username)) {
+            return false;
+        }
         for (SocketKey key : userList.get(username)) {
             if (sockets.get(key).isClosed()) {
                 keyToChange = key;
