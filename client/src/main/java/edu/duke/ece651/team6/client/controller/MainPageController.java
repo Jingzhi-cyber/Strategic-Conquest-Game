@@ -383,10 +383,10 @@ public class MainPageController extends Controller implements Initializable {
 
       // gameLounge.removeGame(gameId);
       GameLoungeController gameLoungeController = client.getGameLoungeController();
-      gameLoungeController.gameLounge.removeGame(gameId);
+      gameLoungeController.gameLounge.removeGame(String.valueOf(gameId));
       // gameLoungeController.updateGameList(gameLounge);
       // ...
-      HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
+      HashMap<Class<?>, Object> controllers = new HashMap<>();
       // System.out.print(this.usernameField.getText());
       controllers.put(GameLoungeController.class, gameLoungeController);
       switchToPage("/ui/game-lounge-page.xml", "/ui/buttonstyle.css", controllers, "Game Lounge", client.getStage());

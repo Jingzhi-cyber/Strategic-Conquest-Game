@@ -22,8 +22,8 @@ public class RiscMaster implements Master {
   private final AccountManager m;
   private final Set<Integer> disconnectedList;
 
-  private List<PlayerProfile> playerProfiles;
-  private Set<Integer> losers;
+  private final List<PlayerProfile> playerProfiles;
+  private final Set<Integer> losers;
 
   /**
    * Construct a RiscMaster by passing a server - Mainly for testing
@@ -123,7 +123,7 @@ public class RiscMaster implements Master {
     /**
      * Calculate Resources for each player and update playerProfile
      */
-    Set<Integer> playerIds = new HashSet<Integer>();
+    Set<Integer> playerIds = new HashSet<>();
     for (PlayerProfile playerProfile : playerProfiles) {
       playerIds.add(playerProfile.getId());
     }
