@@ -1,5 +1,8 @@
 package edu.duke.ece651.team6.server;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,13 +86,13 @@ public class AccountManager {
      * @param socket
      * @return true if succeed.
      */
-    public boolean update(String username, Socket socket) {
+    public boolean update(String username, Socket socket) throws IOException {
         SocketKey keyToChange = null;
         if (!userList.containsKey(username)) {
             return false;
         }
         for (SocketKey key : userList.get(username)) {
-            if (sockets.get(key).isClosed()) {
+            if (isClosed(sockets.get(key))) {
                 keyToChange = key;
                 break;
             }
@@ -115,6 +118,25 @@ public class AccountManager {
         }
         String actualPassword = this.password.get(username);
         return actualPassword.equals(password);
+    }
+
+    private boolean isClosed(Socket socket) {
+        if (socket.isClosed()) {
+            return true;
+        }
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            reader.mark(1);
+            int ch = reader.read();
+            if (ch == -1) {
+                return true;
+            } else {
+                reader.reset();
+                return false;
+            }
+        } catch (IOException e) {
+            return true;
+        }
     }
     
 }

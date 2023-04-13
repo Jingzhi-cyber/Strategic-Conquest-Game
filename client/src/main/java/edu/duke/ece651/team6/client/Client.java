@@ -36,7 +36,7 @@ public class Client {
   Stage stage;
 
   UIGame currentGame;
-  Map<Integer, UIGame> uiGames;
+  public Map<Integer, UIGame> uiGames;
 
   public void setScene(Scene scene) {
     this.scene = scene;
@@ -155,9 +155,10 @@ public class Client {
     return newGameId;
   }
 
-  public int backToGame() throws IOException, ClassNotFoundException, InterruptedException {
+  public int backToGame() throws IOException, ClassNotFoundException {
     SocketHandler socketHandler = new SocketHandler(serverHostName, serverPort);
     socketHandler.sendUserNameAndNumPlayer(username + " " + password + " 0");
+    System.out.println("Try to back to a game");
     if (socketHandler.socket.getInputStream().read() == -1) {
       throw new IOException("Request denied");
     }

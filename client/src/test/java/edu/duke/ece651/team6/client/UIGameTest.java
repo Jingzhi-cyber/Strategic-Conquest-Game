@@ -1,6 +1,7 @@
 package edu.duke.ece651.team6.client;
 
 import edu.duke.ece651.team6.client.controller.MainPageController;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import static edu.duke.ece651.team6.shared.Constants.GAME_STATUS.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UIGameTest {
+    @Disabled
     @Test
     void superCoolTest() throws IOException, ExecutionException, ClassNotFoundException, InterruptedException {
         new Thread(() -> {

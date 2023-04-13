@@ -5,10 +5,12 @@ to the user, and provides functionality for logging out of the application.
 */
 package edu.duke.ece651.team6.client.controller;
 
+import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
 
 import edu.duke.ece651.team6.client.Client;
+import edu.duke.ece651.team6.client.UIGame;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -212,7 +214,12 @@ public class Controller {
    * @throws Exception If an error occurs while switching pages.
    */
   protected void logOut() throws Exception {
-
+    for (Integer i : client.uiGames.keySet()) {
+      UIGame game = client.uiGames.get(i);
+      game.exit();
+      int gameId = game.getGameId();
+      client.getGameLoungeController().gameLounge.removeGame(String.valueOf(gameId));
+    }
     HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
     // System.out.print(this.usernameField.getText());
     controllers.put(LoginRegisterController.class, new LoginRegisterController(client));
