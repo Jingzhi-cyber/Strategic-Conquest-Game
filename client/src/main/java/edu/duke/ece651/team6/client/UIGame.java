@@ -255,8 +255,7 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
-              .get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
@@ -1030,15 +1029,34 @@ public class UIGame extends Game {
    */
   private CompletableFuture<Integer> showUnitLevelSelectionDialog(int inclusiveLowerLevel, int inclusiveUpperLevel,
       Territory src, String title, String content) {
+    CompletableFuture<Integer> future = new CompletableFuture<>();
 
+    // Platform.runLater(() -> {
     List<Integer> levels = new ArrayList<>();
+    // TODO <=
     for (int i = inclusiveLowerLevel; i <= inclusiveUpperLevel; i++) {
       levels.add(i);
     }
 
-    CompletableFuture<Integer> future = showSelectionDialog(levels,
-        title + " Cannot upgrade level for units on " + src.getName() + " because of level upper limit. ", title,
-        content);
+    if (levels.isEmpty()) {
+      mainPageController
+          .showError(title + " Cannot upgrade level for units on " + src.getName() + " because of level upper limit. ");
+      future.complete(null);
+    } else {
+      ChoiceDialog<Integer> dialog = new ChoiceDialog<>(levels.get(0), levels);
+      dialog.setTitle(title);
+      dialog.setHeaderText(null);
+      dialog.setContentText(content);
+
+      Optional<Integer> result = dialog.showAndWait();
+
+      if (result.isPresent()) {
+        future.complete(result.get());
+      } else {
+        future.complete(null);
+      }
+    }
+    // });
 
     return future;
   }
@@ -1103,17 +1121,35 @@ public class UIGame extends Game {
    */
   private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
       String title) {
+    CompletableFuture<Integer> future = new CompletableFuture<>();
 
+    // Platform.runLater(() -> {
     List<Integer> nums = new ArrayList<>();
     int num = src.getUnitsNumByLevel(currentLevel);
-
+    // TODO <=
     for (int i = 1; i <= num; i++) {
       nums.add(i);
     }
 
-    CompletableFuture<Integer> future = showSelectionDialog(nums,
-        title + " Cannot " + " to upgrade level for units on " + src.getName() + " because units are not enough", title,
-        "Choose unit number:");
+    if (nums.isEmpty()) {
+      mainPageController.showError(
+          "Cannot " + title + " to upgrade level for units on " + src.getName() + " because units are not enough");
+      future.complete(null);
+    } else {
+      ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);
+      dialog.setTitle(title);
+      dialog.setHeaderText(null);
+      dialog.setContentText("Choose unit number:");
+
+      Optional<Integer> result = dialog.showAndWait();
+
+      if (result.isPresent()) {
+        future.complete(result.get());
+      } else {
+        future.complete(null);
+      }
+    }
+    // });
 
     return future;
   }
