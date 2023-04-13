@@ -17,6 +17,13 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 
+/**
+ * 
+ * This class defines methods and event handlers for the login/register page of
+ * the application.
+ * 
+ * It extends the Controller class and implements the Initializable interface.
+ */
 public class LoginRegisterController extends Controller {
 
   @FXML
@@ -30,8 +37,6 @@ public class LoginRegisterController extends Controller {
 
   @FXML
   private TextField usernameField;
-
-  // private String username;
 
   @FXML
   private PasswordField passwordField;
@@ -54,11 +59,22 @@ public class LoginRegisterController extends Controller {
     super(client);
   }
 
+  /**
+   * 
+   * Constructs a new LoginRegisterController with the given client.
+   * 
+   * @param client The client for the controller to use
+   */
   public String getUserName() {
     // TODO
     return this.usernameField.getText();
   }
 
+  /**
+   * 
+   * Initializes the controller by setting up event handlers for the login and
+   * register buttons.
+   */
   public void initialize() {
     // Set up the login button event handler
     loginButton.setOnAction(event -> {
@@ -91,6 +107,15 @@ public class LoginRegisterController extends Controller {
     });
   }
 
+  /**
+   * 
+   * Logs in the user with the given username and password.
+   * 
+   * @param username The user's username
+   * @param password The user's password
+   * @throws IllegalArgumentException If the username or password is empty or
+   *                                  invalid
+   */
   private void loginUser(String username, String password) {
     if (username.isEmpty() || password.isEmpty()) {
       throw new IllegalArgumentException("username and password cannot be empty!");
@@ -107,6 +132,15 @@ public class LoginRegisterController extends Controller {
     }
   }
 
+  /**
+   * 
+   * Registers a new user with the given username and password.
+   * 
+   * @param username The user's desired username
+   * @param password The user's desired password
+   * @throws IllegalArgumentException If the username or password is empty or
+   *                                  invalid
+   */
   private void registerUser(String username, String password) {
     if (username.isEmpty() || password.isEmpty()) {
       throw new IllegalArgumentException("username and password can't be empty!");
@@ -123,15 +157,12 @@ public class LoginRegisterController extends Controller {
     }
   }
 
-  private void switchToGameMainPage() throws Exception {
-    // Load the main game window
-    // ...
-    HashMap<Class<?>, Object> controllers = new HashMap<Class<?>, Object>();
-    // System.out.print(this.usernameField.getText());
-    controllers.put(MainPageController.class, new MainPageController(client));
-    switchToPage("/ui/mainPage.xml", "/ui/buttonstyle.css", controllers, "Main Page", tabPane);
-  }
-
+  /**
+   * 
+   * Switches the application to the game lounge page.
+   * 
+   * @throws Exception If an error occurs while switching pages.
+   */
   private void switchToGameLoungePage() throws Exception {
     // Load the main game window
     // ...
