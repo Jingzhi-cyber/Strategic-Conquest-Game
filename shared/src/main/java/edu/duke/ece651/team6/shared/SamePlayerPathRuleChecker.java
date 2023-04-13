@@ -17,8 +17,7 @@ public class SamePlayerPathRuleChecker extends MoveOrderRuleChecker {
   /**
    * This method checks current rule.
    *
-   * @param move           is a simple move object that can be moveOrder or
-   *                       attackOrder
+   * @param order          is an order object
    * @param remainingUnits is the number of remaining units allowed to perform
    *                       actions
    * @param theMap         is the game map that has adjacency information
@@ -26,7 +25,8 @@ public class SamePlayerPathRuleChecker extends MoveOrderRuleChecker {
    *         string if otherwise.
    */
   @Override
-  protected String checkMyRule(SimpleMove move, GameMap theMap) {
+  protected String checkMyRule(Order order, GameMap theMap) {
+    SimpleMove move = (SimpleMove) order;
     if (!theMap.hasSamePlayerPath(move.src, move.dest)) {
       return "Invalid move action: there isn't a connected path through src to dest where all territories belong to the same player.";
     }

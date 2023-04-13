@@ -1,16 +1,9 @@
 package edu.duke.ece651.team6.server;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import edu.duke.ece651.team6.shared.Edge;
+import edu.duke.ece651.team6.shared.Point2D;
 import edu.duke.ece651.team6.shared.Territory;
 
 /**
@@ -20,9 +13,12 @@ import edu.duke.ece651.team6.shared.Territory;
 public class MapGenerator {
     private Set<String> names;
     private List<Point2D> points;
-    private int n;
+    private final int n;
     private List<Triangle> triangles;
     private Set<Edge> connections;
+    private Map<Point2D, Territory> territories;
+    private double width = 1000;
+    private double height = 500;
     
     public MapGenerator(int n) {
         names = new HashSet<>();
@@ -33,9 +29,7 @@ public class MapGenerator {
     public MapGenerator(int n, String... names) {
         this.names = new HashSet<>();
         this.n = n;
-        for (String name : names) {
-            this.names.add(name);
-        }
+        Collections.addAll(this.names, names);
         generateMap();
     }
 
@@ -52,12 +46,12 @@ public class MapGenerator {
                 if (adder++ > 100) {
                     throw new RuntimeException("Cannot generate the map!");
                 }
-                int x = random.nextInt(1800) + 100;
-                int y = random.nextInt(800) + 100;
+                int x = random.nextInt(960) + 20;
+                int y = random.nextInt(460) + 20;
                 Point2D p = new Point2D(x, y);
                 boolean closeTo = false;
                 for (Point2D point : points) {
-                    if (point.closeTo(p, 100.0)) {
+                    if (point.closeTo(p, 50.0)) {
                         closeTo = true;
                         break;
                     }
@@ -75,7 +69,6 @@ public class MapGenerator {
         List<Triangle> tempTri = new LinkedList<>();
         tempTri.add(superTri);
         Set<Edge> buffer = new HashSet<>(); 
-        
         // Delaunay triangulation incremental algorithm
         for (Point2D p : this.points) {
             buffer.clear();
@@ -102,13 +95,7 @@ public class MapGenerator {
             }
         }
         triangles.addAll(tempTri);
-        ListIterator<Triangle> it = triangles.listIterator();
-        while (it.hasNext()) {
-            Triangle t = it.next();
-            if (t.overlaps(superTri)) {
-                it.remove();
-            }
-        }
+        triangles.removeIf(t -> t.overlaps(superTri));
         connections = new HashSet<>();
         for (Triangle t : triangles) {
             connections.addAll(t.getEdges());
@@ -116,14 +103,14 @@ public class MapGenerator {
     }
 
     /**
-     * Get the adjacent list of the map.
-     * @return
+     * Get the map with distance between any two adjacent Territories.
+     * @return the distance map.
      */
-    public HashMap<Territory, HashSet<Territory>> getTheMap() {
-        HashMap<Territory, HashSet<Territory>> map = new HashMap<>();
-        List<Territory> list = new ArrayList<>();
+    public Map<Territory, Map<Territory, Double>> getDistanceMap() {
+        Map<Territory, Map<Territory, Double>> map = new HashMap<>();
         Iterator<String> it = names.iterator();
         char c = 'A';
+        territories = new HashMap<>();
         for (int i = 0; i < n; i++) {
             String str;
             if (it.hasNext()) {
@@ -133,15 +120,59 @@ public class MapGenerator {
                 c++;
             }
             Territory t = new Territory(str);
-            map.put(t, new HashSet<>());
-            list.add(t);
+            map.put(t, new HashMap<>());
+            territories.put(points.get(i), t);
         }
         for (Edge edge : connections) {
-            int index1 = points.indexOf(edge.p1);
-            int index2 = points.indexOf(edge.p2);
-            map.get(list.get(index1)).add(list.get(index2));
-            map.get(list.get(index2)).add(list.get(index1));
+            Territory t1 = territories.get(edge.p1);
+            Territory t2 = territories.get(edge.p2);
+            double distance = edge.p1.dist(edge.p2);
+            map.get(t1).put(t2, distance);
+            map.get(t2).put(t1, distance);
         }
+        generateVoronoi();
         return map;
     }
+
+    /**
+     * Get voronoi map.
+     */
+    private void generateVoronoi() {
+        for (Edge e : connections) {
+            Triangle t1 = null;
+            Triangle t2 = null;
+            Territory terri1 = territories.get(e.p1);
+            Territory terri2 = territories.get(e.p2);
+            for (Triangle t : triangles) {
+                if (t.overlaps(e.p1) && t.overlaps(e.p2)) {
+                    if (t1 == null) {
+                        t1 = t;
+                    } else {
+                        t2 = t;
+                        break;
+                    }
+                }
+            }
+            if (t1 != null && t2 != null) {
+                if (t1.c.isInsideRectangle(width, height) || t2.c.isInsideRectangle(width, height)) {
+                    Edge edge = new Edge(t1.c, t2.c).getEdgeInsideRectangle(width, height);
+                    if (edge != null) {
+                        terri1.addEdge(edge);
+                        terri2.addEdge(edge);
+                    }
+                }
+            } else if (t1 != null) {
+                Edge ve = t1.getVoronoiEdge(e).getEdgeInsideRectangle(width, height);
+                if (ve != null) {
+                    terri1.addEdge(ve);
+                    terri2.addEdge(ve);
+                }
+            }
+        }
+    }
+    
+    public List<Point2D> getPoints() {
+        return points;
+    }
+
 }

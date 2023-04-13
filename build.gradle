@@ -7,18 +7,25 @@
 plugins {
     id 'com.bmuschko.clover' version '2.2.3'
     id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 
 subprojects{
     apply plugin: "java"
     apply plugin: "com.bmuschko.clover"
+    apply plugin: "org.openjfx.javafxplugin"
     repositories {
         jcenter()
+        mavenCentral()
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    javafx {
+        version = "20"
+        modules = [ 'javafx.controls', 'javafx.fxml' ]
     }
     dependencies {
         // Use JUnit Jupiter for testing.
@@ -30,7 +37,18 @@ subprojects{
         clover 'org.openclover:clover:4.4.1'
         // Use Mockito for testing
         testImplementation 'org.mockito:mockito-core:3.12.4'
-        
+
+        implementation 'org.openjfx:javafx-base:16'
+        implementation 'org.openjfx:javafx-controls:16'
+        implementation 'org.openjfx:javafx-fxml:16'
+        implementation 'org.openjfx:javafx-graphics:16'
+        implementation 'org.openjfx:javafx-media:16'
+        implementation 'org.openjfx:javafx-swing:16'
+        implementation 'org.openjfx:javafx-web:16'
+        testImplementation "org.testfx:testfx-core:4.0.16-alpha"
+        testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
+        testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
+        testImplementation 'org.testfx:openjfx-monocle:jdk-12.0.1+2'   
     }
     clover{
         compiler{
@@ -42,6 +60,9 @@ subprojects{
             showStandardStreams = true
             exceptionFormat = 'full'
         }
+        //systemProperty "testfx.headless", "true"
+        //systemProperty "testfx.robot", "glass"
+
     }
     test {
         // Use junit platform for unit tests

@@ -3,19 +3,20 @@ package edu.duke.ece651.team6.server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import edu.duke.ece651.team6.shared.Territory;
 
 public class MapGeneratorTest {
+
     @Test
     void testGetTheMap() {
         MapGenerator m = new MapGenerator(15, "Hello", "Nihao", "Hi", "yeah");
         int a = 0, b = 0, c = 0, d = 0;
-        HashMap<Territory, HashSet<Territory>> map = m.getTheMap();
+        Map<Territory, Map<Territory, Double>> map = m.getDistanceMap();
         for (Territory t : map.keySet()) {
             if (t.getName().equals("Hello")) {
                 a = 1;
@@ -32,5 +33,15 @@ public class MapGeneratorTest {
         assertEquals(1, c);
         assertEquals(1, d);
         assertThrows(RuntimeException.class, () -> new MapGenerator(1000));
+        Map<Territory, Map<Territory, Double>> distMap = m.getDistanceMap();
+        Set<Territory> set = distMap.keySet();
+        for (Territory t1 : set) {
+            Map<Territory, Double> dist = distMap.get(t1);
+            for (Territory t2 : dist.keySet()) {
+                assertEquals(dist.get(t2), distMap.get(t2).get(t1));
+            }
+        }
+        m.getPoints();
+        //SimplePrinter.main(null);
     }
 }

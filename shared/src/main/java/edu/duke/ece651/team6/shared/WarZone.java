@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /**
  * An abstract class that can represent a war happens on a territory.
  */
-public abstract class WarZone {
+public abstract class WarZone implements java.io.Serializable, Cloneable {
     protected final Territory territory;
     protected Deque<Army> armies;
 

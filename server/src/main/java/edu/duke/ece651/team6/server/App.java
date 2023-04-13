@@ -4,37 +4,15 @@
 package edu.duke.ece651.team6.server;
 
 import java.io.IOException;
-import edu.duke.ece651.team6.shared.SampleMap;
-import edu.duke.ece651.team6.shared.GameMap;
 
 public class App {
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
-    if (args.length != 2) {
+  public static void main(String[] args) throws NumberFormatException, IOException, ClassNotFoundException {
+    if (args.length != 1) {
       throw new IllegalArgumentException(
-          "Invalid Argument! Usage: ./server/build/install/server/bin/server <server_port> <player_num>");
+          "Invalid Argument! Usage: ./server/build/install/server/bin/server <server_port>");
     }
-    /**
-     * Generate a random GameMap according to playerNum
-     */
-    // MapGenerator mapGenerator = new MapGenerator(24);
-    // GameMap gameMap = new GameMap(mapGenerator.getTheMap());
-
-    // Testing: Use SampleMap
-    SampleMap sampleMap = new SampleMap();
-    GameMap gameMap = new GameMap(sampleMap.getAdjList());
-
-    // Testing: Use SimpleMap
-    // SimpleMap simpleMap = new SimpleMap();
-    // GameMap gameMap = new GameMap(simpleMap.getAdjList());
-
-    RiscMaster riscMaster = new RiscMaster(Integer.parseInt(args[0]), Integer.parseInt(args[1]), gameMap);
-    riscMaster.init();
-    riscMaster.setUpGameBasicSettings();
-    while (true) {
-      if (riscMaster.playOneTurn()) {
-        break;
-      }
-    }
-    riscMaster.finish();
+    GameReactor gr = new GameReactor(Integer.parseInt(args[0]), 10);
+    gr.run();
+    gr.close();
   }
 }

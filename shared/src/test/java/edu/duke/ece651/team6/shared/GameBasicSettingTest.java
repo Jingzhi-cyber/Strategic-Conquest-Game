@@ -5,19 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 public class GameBasicSettingTest {
 
   public GameBasicSetting constructGameBasicSetting() {
-    HashSet<Territory> territories = new HashSet<Territory>() {
+    Set<Territory> territories = new HashSet<Territory>() {
       {
         add(new Territory("A", 1));
         add(new Territory("B", 1));
       }
     };
-    GameBasicSetting setting = new GameBasicSetting(1, 3, territories, 10);
+    GameBasicSetting setting = new GameBasicSetting(1, 3, null, territories, 10);
     return setting;
   }
 
@@ -43,8 +45,8 @@ public class GameBasicSettingTest {
   @Test
   public void test_initializeUnitPlacement() {
     GameBasicSetting setting = constructGameBasicSetting();
-    HashSet<Territory> territories = setting.getAssignedTerritories();
-    HashMap<Territory, Integer> unitsPlacement = new HashMap<Territory, Integer>();
+    Set<Territory> territories = setting.getAssignedTerritories();
+    Map<Territory, Integer> unitsPlacement = new HashMap<Territory, Integer>();
 
     // assertThrows(InternalError.class, () ->
     // setting.initializeUnitPlacement(unitsPlacement));

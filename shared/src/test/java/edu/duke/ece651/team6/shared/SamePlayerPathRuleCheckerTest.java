@@ -34,9 +34,10 @@ public class SamePlayerPathRuleCheckerTest {
   public void test_checkOrder() {
     SamePlayerPathRuleChecker checker = new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null));
 
-    assertNull(checker.checkOrder(new MoveOrder(territoryA, territoryB, 1), map));
-    assertNull(checker.checkOrder(new MoveOrder(territoryB, territoryC, 1), map));
-    assertNull(checker.checkOrder(new MoveOrder(territoryA, territoryC, 1), map));
-    assertNotNull(checker.checkOrder(new MoveOrder(territoryA, territoryD, 1), map));
+    int[] numUnitsByLevel = { 1, 0, 0, 0, 0, 0, 0 };
+    assertNull(checker.checkOrder(new MoveOrder(territoryA, territoryB, numUnitsByLevel), map));
+    assertNull(checker.checkOrder(new MoveOrder(territoryB, territoryC, numUnitsByLevel), map));
+    assertNull(checker.checkOrder(new MoveOrder(territoryA, territoryC, numUnitsByLevel), map));
+    assertNotNull(checker.checkOrder(new MoveOrder(territoryA, territoryD, numUnitsByLevel), map));
   }
 }

@@ -1,7 +1,12 @@
 package edu.duke.ece651.team6.server;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import edu.duke.ece651.team6.shared.Edge;
+import edu.duke.ece651.team6.shared.Point2D;
 
 /**
  * A 2D triangle, consists of three Point2Ds.
@@ -10,8 +15,8 @@ public class Triangle {
     private Point2D p1;
     private Point2D p2;
     private Point2D p3;
-    private Point2D c;
-    private double r;
+    protected Point2D c;
+    protected double r;
 
     public Triangle(Point2D p1, Point2D p2, Point2D p3) {
         this.p1 = p1;
@@ -106,6 +111,23 @@ public class Triangle {
         edges.add(e2);
         edges.add(e3);
         return edges;
+    }
+
+    public Edge getVoronoiEdge(Edge e) {
+        Point2D mid = e.middle();
+        Edge verticalE = new Edge(c, mid);
+        List<Point2D> points = verticalE.getInterWithRectangle(1000, 500);
+        Set<Edge> edges = getEdges();
+        edges.remove(e);
+        List<Edge> edges2 = new ArrayList<>(edges);
+        Point2D pt = edges2.get(0).getIntersection(verticalE);
+        if (pt == null) {
+            pt = edges2.get(1).getIntersection(verticalE);
+        }
+        if (new Edge(pt, points.get(0)).containsPoint(mid)) {
+            return new Edge(points.get(0), c);
+        }
+        return new Edge(points.get(1), c);
     }
 
 }

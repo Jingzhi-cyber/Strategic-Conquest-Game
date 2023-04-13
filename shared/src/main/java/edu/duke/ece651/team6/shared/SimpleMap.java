@@ -2,25 +2,27 @@ package edu.duke.ece651.team6.shared;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SimpleMap {
-    private HashMap<Territory, HashSet<Territory>> adjList;
+    private Map<Territory, Set<Territory>> adjList;
 
     public SimpleMap() {
-        adjList = new HashMap<Territory, HashSet<Territory>>();
+        adjList = new HashMap<>();
         Territory Narnia = new Territory("Narnia", 0, 2);
         Territory Midkemia = new Territory("Midkemia", 1, 2);
 
-        HashSet<Territory> NarniaNeighbor = new HashSet<Territory>();
+        Set<Territory> NarniaNeighbor = new HashSet<>();
         NarniaNeighbor.add(Midkemia);
         adjList.put(Narnia, NarniaNeighbor);
 
-        HashSet<Territory> MidkemiaNeighbor = new HashSet<Territory>();
+        Set<Territory> MidkemiaNeighbor = new HashSet<>();
         MidkemiaNeighbor.add(Narnia);
         adjList.put(Midkemia, MidkemiaNeighbor);
     }
 
-    public HashMap<Territory, HashSet<Territory>> getAdjList() {
+    public Map<Territory, Set<Territory>> getAdjList() {
         return adjList;
     }
 }

@@ -1,10 +1,9 @@
 package edu.duke.ece651.team6.shared;
-import java.net.Socket;
 
 public class PlayerProfile implements java.io.Serializable {
     private final int id;
     private String name;
-    private transient Socket socket;
+    private transient SocketKey socketKey;
 
     /**
      * Construct PlayerProfile with an unique id
@@ -13,7 +12,7 @@ public class PlayerProfile implements java.io.Serializable {
     public PlayerProfile(int id) {
         this.id = id;
         this.name = null;
-        this.socket = null;
+        this.socketKey = null;
     }
 
     /**
@@ -28,8 +27,8 @@ public class PlayerProfile implements java.io.Serializable {
      * Set socket
      * @param socket
      */
-    public void setSocket(Socket socket) {
-        this.socket = socket;
+    public void setSocket(SocketKey key) {
+        this.socketKey = key;
     }
 
     /**
@@ -52,7 +51,7 @@ public class PlayerProfile implements java.io.Serializable {
      * Get socket
      * @return
      */
-    public Socket getSocket() {
-        return socket;
+    public SocketKey getSocket() {
+        return socketKey;
     }
 }

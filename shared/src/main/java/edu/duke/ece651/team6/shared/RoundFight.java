@@ -16,23 +16,30 @@ public class RoundFight extends WarZone {
         if (armies.size() == 0) {
             throw new RuntimeException("Cannot start a war with no army!");
         }
+        for (Army army : armies) {
+            army.sort();
+        }
         while (armies.size() > 1) {
             Army army1 = armies.pollFirst();
             Army army2 = armies.peekFirst();
+            Unit strong = army1.pollLast();
+            Unit weak = army2.pollFirst();
             Random random = new Random();
-            int d1 = random.nextInt(20);
-            int d2 = random.nextInt(20);
+            int d1 = random.nextInt(20) + strong.bonus();
+            int d2 = random.nextInt(20) + weak.bonus();
             if (d1 > d2) {
-                army2.loseOneTurn();
+                weak = null;
             } else if (d2 > d1) {
-                army1.loseOneTurn();
+                strong = null;
             } else {
                 if (army1.getOwnerId() == territory.getOwnerId()) {
-                    army2.loseOneTurn();
+                    weak = null;
                 } else if (army2.getOwnerId() == territory.getOwnerId()) {
-                    army1.loseOneTurn();
+                    strong = null;
                 }
             }
+            army1.addLast(strong);
+            army2.addFirst(weak);
             if (!army1.hasLost()) {
                 armies.addLast(army1);
             }

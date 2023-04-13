@@ -16,11 +16,18 @@ Maintainer: ece651-spr23-team6
 ![uml](v1-final-uml-group6-risc.png)
 ## Usage
 ```bash
+# client ui developing..
+./gradlew run-client # to launch the GUI scene
+```
+
+```bash
 ./gradlew build
 ./gradlew installDist
 
-launch server: ./server/build/install/server/bin/server <server_port> <player_num>
-launch client: ./client/build/install/client/bin/client <server_addr> <server_port>
+launch server: ./server/build/install/server/bin/server <server_port>
+launch client: ./gradlew run-client
+
+# Text version
 
 # e.g., vcm-30756.vm.duke.edu 12345
 ```
@@ -30,4 +37,13 @@ launch client: ./client/build/install/client/bin/client <server_addr> <server_po
 git push -o ci.skip # not run any CI pipelines on this push
 ```
 
+```bash
+./gradlew (clean) build
+./gradlew run-client # to see an example launching a JavaFX stage
+```
 
+### Note
+[Download](https://gluonhq.com/products/javafx/) JavaFX SDK if it's not included in your Java SDK
+
+### Resources
+- [JavaFX-tutorial](https://jenkov.com/tutorials/javafx/3d.html)

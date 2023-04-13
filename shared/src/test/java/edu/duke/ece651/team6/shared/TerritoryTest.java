@@ -1,6 +1,9 @@
 package edu.duke.ece651.team6.shared;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 
 public class TerritoryTest {
@@ -27,7 +30,7 @@ public class TerritoryTest {
     assertNotEquals(t2, t4);
     assertNotEquals(t2.hashCode(), t4.hashCode());
 
-    assertEquals("(name: Hogwarts, ownerId: 0, units: 5)", t2.toString());
+    assertEquals("(name: Hogwarts, ownerId: 0)", t2.toString());
 
     Territory t5 = new Territory("SetOwnerId");
     t5.setOwnerId(1);
@@ -45,6 +48,13 @@ public class TerritoryTest {
     t3.update();
     assertEquals(2, t1.getNumUnits());
     assertEquals(9, t3.getNumUnits()); // territory.update() increase numUnit by 1
+
+    // new moveTo
+    assertThrows(IllegalArgumentException.class, () -> t1.moveTo(t3, new int[]{5, 0, 0, 0, 0, 0, 0}));
+    assertThrows(IllegalArgumentException.class, () -> t1.moveTo(t2, new int[]{1, 0, 0, 0, 0, 0, 0}));
+    t3.moveTo(t1, new int[]{6, 0, 0, 0, 0, 0, 0});
+    assertTrue(Arrays.equals(t1.getAllUnitsNum(), new int[]{8, 0, 0, 0, 0, 0, 0}));
+    assertTrue(Arrays.equals(t3.getAllUnitsNum(), new int[]{3, 0, 0, 0, 0, 0, 0}));
   }
 
   @Test
@@ -52,7 +62,7 @@ public class TerritoryTest {
     Territory t1 = new Territory("1", 1, 100);
     assertThrows(IllegalArgumentException.class, () -> t1.attack(t1, 5));
     Territory t2 = new Territory("2", 2, 1);
-    assertThrows(IllegalArgumentException.class, () -> t1.attack(t2, 0));
+    assertThrows(IllegalArgumentException.class, () -> t1.attack(t2, -1));
     t1.attack(t2, 80);
     Territory t3 = new Territory("3", 3, 10);
     t3.attack(t2, 1);
@@ -62,6 +72,24 @@ public class TerritoryTest {
     t1.attack(t4, 5);
     t4.update();
     assertEquals(1, t4.getOwnerId());
+
+    Territory t5 = new Territory("nihao", 1, 0);
+    Territory t6 = new Territory("hello", 2, 10);
+    assertThrows(IllegalArgumentException.class, () -> t6.attack(t6, new int[]{1, 0, 0, 0, 0, 0, 0}));
+    assertThrows(IllegalArgumentException.class, () -> t6.attack(t5, new int[]{5, 1, 0, 0, 0, 0, 0}));
+    t6.attack(t5, new int[]{5, 0, 0, 0, 0, 0, 0});
+    t5.update();
+    assertTrue(Arrays.equals(t5.getAllUnitsNum(), new int[]{6, 0, 0, 0, 0, 0, 0}));
+    assertEquals(2, t5.getOwnerId());
+  }
+
+  @Test
+  public void testUpgrade() {
+    Territory t1 = new Territory("hello", 1, 5);
+    assertThrows(IllegalArgumentException.class, () -> t1.upgradeOneUnit(1, 3));
+    t1.upgradeOneUnit(0, 3);
+    assertTrue(Arrays.equals(t1.getAllUnitsNum(), new int[]{4, 0, 0, 1, 0, 0, 0}));
+    assertThrows(IllegalArgumentException.class, () -> t1.upgradeOneUnit(3, 2));
   }
 
   @Test
@@ -69,5 +97,52 @@ public class TerritoryTest {
     Territory t = new Territory("A", 1);
     t.initNumUnits(5);
     assertEquals(5, t.getNumUnits());
+  }
+
+  @Test
+  public void testSetterAndGetters() {
+    Territory t = new Territory("A", 1, 4);
+    t.setFood(2);
+    t.setTechnology(2);
+    assertEquals(2, t.getFood());
+    assertEquals(2, t.getTechnology());
+    assertEquals(7, t.getNumLevels());
+    assertEquals(4, t.getUnitsNumByLevel(0));
+    assertEquals(4, t.getAllUnits());
+  }
+
+  @Test
+  public void testClone() {
+    Territory t = new Territory("A", 1, 4);
+    Territory cloned = (Territory) t.clone();
+    assertEquals("A", cloned.getName());
+    assertEquals(4, cloned.getUnitsNumByLevel(0));
+  }
+
+  @Test
+  void testGetEdge() {
+    PolygonGetter pg = new PolygonGetter();
+    Territory t = new Territory("A", 1, 4);
+    t.addEdge(new Edge(1, 1, 1, 0));
+    t.addEdge(new Edge(1, 1, 0, 1.5));
+    pg.getPolygon(t);
+    pg.getPolygon(t);
+    t = new Territory("b", 1, 4);
+    t.addEdge(new Edge(1, 1, 2, 2));
+    t.addEdge(new Edge(1, 1, 2, 0.5));
+    t.addEdge(new Edge(2, 2, 2, 0.5));
+    pg.getPolygon(t);
+    pg.updatePolygon(t);
+    pg.updatePolygon(null);
+    t = new Territory("c", 1, 4);
+    t.addEdge(new Edge(2, 2, 3, 3));
+    t.addEdge(new Edge(2, 2, 1, 3));
+    t.addEdge(new Edge(1, 3, 3, 3));
+    pg.getPolygon(t);
+    t = new Territory("d", 1, 4);
+    t.addEdge(new Edge(2, 0, 2, 1));
+    t.addEdge(new Edge(3.5, 0, 3, 1));
+    t.addEdge(new Edge(2, 1, 3, 1));
+    pg.getPolygon(t);
   }
 }

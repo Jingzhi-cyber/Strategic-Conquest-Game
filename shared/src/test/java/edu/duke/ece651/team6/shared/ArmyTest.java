@@ -3,6 +3,7 @@ package edu.duke.ece651.team6.shared;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,6 +25,9 @@ public class ArmyTest {
         Army army = new Army(0, 2);
         assertEquals(2, army.getAllUnits());
         assertTrue(army.hasLost());
+        Army army2 = new Army(0, 10);
+        assertEquals(10, army2.getUnitsList().size());
+        assertTrue(army2.hasLost());
     }
 
     @Test
@@ -36,22 +40,22 @@ public class ArmyTest {
     void testHasLost() {
         Army army = new Army(0, 1);
         assertFalse(army.hasLost());
-        army.loseOneTurn();
+        army.pollFirst();
         assertTrue(army.hasLost());
     }
 
     @Test
     void testLoss() {
         Army army = new Army(0, 1);
-        assertDoesNotThrow(() -> army.loseOneTurn());
-        assertThrows(RuntimeException.class, () -> army.loseOneTurn());
+        assertDoesNotThrow(() -> army.pollFirst());
+        assertNull(army.pollFirst());
     }
 
     @Test
     void testMergeArmy() {
         Army army1 = new Army(0, 1);
         Army army2 = new Army(0, 1);
-        army1.loseOneTurn();
+        army1.pollFirst();
         assertTrue(army1.hasLost());
         army1.mergeArmy(army2);
         assertFalse(army1.hasLost());

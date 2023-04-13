@@ -41,6 +41,9 @@ public class RoundFightTest {
         wz.add(new Army(2, 100));
         wz.add(new Army(3, 100));
         wz.add(new Army(4, 100));
+        wz.add(new Army(5, 100));
+        wz.add(new Army(6, 100));
+        wz.add(new Army(7, 100));
         wz.startWar();
         assertEquals(0, territory.getOwnerId());
     }

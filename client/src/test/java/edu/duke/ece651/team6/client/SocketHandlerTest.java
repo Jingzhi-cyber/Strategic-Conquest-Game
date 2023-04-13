@@ -14,6 +14,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,14 +23,17 @@ import org.junit.jupiter.api.Test;
 
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
+import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
 import edu.duke.ece651.team6.shared.Result;
 
-public class ClientTest {
-  private static final int PORT = 8888;
+public class SocketHandlerTest {
+  //private static final int PORT = 8888;
   private ServerSocket server;
   private Socket clientSocket;
   OutputStream outputStream = mock(OutputStream.class);
+  GameMap gameMap = new GameMap(new HashMap<>());
+  Map<String, Integer> resources = new HashMap<String, Integer>();
 
   @BeforeEach
   void setup() throws IOException {
@@ -130,8 +135,8 @@ public class ClientTest {
   @Test
   void testRecvObject() throws IOException, ClassNotFoundException {
     /* Create a client with the client socket */
-    Client client = new Client(clientSocket);
-    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1));
+    SocketHandler client = new SocketHandler(clientSocket);
+    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1, gameMap, resources));
 
     /* Test recv general object */
     // receive the object from the server
@@ -139,7 +144,7 @@ public class ClientTest {
     assertExpectedRecvObject(receivedObject, Commit.class);
 
     /* Test recv GameBasicSetting */
-    setOutputStreamAndAssumption_recvSpecifiedObject(new GameBasicSetting(1, 2, null, 3));
+    setOutputStreamAndAssumption_recvSpecifiedObject(new GameBasicSetting(1, 2, null, null, 3));
     GameBasicSetting receivedObject2 = client.recvGameBasicSetting();
     assertExpectedRecvObject(receivedObject2, GameBasicSetting.class);
 
@@ -159,16 +164,16 @@ public class ClientTest {
 
   @Test
   void test_recvObject_invalidCase() throws IOException, ClassNotFoundException {
-    Client client = new Client(clientSocket);
-    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1));
+    SocketHandler client = new SocketHandler(clientSocket);
+    setOutputStreamAndAssumption_recvSpecifiedObject(new Commit(1, gameMap, resources));
     assertThrows(InvalidObjectException.class, () -> client.recvGameResult());
   }
 
   @Test
   void testSendObject() throws IOException, ClassNotFoundException {
     // create a client with the client socket
-    Client client = new Client(clientSocket);
-    Commit commit = new Commit(1); // replace with your own object
+    SocketHandler client = new SocketHandler(clientSocket);
+    Commit commit = new Commit(1, gameMap, resources); // replace with your own object
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(baos);
     oos.writeObject(commit);
@@ -190,7 +195,7 @@ public class ClientTest {
     client.sendExitInfo(true);
 
     /* Send Game Basic Info */
-    client.sendUpdatedGameBasicSetting(new GameBasicSetting(1, 2, null, 3));
+    client.sendUpdatedGameBasicSetting(new GameBasicSetting(1, 2, null, null, 3));
 
     client.closeSocket();
   }
@@ -207,7 +212,7 @@ public class ClientTest {
     @Override
     public void run() {
       try {
-        Client client = new Client(hostname, port);
+        SocketHandler client = new SocketHandler(hostname, port);
         String message = (String) client.recvObject();
         assertEquals(message, "Connected to server successfully!");
       } catch (IOException | ClassNotFoundException e) {

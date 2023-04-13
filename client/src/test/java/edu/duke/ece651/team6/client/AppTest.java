@@ -41,7 +41,7 @@ class AppTest {
   // when(this.textPlayer.playerId).thenReturn(1);
   // when(setting.getNumPlayers()).thenReturn(3);
   // when(setting.getRemainingNumUnits()).thenReturn(10);
-  // when(setting.getAssignedTerritories()).thenReturn(new HashSet<Territory>() {
+  // when(setting.getAssignedTerritories()).thenReturn(new HashSet<Territory>(){
   // {
   // add(new Territory("t1", 1, 10));
   // }

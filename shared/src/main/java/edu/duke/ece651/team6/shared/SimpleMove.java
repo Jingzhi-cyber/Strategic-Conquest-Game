@@ -1,13 +1,13 @@
 package edu.duke.ece651.team6.shared;
 
 /**
- * Represents a simple move order
- * It contains src and dest territory information and number of units to move
+ * Represents a simple move order It contains src and dest territory information
+ * and number of units to move
  */
-public abstract class SimpleMove implements java.io.Serializable {
+public abstract class SimpleMove extends Order {
   final Territory src;
   final Territory dest;
-  final int numUnits;
+  final int[] numUnitsByLevel;
 
   /**
    * Constructs a simple move
@@ -16,10 +16,24 @@ public abstract class SimpleMove implements java.io.Serializable {
    * @param dest represents a dest territory on the server side
    * @param num  represents number of units to move
    */
-  public SimpleMove(Territory src, Territory dest, int num) {
+  public SimpleMove(String name, Territory src, Territory dest, int[] numUnitsByLevel) {
+    super(name);
     this.src = src;
     this.dest = dest;
-    this.numUnits = num;
+    this.numUnitsByLevel = numUnitsByLevel;
+  }
+
+  /**
+   * Get total number of units of all levels
+   * 
+   * @return total
+   */
+  public int getTotalUnits() {
+    int total = 0;
+    for (int i = 0; i < numUnitsByLevel.length; i++) {
+      total += numUnitsByLevel[i];
+    }
+    return total;
   }
 
   /**
@@ -31,6 +45,11 @@ public abstract class SimpleMove implements java.io.Serializable {
 
   @Override
   public String toString() {
-    return "{ from: " + src.toString() + ", to: " + dest.toString() + ", numUnits: " + numUnits + " }";
+    String str = getName() + "{ from: " + src.toString() + ", to: " + dest.toString() + "\n";
+    for (int i = 0; i < numUnitsByLevel.length; i++) {
+      str += "level: " + i + " units: " + numUnitsByLevel[i] + "\n";
+    }
+    str += "}";
+    return str;
   }
 }

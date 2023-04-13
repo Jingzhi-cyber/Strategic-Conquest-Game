@@ -28,10 +28,14 @@ public class AttackUnitsRuleCheckerTest {
     AttackUnitsRuleChecker checker = new AttackUnitsRuleChecker(null);
     AttackUnitsRuleChecker checker2 = new AttackUnitsRuleChecker(null);
 
-    assertNotNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 0), map));
-    assertNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 4), map));
-    assertNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, 3), map));
-    assertNotNull(checker2.checkOrder(new AttackOrder(territoryC, territoryA, -1), map));
+    int[] numUnitsByLevel = {0, 0, 0, 0, 0, 0, 0};
+    assertNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, numUnitsByLevel), map));
+    numUnitsByLevel[0] = 4;
+    assertNotNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, numUnitsByLevel), map));
+    numUnitsByLevel[0] = 3;
+    assertNull(checker.checkOrder(new AttackOrder(territoryA, territoryB, numUnitsByLevel), map));
+    numUnitsByLevel[0] = -1;
+    assertNotNull(checker2.checkOrder(new AttackOrder(territoryC, territoryA, numUnitsByLevel), map));
   }
 
 }
