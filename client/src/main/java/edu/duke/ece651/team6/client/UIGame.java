@@ -981,7 +981,7 @@ public class UIGame extends Game {
    *         null if the user cancelled the dialog
    */
   private CompletableFuture<Territory> showTerritorySelectionDialog(Territory src, boolean isMove, String title,
-      String context) {
+      String content) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
     // Platform.runLater(() -> {
@@ -989,13 +989,13 @@ public class UIGame extends Game {
     List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
 
     if (territories.isEmpty()) {
-      mainPageController.showError(title + " Cannot " + " because there aren't available territories");
+      mainPageController.showError("There aren't enough territories");
       future.complete(null);
     } else {
       ChoiceDialog<String> dialog = new ChoiceDialog<>(territoryNames.get(0), territoryNames);
       dialog.setTitle(title);
       dialog.setHeaderText(null);
-      dialog.setContentText(context);
+      dialog.setContentText(content);
 
       Optional<String> result = dialog.showAndWait();
 
@@ -1047,8 +1047,8 @@ public class UIGame extends Game {
     }
 
     if (levels.isEmpty()) {
-      mainPageController
-          .showError(title + " Cannot upgrade level for units on " + src.getName() + " because of level upper limit. ");
+      mainPageController.showError("Cannot upgrade unit level from " + inclusiveLowerLevel + " to "
+          + inclusiveUpperLevel + " on " + src.getName());
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(levels.get(0), levels);
@@ -1140,8 +1140,8 @@ public class UIGame extends Game {
     }
 
     if (nums.isEmpty()) {
-      mainPageController.showError(
-          "Cannot " + title + " to upgrade level for units on " + src.getName() + " because units are not enough");
+      mainPageController
+          .showError("Number of units not enough for level " + currentLevel + " on territory " + src.getName());
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);
@@ -1222,5 +1222,8 @@ public class UIGame extends Game {
     copiedResource.putAll(this.resource);
     System.out.println("Initiating Commit");
     currentCommit = new Commit(this.playerId, (GameMap) this.startingGameMap.clone(), copiedResource);
+    Platform.runLater(
+        () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
+
   }
 }
