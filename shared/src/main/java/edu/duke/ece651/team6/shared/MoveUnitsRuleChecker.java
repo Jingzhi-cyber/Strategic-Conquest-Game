@@ -29,8 +29,8 @@ public class MoveUnitsRuleChecker extends MoveOrderRuleChecker {
   @Override
   protected String checkMyRule(Order order, GameMap theMap) {
     SimpleMove move = (SimpleMove) order;
-    Territory src = move.src;
-    Territory dest = move.dest;
+    Territory src = theMap.getTerritoryByName(move.src.getName());
+    Territory dest = theMap.getTerritoryByName(move.dest.getName());
     try {
       src.moveTo(dest, move.numUnitsByLevel);
     } catch (IllegalArgumentException e) {
