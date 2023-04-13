@@ -506,8 +506,7 @@ public class UIGame extends Game {
 
   protected void dispalyTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
       Territory territory) {
-    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + "\nNumber of units: "
-        + territory.getNumUnits() + " \n";
+    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n";
     String info2 = getNeighborDistance(territory);
     String info3 = getUnitsNumberByLevel(territory);
     territoryInfoText1.setText(info1);
@@ -576,7 +575,7 @@ public class UIGame extends Game {
 
   protected String getNeighborDistance(Territory territory) {
     Map<Territory, Integer> distanceMap = this.gameMap.getNeighborDist(territory);
-    String info = "Neighbot distance: \n";
+    String info = "Neighbor distance: \n";
     for (Territory currTerritory : distanceMap.keySet()) {
       info = info + currTerritory.getName() + " : " + distanceMap.get(currTerritory) + " \n";
     }
