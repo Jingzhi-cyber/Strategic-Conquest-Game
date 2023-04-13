@@ -81,6 +81,8 @@ public class GameReactor {
             if (numPlayer == 0) {
                 if (!accountManager.update(username, socket)) {
                     socket.close();
+                } else {
+                    socket.getOutputStream().write(0);
                 }
             // Join a new game.
             } else {

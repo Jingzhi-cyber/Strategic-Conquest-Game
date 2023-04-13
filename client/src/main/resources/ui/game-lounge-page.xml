@@ -11,7 +11,7 @@
 
 <GridPane fx:id="gameLoungeGridPane" xmlns:fx="http://javafx.com/fxml"
           fx:controller="edu.duke.ece651.team6.client.controller.GameLoungeController">
-  <columnConstraints>
+    <columnConstraints>
         <ColumnConstraints percentWidth="20" />
         <ColumnConstraints percentWidth="30" />
         <ColumnConstraints percentWidth="40" />
@@ -19,29 +19,34 @@
     </columnConstraints>
     <rowConstraints>
         <RowConstraints percentHeight="10" />
-         <RowConstraints percentHeight="80" />
+        <RowConstraints percentHeight="80" />
         <RowConstraints percentHeight="10" />
     </rowConstraints>
     <children>
-       <Button fx:id="newGame"
+        <Button fx:id="newGame"
             text="${'New Game \n Select a number of players'}"
             GridPane.rowIndex="0"
             GridPane.columnIndex="0"
             styleClass="expandable,gameloungebtn"
             onAction="#onNewGameButton"/>
         <ListView fx:id="numPlayer" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-
-      <ListView fx:id="gameLoungeList" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-     <Button fx:id="switchPageButton"
+        <ListView fx:id="gameLoungeList" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+        <Button fx:id="backToGameButton"
+                text="Back to a disconnected game"
+                GridPane.rowIndex="0"
+                GridPane.columnIndex="1"
+                styleClass="expandable,gameloungebtn"
+                onAction="#onBackToGameButton"/>
+        <Button fx:id="switchPageButton"
             text="Switch to game"
             GridPane.rowIndex="0"
             GridPane.columnIndex="2"
             styleClass="expandable,gameloungebtn"
             onAction="#onSwitchPageButton"/>
-     <Button fx:id="logoutButton"
+        <Button fx:id="logoutButton"
             text="Logout"
             GridPane.rowIndex="0"
             GridPane.columnIndex="3"
             onAction="#onLogoutButton"/>
-  </children>
+    </children>
 </GridPane>

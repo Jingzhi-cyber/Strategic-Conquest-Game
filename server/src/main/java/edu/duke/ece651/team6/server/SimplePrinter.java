@@ -16,7 +16,7 @@ public class SimplePrinter extends Application {
 
     @Override
     public void start(Stage stage) {
-        MapGenerator map = new MapGenerator(24);
+        MapGenerator map = new MapGenerator(8);
         Map<Territory, Map<Territory, Double>> m = map.getDistanceMap();
         List<Point2D> points = map.getPoints();
         Pane pane = new Pane();

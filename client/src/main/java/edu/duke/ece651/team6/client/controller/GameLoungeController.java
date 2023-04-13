@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import edu.duke.ece651.team6.client.Client;
 import edu.duke.ece651.team6.client.UIGame;
 import edu.duke.ece651.team6.client.model.GameLounge;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -113,6 +114,23 @@ public class GameLoungeController extends Controller implements Initializable {
     logOut();
   }
 
+  @FXML
+  private void onBackToGameButton() throws Exception {
+    int gameId = -1;
+    try {
+      gameId = client.backToGame();
+    } catch (IOException | ClassNotFoundException e) {
+      Platform.runLater(() -> {
+        showError("Cannot back to a game, error message: " + e.getMessage());
+      });
+    }
+    if (gameId != -1) {
+      this.gameLoungeList.getItems().add(String.valueOf(gameId));
+      gameLoungeList.refresh();
+      switchToGameMainPage(gameId, false);
+    }
+  }
+
   @Override
   // @SuppressWarnings("unchecked")
   public void initialize(URL location, ResourceBundle resources) {
@@ -189,4 +207,6 @@ public class GameLoungeController extends Controller implements Initializable {
     // Parent root = loader.load();
     // MainPageController controller = loader.getController();
   }
+
+
 }
