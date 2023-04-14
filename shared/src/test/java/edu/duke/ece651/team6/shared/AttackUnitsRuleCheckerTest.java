@@ -4,6 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 public class AttackUnitsRuleCheckerTest {
@@ -21,6 +26,11 @@ public class AttackUnitsRuleCheckerTest {
     this.territoryA = new Territory("A", 1, 3);
     this.territoryB = new Territory("B", 2, 5);
     this.territoryC = new Territory("C", 2, 4);
+    Map<Territory, Set<Territory>> adjList = new HashMap<>();
+    adjList.put(territoryA, new HashSet<>());
+    adjList.put(territoryB, new HashSet<>());
+    adjList.put(territoryC, new HashSet<>());
+    map = new GameMap(adjList);
   }
 
   @Test

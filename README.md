@@ -13,7 +13,7 @@ Maintainer: ece651-spr23-team6
 
 [Detailed coverage](https://mw515.pages.oit.duke.edu/ece651-spr23-team6-risc/dashboard.html)
 
-![uml](v1-final-uml-group6-risc.png)
+![uml](v2-final-uml-group6-risc.png)
 ## Usage
 ```bash
 # client ui developing..

@@ -107,7 +107,11 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   public int getNumUnits() {
-    return units.get(0).size();
+    int total = 0;
+    for (Deque<Unit> unit : units) {
+      total += unit.size();
+    }
+    return total;
   }
 
   private Army dispatchArmy(int[] numUnits) {
