@@ -18,9 +18,11 @@ public class UpgradeUnitRuleChecker extends OrderRuleChecker {
             return "Invalid upgrade: the upgrade unit num is: " + numUnits + " but the territory only has " + nowUnitNum + " units";
         }
         Territory territory = theMap.getTerritoryByName(t.getName());
+        System.out.println("num of target level of units: " + territory.getUnitsNumByLevel(targetLevel));
         for (int i = 0; i < numUnits; i++) {
             territory.upgradeOneUnit(nowLevel, targetLevel);
         }
+        System.out.println("num of target level of units after operation: " + territory.getUnitsNumByLevel(targetLevel));
         return null;
     }
 }

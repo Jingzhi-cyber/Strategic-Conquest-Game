@@ -31,10 +31,10 @@ public class Commit implements java.io.Serializable {
    * @param moveChecker   represents a chain of rules for move order
    * @param attackChecker represents a chain of rules for attack order
    */
-  public Commit(int playerId, GameMap gameMap, Map<String, Integer> resource) {
+  public Commit(int playerId, GameMap gameMap, Map<String, Integer> deprecated) {
     this.playerId = playerId;
     this.gameMap = gameMap;
-    this.resource = resource;
+    this.resource = gameMap.getResourceByPlayerId(playerId);
     this.gameMapBak = (GameMap) this.gameMap.clone();
     this.resourceBak = new HashMap<>();
     this.resourceBak.putAll(this.resource);
@@ -258,7 +258,7 @@ public class Commit implements java.io.Serializable {
     }
 
     if (research != null) {
-      builder.append(research.toString() + " (Cost: " + Constants.researchCosts.get(gameMap.getMaxTechLevel(playerId) - 1) // here the max tech level has already been upgraded
+      builder.append(research.toString() + " (Cost: " + Constants.researchCosts.get(gameMap.getMaxTechLevel(playerId))
           + ")" + "\n");
     }
 
@@ -267,6 +267,10 @@ public class Commit implements java.io.Serializable {
           + UnitManager.costToUpgrade(o.getNowLevel(), o.getTargetLevel()) * o.getNumUnits() + ")" + "\n");
     }
     return builder.toString();
+  }
+
+  public GameMap getCurrentGameMap() {
+    return this.gameMap;
   }
 
 }

@@ -68,7 +68,7 @@ public class UIGame extends Game {
 
   Scene scene;
 
-  GameMap gameMap;
+  // GameMap gameMap;
 
   MapView thisView = null;
 
@@ -178,7 +178,6 @@ public class UIGame extends Game {
     this.polygonGetter = new PolygonGetter();
     this.playerColor = new HashMap<>();
     this.colors = new ArrayList<>(Arrays.asList(Color.AQUAMARINE, Color.AZURE, Color.VIOLET, Color.LIGHTCORAL));
-    // this.mainPageController.setUsername(username);
   }
 
   /**
@@ -302,7 +301,7 @@ public class UIGame extends Game {
 
       System.out.println((String) socketHandler.recvObject());
       setting = socketHandler.recvGameBasicSetting();
-      this.gameMap = setting.getGameMap();
+      this.startingGameMap = setting.getGameMap();
       this.gameStatus = GAME_STATUS.PLACE_UNITS;
       Platform.runLater(() -> {
         mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
@@ -505,7 +504,8 @@ public class UIGame extends Game {
 
   protected void dispalyTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
       Territory territory) {
-    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n";
+    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
+        + territory.getFood() + "\nTech prod: " + territory.getTechnology();
     String info2 = getNeighborDistance(territory);
     String info3 = getUnitsNumberByLevel(territory);
     territoryInfoText1.setText(info1);
@@ -573,7 +573,7 @@ public class UIGame extends Game {
   }
 
   protected String getNeighborDistance(Territory territory) {
-    Map<Territory, Integer> distanceMap = this.gameMap.getNeighborDist(territory);
+    Map<Territory, Integer> distanceMap = this.startingGameMap.getNeighborDist(territory);
     String info = "Neighbor distance: \n";
     for (Territory currTerritory : distanceMap.keySet()) {
       info = info + currTerritory.getName() + " : " + distanceMap.get(currTerritory) + " \n";
@@ -610,8 +610,10 @@ public class UIGame extends Game {
       Polygon currPolygon = this.polygonGetter.getPolygon(currTerritory);
       currPolygon.setId(name);
       setPolygonColor(currPolygon, ownerID);
-      setPolygonTooltip(currPolygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\n"
-          + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory));
+      setPolygonTooltip(currPolygon,
+          "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
+              + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
+              + currTerritory.getTechnology());
       setPolygonMouseClick(currPolygon, currTerritory);
       Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
       mapPane.getChildren().add(currPolygon);
@@ -647,8 +649,10 @@ public class UIGame extends Game {
             setPolygonMouseClick(polygon, currTerritory);
             setPolygonText(mapPane, polygon, name + " - " + ownerID);
             Tooltip.uninstall(polygon, null);
-            setPolygonTooltip(polygon, "Territory: " + name + "\nOwnerID: " + ownerID + "\n"
-                + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory));
+            setPolygonTooltip(polygon,
+                "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
+                    + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
+                    + currTerritory.getTechnology());
           }
         }
       }
@@ -671,23 +675,27 @@ public class UIGame extends Game {
       this.playerId = mapInfo.playerId;
     }
     this.thisView = new UIGameView(mapInfo);
-    this.gameMap = mapInfo.getGameMap();
-    this.unChangedGameMap = mapInfo.getGameMap();
-    System.out.println("GameMap - UIGame.java" + gameMap.toString());
+    // this.gameMap = mapInfo.getGameMap();
+    this.startingGameMap = mapInfo.getGameMap();
 
-    Platform.runLater(() -> updateMap(mainPageController.getMapPane(), this.gameMap.getTerritorySet()));
+    initiateCommit();
+
+    System.out.println("GameMap - UIGame.java" + this.currentCommit.getCurrentGameMap().toString());
+
+    Platform.runLater(
+        () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
 
     this.resource.put(Constants.RESOURCE_FOOD,
-        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
+        this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
     this.resource.put(Constants.RESOURCE_TECH,
-        this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
+        this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
 
     Platform.runLater(() -> {
-      mainPageController.updateTechLevel(gameMap.getMaxTechLevel(playerId));
-      mainPageController
-          .updateFoodResources(this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
-      mainPageController
-          .updateTechResources(this.gameMap.getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
+      mainPageController.updateTechLevel(this.currentCommit.getCurrentGameMap().getMaxTechLevel(playerId));
+      mainPageController.updateFoodResources(
+          this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
+      mainPageController.updateTechResources(
+          this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
 
       mainPageController.setPlayTurnsButtonsDisabled(false);
     });
@@ -701,7 +709,7 @@ public class UIGame extends Game {
       return;
     }
 
-    initiateCommit();
+    // initiateCommit();
 
     // TODO Update Map!
 
@@ -973,7 +981,7 @@ public class UIGame extends Game {
    *         null if the user cancelled the dialog
    */
   private CompletableFuture<Territory> showTerritorySelectionDialog(Territory src, boolean isMove, String title,
-      String context) {
+      String content) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
     // Platform.runLater(() -> {
@@ -981,13 +989,13 @@ public class UIGame extends Game {
     List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
 
     if (territories.isEmpty()) {
-      mainPageController.showError(title + " Cannot " + " because there aren't available territories");
+      mainPageController.showError("There aren't enough territories");
       future.complete(null);
     } else {
       ChoiceDialog<String> dialog = new ChoiceDialog<>(territoryNames.get(0), territoryNames);
       dialog.setTitle(title);
       dialog.setHeaderText(null);
-      dialog.setContentText(context);
+      dialog.setContentText(content);
 
       Optional<String> result = dialog.showAndWait();
 
@@ -1039,8 +1047,8 @@ public class UIGame extends Game {
     }
 
     if (levels.isEmpty()) {
-      mainPageController
-          .showError(title + " Cannot upgrade level for units on " + src.getName() + " because of level upper limit. ");
+      mainPageController.showError("Cannot upgrade unit level from " + inclusiveLowerLevel + " to "
+          + inclusiveUpperLevel + " on " + src.getName());
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(levels.get(0), levels);
@@ -1132,8 +1140,8 @@ public class UIGame extends Game {
     }
 
     if (nums.isEmpty()) {
-      mainPageController.showError(
-          "Cannot " + title + " to upgrade level for units on " + src.getName() + " because units are not enough");
+      mainPageController
+          .showError("Number of units not enough for level " + currentLevel + " on territory " + src.getName());
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);
@@ -1160,78 +1168,9 @@ public class UIGame extends Game {
    * @return a Map<Integer, Territory> mapping from serial number to the territory
    */
   private Set<Territory> getSelfOwnedTerritories() {
-    PlayerMapInfo playerMapInfo = this.thisView.globalMapInfo.getPlayerMapInfo(this.playerId);
-
-    return playerMapInfo.getTerritories();
-  }
-
-  /**
-   * 
-   * Finds all enemy territories on the current game map and returns them as a Set
-   * of Territory objects.
-   *
-   * @return a Set of all enemy territories
-   */
-  protected Set<Territory> findEnemyTerritories() {
-    Set<Territory> set = new HashSet<>();
-    Map<Integer, PlayerMapInfo> globalInfo = this.thisView.globalMapInfo.getGlobalMap();
-    for (Map.Entry<Integer, PlayerMapInfo> entry : globalInfo.entrySet()) {
-      if (!entry.getKey().equals(this.playerId)) {
-        Set<Territory> territories = entry.getValue().getTerritories();
-        for (Territory t : territories) {
-          set.add(t);
-        }
-      }
-    }
-    return set;
-  }
-
-  /**
-   * 
-   * Finds all enemy territories that are directly connected to the given source
-   * territory. It first calls the findEnemyTerritories() method to retrieve all
-   * enemy territories, then checks the neighboring territories of the source
-   * territory to see which ones are also enemy territories. The result is a set
-   * of all enemy territories that are directly connected to the source territory.
-   *
-   * @param src the source territory for which to find connected enemy territories
-   * @return a set of all enemy territories that are directly connected to the
-   *         source territory
-   */
-  private Set<Territory> getConnectedEnemyTerritories(Territory src) {
-    Set<Territory> enemyTerritories = findEnemyTerritories();
-    Map<Territory, Integer> neighs = this.gameMap.getNeighborDist(src);
-    Set<Territory> result = new HashSet<>();
-    for (Territory t : neighs.keySet()) {
-      if (enemyTerritories.contains(t)) {
-        result.add(t);
-      }
-    }
-    return result;
-  }
-
-  /**
-   * 
-   * Returns a set of self-owned territories that are reachable from the given
-   * source territory via a path owned by the same player. This method uses the
-   * hasSamePlayerPath() method from the GameMap class to check if a path between
-   * the source and each potential territory exists and is owned by the same
-   * player as the source. If a reachable territory is found, it is added to the
-   * result set.
-   *
-   * @param src the source territory
-   * @return a set of self-owned territories reachable from the source territory
-   */
-  private Set<Territory> getHasPathSelfTerritories(Territory src) {
-    Set<Territory> selfTerritories = getSelfOwnedTerritories();
-
-    Set<Territory> result = new HashSet<>();
-    for (Territory t : selfTerritories) {
-      if (this.gameMap.hasSamePlayerPath(src, t)) {
-        result.add(t);
-      }
-    }
-    return result;
+    // PlayerMapInfo playerMapInfo =
+    // this.thisView.globalMapInfo.getPlayerMapInfo(this.playerId);
+    return this.currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(this.playerId);
   }
 
   /**
@@ -1244,26 +1183,32 @@ public class UIGame extends Game {
    * returns all territories that are owned by the current player and have a path
    * to the source territory. If the order is an attack, the method returns all
    * enemy territories that are adjacent to the source territory.
+   * 
+   * It is worth mentioning that the territories are gotten from the
+   * currentCommit's gameMap
    *
    * @param src  the source territory for the order
    * @param move true if the order is a move, false if it is an attack
    * @return a set of territories that can be selected for issuing the order
    */
   private Set<Territory> getTerritories(Territory src, boolean move) {
+    GameMap newestGameMap = this.currentCommit.getCurrentGameMap();
     if (src == null) {
-      return getSelfOwnedTerritories().stream().filter(territory -> territory.getNumUnits() > 0)
-          .collect(Collectors.toSet()); // to ensure only display src territory that has more than 0 units
+      return newestGameMap.getTerritorySetByPlayerId(this.playerId).stream()
+          .filter(territory -> territory.getNumUnits() > 0).collect(Collectors.toSet()); // to ensure only display src
+                                                                                         // territory that has more than
+                                                                                         // 0 units
     } else {
       if (move) {
-        return getHasPathSelfTerritories(src);
+        return newestGameMap.getHasPathSelfTerritories(src);
       } else {
-        return getConnectedEnemyTerritories(src);
+        return newestGameMap.getEnemyNeighbors(src);
       }
     }
   }
 
   private Commit currentCommit = null;
-  private GameMap unChangedGameMap = null;
+  private GameMap startingGameMap = null;
 
   /**
    *
@@ -1276,6 +1221,9 @@ public class UIGame extends Game {
     Map<String, Integer> copiedResource = new HashMap<>();
     copiedResource.putAll(this.resource);
     System.out.println("Initiating Commit");
-    currentCommit = new Commit(this.playerId, (GameMap) this.unChangedGameMap.clone(), copiedResource);
+    currentCommit = new Commit(this.playerId, (GameMap) this.startingGameMap.clone(), copiedResource);
+    Platform.runLater(
+        () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
+
   }
 }
