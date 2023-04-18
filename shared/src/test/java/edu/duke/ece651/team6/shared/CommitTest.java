@@ -2,6 +2,7 @@ package edu.duke.ece651.team6.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.matchers.Any;
 
 public class CommitTest {
   Territory t0 = new Territory("0", 1, 30);
@@ -74,6 +76,11 @@ public class CommitTest {
     when(gameMap.getTerritoryByName("2")).thenReturn(t2);
     when(gameMap.getTerritoryByName("3")).thenReturn(t3);
     when(gameMap.getTerritoryByName("4")).thenReturn(t4);
+
+    Map<String, Integer> mockResources = new HashMap<>();
+    mockResources.put(Constants.RESOURCE_FOOD, 1000);
+    mockResources.put(Constants.RESOURCE_TECH, 1000);
+    when(gameMap.getResourceByPlayerId(any(Integer.class))).thenReturn(mockResources);
 
     when(gameMap.clone()).thenReturn(new GameMap(new HashMap<>()));
   }

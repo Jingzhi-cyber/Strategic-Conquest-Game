@@ -32,7 +32,7 @@ public class SamePlayerPathRuleCheckerTest {
 
   @Test
   public void test_checkOrder() {
-    SamePlayerPathRuleChecker checker = new SamePlayerPathRuleChecker(new MoveUnitsRuleChecker(null));
+    SamePlayerPathRuleChecker checker = new SamePlayerPathRuleChecker(null);
 
     int[] numUnitsByLevel = { 1, 0, 0, 0, 0, 0, 0 };
     assertNull(checker.checkOrder(new MoveOrder(territoryA, territoryB, numUnitsByLevel), map));
