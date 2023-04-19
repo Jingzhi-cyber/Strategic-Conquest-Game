@@ -123,6 +123,21 @@ public class Commit implements java.io.Serializable {
     upgrades.add(upgrade);
   }
 
+  public void addCloakTerritoryOrder(CloakTerritoryOrder cloakTerritoryOrder) {
+    // TODO stub
+    return;
+  }
+
+  public void addGenerateSpyOrder(GenerateSpyOrder generateSpyOrder) {
+    // TODO stub
+    return;
+  }
+
+  public void addMoveSpyOrder(MoveSpyOrder moveSpyOrder) {
+    // TODO stub
+    return;
+  }
+
   // private String constructPrompt(String orderName, SimpleMove move, int
   // remainingUnits) {
   // return orderName + move.toString() + " cannot be performed, with " +

@@ -11,10 +11,13 @@ import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.Controller;
 import edu.duke.ece651.team6.shared.AttackOrder;
+import edu.duke.ece651.team6.shared.CloakTerritoryOrder;
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.GameMap;
+import edu.duke.ece651.team6.shared.GenerateSpyOrder;
 import edu.duke.ece651.team6.shared.MoveOrder;
+import edu.duke.ece651.team6.shared.MoveSpyOrder;
 import edu.duke.ece651.team6.shared.ResearchOrder;
 import edu.duke.ece651.team6.shared.Territory;
 import edu.duke.ece651.team6.shared.UpgradeOrder;
@@ -29,16 +32,16 @@ public class OrdersHandler {
 
   public void handleMoveOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
-    Territory src = showTerritorySelectionDialog(currentCommit, playerId, null, true, "Move Order",
-        "Which territory do you want to move units from?").get();
+    Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, true), playerId,
+        "Move Order", "Which territory do you want to move units from?").get();
 
     if (src == null) {
       mainPageController.showError("Must specify a territory to move units from");
       return; // User cancelled the dialog
     }
 
-    Territory dest = showTerritorySelectionDialog(currentCommit, playerId, src, true, "Move Order",
-        "Which territory do you want to move units to?").get();
+    Territory dest = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, src, true), playerId,
+        "Move Order", "Which territory do you want to move units to?").get();
 
     if (dest == null) {
       mainPageController.showError("Must specify a territory to move units to");
@@ -92,16 +95,16 @@ public class OrdersHandler {
   public void handleAttackOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
 
-    Territory src = showTerritorySelectionDialog(currentCommit, playerId, null, true, "Attack Order",
-        "Which territory do you want to attack units from").get();
+    Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, false), playerId,
+        "Attack Order", "Which territory do you want to attack units from").get();
 
     if (src == null) {
       mainPageController.showError("Must specify a territory to attack from");
       return; // User cancelled the dialog
     }
 
-    Territory dest = showTerritorySelectionDialog(currentCommit, playerId, src, false, "Attack Order",
-        "Which territory do you want to attack units to").get();
+    Territory dest = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, src, false), playerId,
+        "Attack Order", "Which territory do you want to attack units to").get();
 
     if (dest == null) {
       mainPageController.showError("Must specify a territory to attack units to");
@@ -184,7 +187,7 @@ public class OrdersHandler {
   public void handleUpgradeOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
     // Show a dialog to get the source territory from the user
-    Territory src = showTerritorySelectionDialog(currentCommit, playerId, null, true,
+    Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, true), playerId,
         "On which territory do you want to upgrade units?", "Choose a territory").get(); // true/false
     // both okay if
     // src is null
@@ -228,6 +231,119 @@ public class OrdersHandler {
     }
   }
 
+  /* ---------------------- Cloak and Spy -------------------- */
+
+  public void handleCloakOrder(Commit currentCommit, int playerId)
+      throws IOException, InterruptedException, ExecutionException {
+    // Show a dialog to get the source territory from the user
+    Territory territory = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, true), playerId,
+        "On which territory do you want to cloak?", "Choose a territory").get(); // true/false
+    // both okay if
+    // src is null
+    if (territory == null) {
+      // mainPageController.showError("Must specify a territory to units");
+      return; // User cancelled the dialog
+    }
+
+    // Create and execute the upgrade order
+    CloakTerritoryOrder cloak = new CloakTerritoryOrder(territory);
+
+    try {
+      currentCommit.addCloakTerritoryOrder(cloak);
+    } catch (IllegalArgumentException e) {
+      mainPageController.showError(e.getMessage());
+      return;
+    }
+  }
+
+  public void handleGenerateSpyOrder(Commit currentCommit, int playerId)
+      throws IOException, InterruptedException, ExecutionException {
+    // Show a dialog to get the source territory from the user
+    Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, true), playerId,
+        "On which territory do you want to generate spies?", "Choose a territory").get(); // true/false
+    // both okay if
+    // src is null
+    if (src == null) {
+      // mainPageController.showError("Must specify a territory to generate spies");
+      return; // User cancelled the dialog
+    }
+
+    // Show a dialog to get the current unit level from the user
+    Integer selectedNowLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL - 1, src, "Upgrade Order",
+        "From which level do you want to generate spies?").get();
+    if (selectedNowLevel == null) {
+      // mainPageController.showError("Must specify a level to generate spies");
+      return; // User cancelled the dialog
+    }
+
+    // Show a dialog to get the number of spies to generate
+    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedNowLevel, src,
+        "How many spies do you want to generate from them?").get();
+    if (numUnits == null) {
+      // mainPageController.showError("Must specify the number of units to generate
+      // spies");
+      return;
+    }
+
+    // Create and execute the upgrade order
+    GenerateSpyOrder generateSpyOrder = new GenerateSpyOrder(playerId, src, selectedNowLevel, numUnits);
+
+    try {
+      currentCommit.addGenerateSpyOrder(generateSpyOrder);
+    } catch (IllegalArgumentException e) {
+      mainPageController.showError(e.getMessage());
+      return;
+    }
+  }
+
+  public void handleMoveSpyOrder(Commit currentCommit, int playerId)
+      throws IOException, InterruptedException, ExecutionException {
+    Territory src = showTerritorySelectionDialog(
+        currentCommit.getCurrentGameMap().getSpyingTerritoriesOfAPlayer(playerId), playerId, "Move Spies Order",
+        "Which territory do you want to move spies from?").get();
+
+    if (src == null) {
+      // mainPageController.showError("Must specify a territory to move spies from");
+      return; // User cancelled the dialog
+    }
+
+    Territory dest = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getNeighborDist(src).keySet(),
+        playerId, "Move Spies Order", "Which territory do you want to move spies to?").get();
+
+    if (dest == null) {
+      // mainPageController.showError("Must specify a territory to move spies to");
+      return; // User cancelled the dialog
+    }
+
+    int spyNum = src.getSpyNumByPlayerId(playerId);
+    List<Integer> numList = new ArrayList<>();
+    for (int i = 1; i <= spyNum; i++) {
+      numList.add(i);
+    }
+
+    Integer numUnits = showNumberSelectionDialog(numList,
+        "Please change a source territory as the current one doesn't have enough spies to move", "Move Spies Order",
+        "How many of them do you want to move?").get();
+
+    if (numUnits == null) {
+      // mainPageController.showError("Must specify the number of spies to move");
+      return; // User cancelled the dialog
+    }
+
+    // MoveOrder move = null;
+    MoveSpyOrder moveSpy = new MoveSpyOrder(playerId, src, dest, numUnits);
+
+    /* -------- Try adding the order -------- */
+    try {
+      currentCommit.addMoveSpyOrder(moveSpy);
+    } catch (IllegalArgumentException e) {
+      mainPageController.showError(e.getMessage());
+      return;
+    }
+  }
+
+  /* --------------------------------------------------------------- */
+
   /**
    *
    * Shows a dialog for the user to select a territory from a set of available
@@ -249,11 +365,12 @@ public class OrdersHandler {
    * @return a CompletableFuture that completes with the selected territory or
    *         null if the user cancelled the dialog
    */
-  private CompletableFuture<Territory> showTerritorySelectionDialog(Commit currentCommit, int playerId, Territory src,
-      boolean isMove, String title, String content) {
+  private CompletableFuture<Territory> showTerritorySelectionDialog(Set<Territory> territories, int playerId,
+      String title, String content) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
-    Set<Territory> territories = getTerritories(currentCommit, playerId, src, isMove);
+    // Set<Territory> territories = getTerritories(currentCommit, playerId, src,
+    // isMove);
     List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
 
     if (territories.isEmpty()) {
@@ -351,7 +468,6 @@ public class OrdersHandler {
    */
   private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
       String title) {
-    CompletableFuture<Integer> future = new CompletableFuture<>();
 
     List<Integer> nums = new ArrayList<>();
     int num = src.getUnitsNumByLevel(currentLevel);
@@ -360,15 +476,44 @@ public class OrdersHandler {
       nums.add(i);
     }
 
+    return showNumberSelectionDialog(nums,
+        "Number of units not enough for level " + currentLevel + " on territory " + src.getName(), title,
+        "Choose unit number:");
+    // CompletableFuture<Integer> future = new CompletableFuture<>();
+    // if (nums.isEmpty()) {
+    // mainPageController
+    // .showError("Number of units not enough for level " + currentLevel + " on
+    // territory " + src.getName());
+    // future.complete(null);
+    // } else {
+    // ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);
+    // dialog.setTitle(title);
+    // dialog.setHeaderText(null);
+    // dialog.setContentText("Choose unit number:");
+
+    // Optional<Integer> result = dialog.showAndWait();
+
+    // if (result.isPresent()) {
+    // future.complete(result.get());
+    // } else {
+    // future.complete(null);
+    // }
+    // }
+
+    // return future;
+  }
+
+  private CompletableFuture<Integer> showNumberSelectionDialog(List<Integer> nums, String errorMessage, String title,
+      String content) {
+    CompletableFuture<Integer> future = new CompletableFuture<>();
     if (nums.isEmpty()) {
-      mainPageController
-          .showError("Number of units not enough for level " + currentLevel + " on territory " + src.getName());
+      mainPageController.showError(errorMessage);
       future.complete(null);
     } else {
       ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);
       dialog.setTitle(title);
       dialog.setHeaderText(null);
-      dialog.setContentText("Choose unit number:");
+      dialog.setContentText(content);
 
       Optional<Integer> result = dialog.showAndWait();
 
@@ -378,7 +523,6 @@ public class OrdersHandler {
         future.complete(null);
       }
     }
-
     return future;
   }
 

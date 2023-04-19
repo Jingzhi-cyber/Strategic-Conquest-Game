@@ -209,6 +209,23 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
+      case "Cloak":
+        uiGame.constructCloakTerritoryOrder();
+        break;
+      case "Generate Spies":
+        try {
+          uiGame.constructGenerateSpyOrder();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+       case "Move Spies":
+        try {
+          uiGame.constructMoveSpyOrder();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
       default:
         // Handle null / unexpected input - impossible
     }
@@ -289,7 +306,8 @@ public class MainPageController extends Controller implements Initializable {
 
     // this.mainPageScene = resetCommitButton.getScene();
 
-    ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade");
+    ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade", "Cloak",
+        "Generate Spies", "Move Spies");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
 

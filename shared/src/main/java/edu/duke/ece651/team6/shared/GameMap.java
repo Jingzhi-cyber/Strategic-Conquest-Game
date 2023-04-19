@@ -129,7 +129,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
   public Map<Territory, Integer> getNeighborDist(Territory territory) {
     return weightedAdjList.get(territory);
   }
-
+  
   /**
    * 
    * Finds all enemy territories that are directly connected to the given source
@@ -335,6 +335,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
 
   /**
    * Get the visible set of territories to a player
+   * 
    * @param playerId
    * @return visible set of territories
    */
@@ -343,14 +344,31 @@ public class GameMap implements java.io.Serializable, Cloneable {
     /**
      * TODO: implement the visible rules:
      * 
-     * 1. Territories are visible if owned by that player
-     * 2. Territories are visible if it is a neighbor of territory that owned by that player
-     * 3. Territories are visible if it has at least 1 spy owned by that player on it
-     * 4. Territories that are cloaked by the owner without spies is invisible
-     * 5. Other territories should be invisible.
+     * 1. Territories are visible if owned by that player 2. Territories are visible
+     * if it is a neighbor of territory that owned by that player 3. Territories are
+     * visible if it has at least 1 spy owned by that player on it 4. Territories
+     * that are cloaked by the owner without spies is invisible 5. Other territories
+     * should be invisible.
      * 
      */
 
     return visibleTerritories;
   }
+
+  /**
+   * Get a set of territories that a player has spies on, including self-owned
+   * territories as long as their spies are on them
+   * 
+   * @param playerId the player who requests a set of their spying territories
+   */
+  public Set<Territory> getSpyingTerritoriesOfAPlayer(int playerId) {
+    Set<Territory> spyingTerritories = new HashSet<>();
+
+    // TODO: implement rules:
+    // return a set of territories that the player (with playerId) has spies on (1,
+    // 2, .. )
+    // no need to filter out self-owned territories
+
+    return spyingTerritories;
+  } 
 }
