@@ -3,9 +3,11 @@ package edu.duke.ece651.team6.shared;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javafx.scene.paint.Color;
@@ -15,11 +17,13 @@ public class Territory implements java.io.Serializable, Cloneable {
   private final String name;
   private int ownerId;
   private List<Deque<Unit>> units;
+  private Map<Integer, Deque<Spy>> spies;
   private final int numLevel;
   private WarZone warZone;
   private boolean underWar;
   private int food;
   private int technology;
+  private int cloakedTurns;
   private List<Edge> edges;
   private List<Point2D> points;
   private int[] color;
@@ -36,10 +40,12 @@ public class Territory implements java.io.Serializable, Cloneable {
     this.ownerId = -1;
     numLevel = 7;
     unitsInit();
+    this.spies = new HashMap<>();
     warZone = null;
     underWar = false;
     food = 5;
     technology = 5;
+    cloakedTurns = 0;
   }
 
   public Territory(String name, int ownerId) {
@@ -47,10 +53,12 @@ public class Territory implements java.io.Serializable, Cloneable {
     this.ownerId = ownerId;
     numLevel = 7;
     unitsInit();
+    this.spies = new HashMap<>();
     warZone = null;
     underWar = false;
     food = 5;
     technology = 5;
+    cloakedTurns = 0;
   }
 
   /**
@@ -69,10 +77,12 @@ public class Territory implements java.io.Serializable, Cloneable {
     numLevel = 7;
     unitsInit();
     this.units.get(0).addAll(UnitManager.newUnits(units));
+    this.spies = new HashMap<>();
     warZone = null;
     underWar = false;
     food = 5;
     technology = 5;
+    cloakedTurns = 0;
   }
 
   @Override
@@ -84,6 +94,7 @@ public class Territory implements java.io.Serializable, Cloneable {
         sameLevelUnits.add((Unit) unit.clone());
       }
     }
+    territory.spies.putAll(this.spies);
     return territory;
   }
 
@@ -242,6 +253,9 @@ public class Territory implements java.io.Serializable, Cloneable {
       warZone = null;
     }
     recover();
+    if (cloakedTurns > 0) {
+      cloakedTurns--;
+    }
   }
 
   /**
@@ -351,6 +365,59 @@ public class Territory implements java.io.Serializable, Cloneable {
     Unit unit = units.get(now).poll();
     UnitManager.upgrade(unit, target);
     units.get(target).add(unit);
+  }
+
+  /**
+   * Add spy owned by the player to this territory
+   * @param playerId
+   * @param num the number of spy
+   */
+  public void addSpy(int playerId, int num) {
+    if (!this.spies.containsKey(playerId)) {
+      this.spies.put(playerId, new LinkedList<Spy>());
+    }
+    Deque<Spy> spy = this.spies.get(playerId);
+    for (int i = 0; i < num; i++) {
+      spy.add(new Spy(playerId));
+    }
+  }
+
+  /**
+   * Get the number of spy owned by a player on the territory
+   * @param playerId
+   * @return the number of spies
+   */
+  public int getSpyNumByPlayerId(int playerId) {
+    Deque<Spy> spy = this.spies.getOrDefault(playerId, null);
+    if (spy == null) {
+      return 0;
+    }
+    return spy.size();
+  }
+
+  /**
+   * Move spy to another territory
+   * @param playerId is the playerId that makes this order
+   * @param dest is the destination territory
+   * @param num is the number of spies
+   */
+  public void moveSpyTo(int playerId, Territory dest, int num) {
+    /** 
+     * TODO: implement spy move order
+     * 
+     * 1. check if there is enough spy to move
+     * 2. if the spy is on enemy's territory, can only move to adjacent territory
+     * 3. if the spy is on owned territory, apply the same move rule as the units
+     * 
+     */
+  }
+
+  public void setCloakedTurn(int turn) {
+    this.cloakedTurns = turn;
+  }
+
+  public int getCloakedTurn() {
+    return this.cloakedTurns;
   }
 
   public void addEdge(Edge e) {
