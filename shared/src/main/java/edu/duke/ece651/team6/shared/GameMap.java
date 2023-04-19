@@ -332,4 +332,25 @@ public class GameMap implements java.io.Serializable, Cloneable {
     defaultVal.put(Constants.RESOURCE_TECH, 0);
     return this.resources.getOrDefault(playerId, defaultVal);
   }
+
+  /**
+   * Get the visible set of territories to a player
+   * @param playerId
+   * @return visible set of territories
+   */
+  public Set<Territory> getVisibleTerritoriesByPlayerId(int playerId) {
+    Set<Territory> visibleTerritories = new HashSet<Territory>();
+    /**
+     * TODO: implement the visible rules:
+     * 
+     * 1. Territories are visible if owned by that player
+     * 2. Territories are visible if it is a neighbor of territory that owned by that player
+     * 3. Territories are visible if it has at least 1 spy owned by that player on it
+     * 4. Territories that are cloaked by the owner without spies is invisible
+     * 5. Other territories should be invisible.
+     * 
+     */
+
+    return visibleTerritories;
+  }
 }
