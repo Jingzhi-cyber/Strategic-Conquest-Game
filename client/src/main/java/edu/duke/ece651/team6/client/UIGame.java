@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,25 +12,20 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.MainPageController;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import edu.duke.ece651.team6.client.model.OrdersHandler;
-import edu.duke.ece651.team6.shared.AttackOrder;
+import edu.duke.ece651.team6.client.view.MapView;
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
-import edu.duke.ece651.team6.shared.MoveOrder;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.PolygonGetter;
-import edu.duke.ece651.team6.shared.ResearchOrder;
 import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.Territory;
-import edu.duke.ece651.team6.shared.UpgradeOrder;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -39,7 +33,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
@@ -69,9 +62,7 @@ public class UIGame extends Game {
 
   Scene scene;
 
-  // GameMap gameMap;
-
-  MapView thisView = null;
+  // MapView thisView = null;
 
   GAME_STATUS gameStatus;
 
@@ -175,6 +166,7 @@ public class UIGame extends Game {
     this.resource = new HashMap<>();
     this.mainPageController = mainPageController;
     this.mainPageController.setUiGame(this);
+
     this.polygonGetter = new PolygonGetter();
     this.playerColor = new HashMap<>();
     this.colors = new ArrayList<>(Arrays.asList(Color.AQUAMARINE, Color.AZURE, Color.VIOLET, Color.LIGHTCORAL));
@@ -202,7 +194,10 @@ public class UIGame extends Game {
     this.gameStatus = gameStatus;
   }
 
-  /* ----------1. Handling Unit Placement ----------- */
+  /* ------------------------------------------------------------ */
+  /* ----------------- 1. Unit Placement UI ------------------- */
+  /* ------------------------------------------------------------ */
+
   private final Map<Territory, Integer> territoryToNumUnitMapping = new HashMap<>();
   private Iterator<Territory> territoryIterator;
   private Territory currentTerritory;
@@ -291,6 +286,10 @@ public class UIGame extends Game {
     }
   }
 
+  /* ------------------------------------------------------------ */
+  /* ----------------- 0. Entry Point ------------------- */
+  /* ------------------------------------------------------------ */
+
   /**
    * This method receives initial Territory information from the server And
    * display UI to the user so that user interact to input units information
@@ -311,7 +310,10 @@ public class UIGame extends Game {
 
       Set<Territory> territories = setting.getAssignedTerritories();
 
+      // TODO
       Platform.runLater(() -> updateMap(mainPageController.getMapPane(), setting.getGameMap().getTerritorySet()));
+      // renderingMap(setting.getGameMap());
+
       territoryIterator = territories.iterator();
 
       while (gameStatus == GAME_STATUS.PLACE_UNITS) {
@@ -320,6 +322,10 @@ public class UIGame extends Game {
     }
     refreshMap();
   }
+
+  /* ------------------------------------------------------------ */
+  /* -------- Receive Game Result from server -------- */
+  /* ------------------------------------------------------------ */
 
   /**
    * This method receives the game result from the server and handles it. It
@@ -381,6 +387,10 @@ public class UIGame extends Game {
 
     return null;
   }
+
+  /* ------------------------------------------------------------ */
+  /* --------- Send Commit (Orders) to server --------- */
+  /* ------------------------------------------------------------ */
 
   /**
    * This method submits the current commit to the server after showing a
@@ -470,7 +480,7 @@ public class UIGame extends Game {
   }
 
   /* ------------------------------------------------------------ */
-  /* ------------------ Map-related UI -------------------- */
+  /* ------------------- Map-related UI --------------------- */
   /* ------------------------------------------------------------ */
 
   /**
@@ -622,7 +632,6 @@ public class UIGame extends Game {
       mapPane.getChildren().add(currPolygon);
       polygonInfo.toFront();
     }
-
   }
 
   /**
@@ -677,7 +686,7 @@ public class UIGame extends Game {
     if (mapInfo.playerId != -1) {
       this.playerId = mapInfo.playerId;
     }
-    this.thisView = new UIGameView(mapInfo);
+    // this.thisView = new UIGameView(mapInfo);
     // this.gameMap = mapInfo.getGameMap();
     this.startingGameMap = mapInfo.getGameMap();
 
@@ -685,8 +694,10 @@ public class UIGame extends Game {
 
     System.out.println("GameMap - UIGame.java" + this.currentCommit.getCurrentGameMap().toString());
 
+    // TODO
     Platform.runLater(
         () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
+    // renderingMap(this.currentCommit.getCurrentGameMap());
 
     this.resource.put(Constants.RESOURCE_FOOD,
         this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
@@ -713,11 +724,9 @@ public class UIGame extends Game {
     }
   }
 
-  
   /* ------------------------------------------------------------ */
-  /* ------------------ Orders-related UI -------------------- */
+  /* -------------- Order Constructions ------------------- */
   /* ------------------------------------------------------------ */
-
 
   private void prepWorkBeforeNewOrder() {
     this.gameStatus = GAME_STATUS.ISSUE_ORDER;
@@ -750,6 +759,24 @@ public class UIGame extends Game {
     prepWorkBeforeNewOrder();
 
     this.ordersHandler.handleUpgradeOrder(currentCommit, playerId);
+  }
+
+  public void constructCloakTerritoryOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleCloakOrder(currentCommit, playerId);
+  }
+
+  public void constructGenerateSpyOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleGenerateSpyOrder(currentCommit, playerId);
+  }
+
+  public void constructMoveSpyOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleMoveSpyOrder(currentCommit, playerId);
   }
 
   /**
@@ -809,7 +836,17 @@ public class UIGame extends Game {
     copiedResource.putAll(this.resource);
     System.out.println("Initiating Commit");
     currentCommit = new Commit(this.playerId, (GameMap) this.startingGameMap.clone(), copiedResource);
+
+    // TODO
     Platform.runLater(
         () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
+    // renderingMap(this.currentCommit.getCurrentGameMap());
+  }
+
+  private void renderingMap(GameMap gameMap) {
+    Platform.runLater(() -> {
+      MapView mapView = new MapView(mainPageController, gameMap);
+      mapView.refresh();
+    });
   }
 }
