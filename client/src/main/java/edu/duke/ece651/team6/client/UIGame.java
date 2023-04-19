@@ -170,9 +170,6 @@ public class UIGame extends Game {
     this.username = username;
     this.gameStatus = GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER;
     this.resource = new HashMap<>();
-    // Initialize the controller, e.g., by loading the FXML file
-    // this.unitPlacementController = unitPlacementController;// TODO
-    // this.unitPlacementController.setUIGame(this);
     this.mainPageController = mainPageController;
     this.mainPageController.setUiGame(this);
     this.polygonGetter = new PolygonGetter();
@@ -207,7 +204,6 @@ public class UIGame extends Game {
 
   List<Integer> constructIntegersFrom0UpTo(int maxInteger) {
     List<Integer> intList = new ArrayList<>();
-    // TODO <=
     for (int i = 0; i <= maxInteger; i++) {
       intList.add(i);
     }
@@ -307,8 +303,6 @@ public class UIGame extends Game {
         mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
         mainPageController.updateGameStatus(this.gameStatus);
       });
-
-      // territoryToNumUnitMapping = new HashMap<>();
 
       Set<Territory> territories = setting.getAssignedTerritories();
 
@@ -470,6 +464,10 @@ public class UIGame extends Game {
     new Thread(new MyTask(this)).start();
   }
 
+  /* ------------------------------------------------------------ */
+  /* ------------------ Map-related UI -------------------- */
+  /* ------------------------------------------------------------ */
+
   /**
    * Sets the fill color of a given polygon to the color associated with a given
    * owner ID.
@@ -502,7 +500,7 @@ public class UIGame extends Game {
     }).start();
   }
 
-  protected void dispalyTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
+  protected void displayTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
       Territory territory) {
     String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
         + territory.getFood() + "\nTech prod: " + territory.getTechnology();
@@ -522,7 +520,7 @@ public class UIGame extends Game {
   protected void setPolygonMouseClick(Polygon polygon, Territory territory) {
     polygon.setOnMouseClicked((MouseEvent click_event) -> {
       performPolygonAnimation(polygon);
-      dispalyTerritoryInfo(this.mainPageController.getTerritoryInfoText1(),
+      displayTerritoryInfo(this.mainPageController.getTerritoryInfoText1(),
           this.mainPageController.getTerritoryInfoText2(), this.mainPageController.getTerritoryInfoText3(), territory);
     });
   }
@@ -708,19 +706,6 @@ public class UIGame extends Game {
       receiveGameResult();
       return;
     }
-
-    // initiateCommit();
-
-    // TODO Update Map!
-
-    // thisView.updateScene();
-    // TODO Map<String, Territory> territoriesMap;
-    // populate the map with Territory objects
-
-    // TODO SelectableTerritories selectableTerritories = new
-    // SelectableTerritories(territoriesMap);
-
-    // TODO display the globalMap on UI
   }
 
   public MoveOrder constructMoveOrder() throws IOException, InterruptedException, ExecutionException {
@@ -795,7 +780,6 @@ public class UIGame extends Game {
   public AttackOrder constructAttackOrder() throws IOException, InterruptedException, ExecutionException {
     this.gameStatus = GAME_STATUS.ISSUE_ORDER;
 
-    // TODO Auto-generated method stub
     if (currentCommit == null) {
       initiateCommit();
     }
@@ -834,15 +818,12 @@ public class UIGame extends Game {
 
     numUnitsByLevel[selectedLevel] = numUnits;
 
-    // AttackOrder attack = null;
     AttackOrder attack = new AttackOrder(src, dest, numUnitsByLevel);
     try {
       this.currentCommit.addAttack(attack);
     } catch (IllegalArgumentException e) {
 
-      // Platform.runLater(() -> {
       mainPageController.showError(e.getMessage());
-      // });
 
       return null;
     }
@@ -873,9 +854,7 @@ public class UIGame extends Game {
       mainPageController.showSuccess("Successfully added a research order");
     } catch (IllegalArgumentException e) {
 
-      // Platform.runLater(() -> {
       mainPageController.showError(e.getMessage());
-      // });
 
       return null;
     }
@@ -984,7 +963,6 @@ public class UIGame extends Game {
       String content) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
-    // Platform.runLater(() -> {
     Set<Territory> territories = getTerritories(src, isMove);
     List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
 
@@ -1039,9 +1017,7 @@ public class UIGame extends Game {
       Territory src, String title, String content) {
     CompletableFuture<Integer> future = new CompletableFuture<>();
 
-    // Platform.runLater(() -> {
     List<Integer> levels = new ArrayList<>();
-    // TODO <=
     for (int i = inclusiveLowerLevel; i <= inclusiveUpperLevel; i++) {
       levels.add(i);
     }
@@ -1064,8 +1040,6 @@ public class UIGame extends Game {
         future.complete(null);
       }
     }
-    // });
-
     return future;
   }
 
@@ -1131,10 +1105,9 @@ public class UIGame extends Game {
       String title) {
     CompletableFuture<Integer> future = new CompletableFuture<>();
 
-    // Platform.runLater(() -> {
     List<Integer> nums = new ArrayList<>();
     int num = src.getUnitsNumByLevel(currentLevel);
-    // TODO <=
+
     for (int i = 1; i <= num; i++) {
       nums.add(i);
     }
@@ -1157,20 +1130,8 @@ public class UIGame extends Game {
         future.complete(null);
       }
     }
-    // });
 
     return future;
-  }
-
-  /**
-   * Construct, display and return self-owned territories with serial numbers
-   * 
-   * @return a Map<Integer, Territory> mapping from serial number to the territory
-   */
-  private Set<Territory> getSelfOwnedTerritories() {
-    // PlayerMapInfo playerMapInfo =
-    // this.thisView.globalMapInfo.getPlayerMapInfo(this.playerId);
-    return this.currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(this.playerId);
   }
 
   /**
@@ -1224,6 +1185,5 @@ public class UIGame extends Game {
     currentCommit = new Commit(this.playerId, (GameMap) this.startingGameMap.clone(), copiedResource);
     Platform.runLater(
         () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
-
   }
 }
