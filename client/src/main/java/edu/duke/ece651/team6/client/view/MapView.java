@@ -31,13 +31,14 @@ public class MapView {
 
   ArrayList<Color> colors;
 
-  public MapView(MainPageController mainPageController, GameMap gameMap) {
+  public MapView(MainPageController mainPageController, GameMap gameMap, PolygonGetter polygonGetter,
+      Map<Integer, Color> playerColor, ArrayList<Color> colors) {
     this.mainPageController = mainPageController;
     this.gameMap = gameMap;
 
-    this.polygonGetter = new PolygonGetter();
-    this.playerColor = new HashMap<>();
-    this.colors = new ArrayList<>(Arrays.asList(Color.AQUAMARINE, Color.AZURE, Color.VIOLET, Color.LIGHTCORAL));
+    this.polygonGetter = polygonGetter;
+    this.playerColor = playerColor;
+    this.colors = colors;
   }
 
   /**
@@ -180,11 +181,13 @@ public class MapView {
       Polygon currPolygon = this.polygonGetter.getPolygon(currTerritory);
       currPolygon.setId(name);
       setPolygonColor(currPolygon, ownerID);
+
       setPolygonTooltip(currPolygon,
           "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
               + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
               + currTerritory.getTechnology());
       setPolygonMouseClick(currPolygon, currTerritory);
+      
       Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
       mapPane.getChildren().add(currPolygon);
       polygonInfo.toFront();
@@ -206,7 +209,7 @@ public class MapView {
             Polygon polygon = (Polygon) node;
             setPolygonColor(polygon, ownerID);
             setPolygonMouseClick(polygon, currTerritory);
-            setPolygonText(mapPane, polygon, name + " - " + ownerID);
+            setPolygonText(mapPane, polygon, name + " - " + ownerID); // TODO greyed out if not visible
             Tooltip.uninstall(polygon, null);
             setPolygonTooltip(polygon,
                 "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
