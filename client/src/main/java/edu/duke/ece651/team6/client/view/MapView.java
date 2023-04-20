@@ -1,7 +1,6 @@
 package edu.duke.ece651.team6.client.view;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +23,7 @@ public class MapView {
   MainPageController mainPageController;
   // Commit currentCommit;
   GameMap gameMap;
+  int playerId;
 
   PolygonGetter polygonGetter;
 
@@ -31,14 +31,19 @@ public class MapView {
 
   ArrayList<Color> colors;
 
-  public MapView(MainPageController mainPageController, GameMap gameMap, PolygonGetter polygonGetter,
+  Map<Territory, Map<String, String>> previouslySeenTerritories;
+
+  public MapView(MainPageController mainPageController, GameMap gameMap, int playerId, PolygonGetter polygonGetter,
       Map<Integer, Color> playerColor, ArrayList<Color> colors) {
     this.mainPageController = mainPageController;
     this.gameMap = gameMap;
+    this.playerId = playerId;
 
     this.polygonGetter = polygonGetter;
     this.playerColor = playerColor;
     this.colors = colors;
+
+    previouslySeenTerritories = new HashMap<>();
   }
 
   /**
@@ -51,6 +56,10 @@ public class MapView {
    */
   protected void setPolygonColor(Polygon polygon, int ownerID) {
     polygon.setFill(this.playerColor.get(ownerID));
+  }
+
+  protected void greyOutPolygon(Polygon polygon) {
+    polygon.setFill(Color.LIGHTGREY);
   }
 
   /**
@@ -74,11 +83,28 @@ public class MapView {
   }
 
   protected void displayTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
-      Territory territory) {
-    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
-        + territory.getFood() + "\nTech prod: " + territory.getTechnology();
-    String info2 = getNeighborDistance(territory);
-    String info3 = getUnitsNumberByLevel(territory);
+      Territory territory, boolean obsolete) {
+    String info1 = null;
+    String info2 = null;
+    String info3 = null;
+    if (obsolete) {
+      info1 = previouslySeenTerritories.get(territory).get("info1");
+      info2 = previouslySeenTerritories.get(territory).get("info2");
+      info3 = previouslySeenTerritories.get(territory).get("info3");
+    } else {
+      info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
+          + territory.getFood() + "\nTech prod: " + territory.getTechnology();
+      info2 = getNeighborDistance(territory);
+      info3 = getUnitsNumberByLevel(territory);
+
+      if (!previouslySeenTerritories.containsKey(territory)) {
+        previouslySeenTerritories.put(territory, new HashMap<>());
+      }
+
+      previouslySeenTerritories.get(territory).put("info1", info1);
+      previouslySeenTerritories.get(territory).put("info2", info2);
+      previouslySeenTerritories.get(territory).put("info3", info3);
+    }
     territoryInfoText1.setText(info1);
     territoryInfoText2.setText(info2);
     territoryInfoText3.setText(info3);
@@ -90,11 +116,12 @@ public class MapView {
    *
    * @param polygon The polygon to set the mouse click event on.
    */
-  protected void setPolygonMouseClick(Polygon polygon, Territory territory) {
+  protected void setPolygonMouseClick(Polygon polygon, Territory territory, boolean obsolete) {
     polygon.setOnMouseClicked((MouseEvent click_event) -> {
       performPolygonAnimation(polygon);
       displayTerritoryInfo(this.mainPageController.getTerritoryInfoText1(),
-          this.mainPageController.getTerritoryInfoText2(), this.mainPageController.getTerritoryInfoText3(), territory);
+          this.mainPageController.getTerritoryInfoText2(), this.mainPageController.getTerritoryInfoText3(), territory,
+          obsolete);
     });
   }
 
@@ -160,6 +187,10 @@ public class MapView {
     return info;
   }
 
+  protected void greyOutPolygons(Set<Territory> territories) {
+
+  }
+
   /**
    *
    * Sets the polygons representing the territories on the game map. For each
@@ -171,53 +202,137 @@ public class MapView {
    * @param territories: A set of Territory objects representing the territories
    *                     on the game map.
    */
-  protected void setMap(Pane mapPane, Set<Territory> territories) {
-    for (Territory currTerritory : territories) {
+  protected void initializeMap(Pane mapPane, Set<Territory> allTerritories, Set<Territory> visibleTerritories) {
+    for (Territory currTerritory : allTerritories) {
       int ownerID = currTerritory.getOwnerId();
+      String name = currTerritory.getName();
+
       if (!playerColor.containsKey(ownerID)) {
         this.playerColor.put(ownerID, this.colors.remove(0));
+        System.out.println("OwnerId: " + ownerID + ", Color: " + this.playerColor.get(ownerID));
       }
-      String name = currTerritory.getName();
+
       Polygon currPolygon = this.polygonGetter.getPolygon(currTerritory);
       currPolygon.setId(name);
-      setPolygonColor(currPolygon, ownerID);
 
-      setPolygonTooltip(currPolygon,
-          "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
-              + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
-              + currTerritory.getTechnology());
-      setPolygonMouseClick(currPolygon, currTerritory);
-      
-      Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
-      mapPane.getChildren().add(currPolygon);
-      polygonInfo.toFront();
+      if (!visibleTerritories.contains(currTerritory)) {
+        greyOutPolygon(currPolygon);
+        if (!previouslySeenTerritories.containsKey(currTerritory)) {
+          // 1. never visible
+          mapPane.getChildren().add(currPolygon);
+          // return;
+        } else {
+          // 2. previously visiable : display obselete information
+          // int oldId =
+          // Integer.valueOf(previouslySeenTerritories.get(currTerritory).get("ownerID"));
+          // setPolygonColor(currPolygon, oldId);
+          String oldTooltip = previouslySeenTerritories.get(currTerritory).get("tooltip");
+          setPolygonTooltip(currPolygon, oldTooltip);
+          setPolygonMouseClick(currPolygon, currTerritory, true);
+
+          String oldPolygonText = previouslySeenTerritories.get(currTerritory).get("polygonText");
+          Text polygonInfo = setPolygonText(mapPane, currPolygon, oldPolygonText);
+          mapPane.getChildren().add(currPolygon);
+          polygonInfo.toFront();
+        }
+      } else {
+        // 3. currently visible : set animation + display all information + display Spy
+        // info
+        setPolygonColor(currPolygon, ownerID);
+
+        String tooltip = "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
+            + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
+            + currTerritory.getTechnology();
+        setPolygonTooltip(currPolygon, tooltip);
+        setPolygonMouseClick(currPolygon, currTerritory, false);
+
+        Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
+
+        if (!previouslySeenTerritories.containsKey(currTerritory)) {
+          previouslySeenTerritories.put(currTerritory, new HashMap<>());
+        }
+
+        previouslySeenTerritories.get(currTerritory).put("ownerID", String.valueOf(ownerID));
+        previouslySeenTerritories.get(currTerritory).put("tooltip", tooltip);
+        previouslySeenTerritories.get(currTerritory).put("polygonText", name + " - " + ownerID);
+
+        mapPane.getChildren().add(currPolygon);
+        polygonInfo.toFront();
+      }
+    }
+  }
+
+  protected void updateMap(Pane mapPane, Set<Territory> allTerritories, Set<Territory> visibleTerritories) {
+    for (Territory currTerritory : allTerritories) {
+      int ownerID = currTerritory.getOwnerId();
+      String name = currTerritory.getName();
+      for (Node node : mapPane.getChildren()) {
+        if (node.getId() != null && node.getId().equals(name)) {
+          // 2.1. display them
+          Polygon polygon = (Polygon) node;
+
+          if (!visibleTerritories.contains(currTerritory)) {
+            /* Grey out all territories */
+            greyOutPolygon(polygon);
+            if (!previouslySeenTerritories.containsKey(currTerritory)) {
+              /* 1. never visible */
+              continue;
+            } else {
+              /*
+               * 2. Display territories with their obsolete information that were previously
+               * seen but now cannot be seen
+               */
+              setPolygonMouseClick(polygon, currTerritory, true);
+
+              String oldPolygonText = previouslySeenTerritories.get(currTerritory).get("polygonText");
+              setPolygonText(mapPane, polygon, oldPolygonText);
+
+              Tooltip.uninstall(polygon, null);
+              String oldTooltip = previouslySeenTerritories.get(currTerritory).get("tooltip");
+              setPolygonTooltip(polygon, oldTooltip);
+            }
+          } else {
+
+            /*
+             * 3. Display all visible territories with their newest information, and update
+             * their information into the previouslySeenTerritories
+             */
+            // 3.1. display
+            setPolygonColor(polygon, ownerID);
+            setPolygonMouseClick(polygon, currTerritory, false);
+
+            String polygonText = name + " - " + ownerID;
+            setPolygonText(mapPane, polygon, polygonText); // TODO greyed out if not visible
+
+            Tooltip.uninstall(polygon, null);
+            String tooltip = "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
+                + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
+                + currTerritory.getTechnology();
+            setPolygonTooltip(polygon, tooltip);
+
+            // 3.2. store their info
+            if (!previouslySeenTerritories.containsKey(currTerritory)) {
+              previouslySeenTerritories.put(currTerritory, new HashMap<>());
+            }
+
+            previouslySeenTerritories.get(currTerritory).put("ownerID", String.valueOf(ownerID));
+            previouslySeenTerritories.get(currTerritory).put("tooltip", tooltip);
+            previouslySeenTerritories.get(currTerritory).put("polygonText", polygonText);
+          }
+        }
+      }
     }
   }
 
   public void refresh() {
     Pane mapPane = mainPageController.getMapPane();
-    Set<Territory> territories = gameMap.getTerritorySet();
+    Set<Territory> allTerritories = gameMap.getTerritorySet();
+    Set<Territory> visiableTerritories = gameMap.getVisibleTerritoriesByPlayerId(playerId);
 
     if (mapPane.getChildren().isEmpty()) {
-      setMap(mapPane, territories);
+      initializeMap(mapPane, allTerritories, visiableTerritories);
     } else {
-      for (Territory currTerritory : territories) {
-        int ownerID = currTerritory.getOwnerId();
-        String name = currTerritory.getName();
-        for (Node node : mapPane.getChildren()) {
-          if (node.getId() != null && node.getId().equals(name)) {
-            Polygon polygon = (Polygon) node;
-            setPolygonColor(polygon, ownerID);
-            setPolygonMouseClick(polygon, currTerritory);
-            setPolygonText(mapPane, polygon, name + " - " + ownerID); // TODO greyed out if not visible
-            Tooltip.uninstall(polygon, null);
-            setPolygonTooltip(polygon,
-                "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
-                    + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
-                    + currTerritory.getTechnology());
-          }
-        }
-      }
+      updateMap(mapPane, allTerritories, visiableTerritories);
     }
   }
 }

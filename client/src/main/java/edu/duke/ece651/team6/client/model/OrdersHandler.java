@@ -36,7 +36,7 @@ public class OrdersHandler {
         "Move Order", "Which territory do you want to move units from?").get();
 
     if (src == null) {
-      mainPageController.showError("Must specify a territory to move units from");
+      // mainPageController.showError("Must specify a territory to move units from");
       return; // User cancelled the dialog
     }
 
@@ -44,7 +44,7 @@ public class OrdersHandler {
         "Move Order", "Which territory do you want to move units to?").get();
 
     if (dest == null) {
-      mainPageController.showError("Must specify a territory to move units to");
+      // mainPageController.showError("Must specify a territory to move units to");
       return; // User cancelled the dialog
     }
 
@@ -52,14 +52,14 @@ public class OrdersHandler {
     Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "Move Order",
         "Which level of units do you want to move?").get();
     if (selectedLevel == null) {
-      mainPageController.showError("Must specify a level to move");
+      // mainPageController.showError("Must specify a level to move");
       return; // User cancelled the dialog
     }
     Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them do you want to move?")
         .get();
 
     if (numUnits == null) {
-      mainPageController.showError("Must specify the number of units to move");
+      // mainPageController.showError("Must specify the number of units to move");
       return; // User cancelled the dialog
     }
 
@@ -99,7 +99,7 @@ public class OrdersHandler {
         "Attack Order", "Which territory do you want to attack units from").get();
 
     if (src == null) {
-      mainPageController.showError("Must specify a territory to attack from");
+      // mainPageController.showError("Must specify a territory to attack from");
       return; // User cancelled the dialog
     }
 
@@ -107,7 +107,7 @@ public class OrdersHandler {
         "Attack Order", "Which territory do you want to attack units to").get();
 
     if (dest == null) {
-      mainPageController.showError("Must specify a territory to attack units to");
+      // mainPageController.showError("Must specify a territory to attack units to");
       return; // User cancelled the dialog
     }
 
@@ -116,14 +116,14 @@ public class OrdersHandler {
     Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "Attack Order",
         "Which level of units do you want to attack?").get();
     if (selectedLevel == null) {
-      mainPageController.showError("Must specify a level to attack");
+      // mainPageController.showError("Must specify a level to attack");
       return; // User cancelled the dialog
     }
     Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them are used to attack")
         .get();
 
     if (numUnits == null) {
-      mainPageController.showError("Must specify the number of units to attack");
+      // mainPageController.showError("Must specify the number of units to attack");
       return; // User cancelled the dialog
     }
 
@@ -133,9 +133,7 @@ public class OrdersHandler {
     try {
       currentCommit.addAttack(attack);
     } catch (IllegalArgumentException e) {
-
       mainPageController.showError(e.getMessage());
-
       return;
     }
   }
@@ -192,7 +190,7 @@ public class OrdersHandler {
     // both okay if
     // src is null
     if (src == null) {
-      mainPageController.showError("Must specify a territory to upgrade units");
+      // mainPageController.showError("Must specify a territory to upgrade units");
       return; // User cancelled the dialog
     }
 
@@ -200,7 +198,7 @@ public class OrdersHandler {
     Integer selectedNowLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL - 1, src, "Upgrade Order",
         "From which level do you want to upgrade units?").get();
     if (selectedNowLevel == null) {
-      mainPageController.showError("Must specify a level to upgrade");
+      // mainPageController.showError("Must specify a level to upgrade");
       return; // User cancelled the dialog
     }
 
@@ -208,7 +206,7 @@ public class OrdersHandler {
     Integer selectedTargetLevel = showUnitLevelSelectionDialog(selectedNowLevel + 1, Constants.MAX_LEVEL, src,
         "Upgrade Order", "To which level do you want to upgrade units?").get();
     if (selectedTargetLevel == null) {
-      mainPageController.showError("Must specify a target level");
+      // mainPageController.showError("Must specify a target level");
       return;
     }
 
@@ -216,7 +214,7 @@ public class OrdersHandler {
     Integer numUnits = showNumberOfUnitsSelectionDialog(selectedNowLevel, src,
         "How many of them do you want to upgrade?").get();
     if (numUnits == null) {
-      mainPageController.showError("Must specify the number of units to upgrade");
+      // mainPageController.showError("Must specify the number of units to upgrade");
       return;
     }
 
