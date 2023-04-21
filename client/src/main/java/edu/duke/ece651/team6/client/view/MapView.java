@@ -34,7 +34,8 @@ public class MapView {
   Map<Territory, Map<String, String>> previouslySeenTerritories;
 
   public MapView(MainPageController mainPageController, GameMap gameMap, int playerId, PolygonGetter polygonGetter,
-      Map<Integer, Color> playerColor, ArrayList<Color> colors) {
+      Map<Integer, Color> playerColor, ArrayList<Color> colors,
+      Map<Territory, Map<String, String>> previouslySeenTerritories) {
     this.mainPageController = mainPageController;
     this.gameMap = gameMap;
     this.playerId = playerId;
@@ -43,7 +44,7 @@ public class MapView {
     this.playerColor = playerColor;
     this.colors = colors;
 
-    previouslySeenTerritories = new HashMap<>();
+    this.previouslySeenTerritories = previouslySeenTerritories;
   }
 
   /**
@@ -187,10 +188,6 @@ public class MapView {
     return info;
   }
 
-  protected void greyOutPolygons(Set<Territory> territories) {
-
-  }
-
   /**
    *
    * Sets the polygons representing the territories on the game map. For each
@@ -268,7 +265,7 @@ public class MapView {
       String name = currTerritory.getName();
       for (Node node : mapPane.getChildren()) {
         if (node.getId() != null && node.getId().equals(name)) {
-          // 2.1. display them
+          // display them
           Polygon polygon = (Polygon) node;
 
           if (!visibleTerritories.contains(currTerritory)) {
