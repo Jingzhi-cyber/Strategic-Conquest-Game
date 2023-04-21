@@ -48,7 +48,7 @@ public class UIGame extends Game {
 
   int gameId; // unique for games that are of each player
 
-  Integer playerId;
+  Integer playerId = -1;
 
   String username;
 
@@ -291,6 +291,7 @@ public class UIGame extends Game {
 
       System.out.println((String) socketHandler.recvObject());
       setting = socketHandler.recvGameBasicSetting();
+      this.playerId = setting.getPlayerId();
       this.startingGameMap = setting.getGameMap();
       this.gameStatus = GAME_STATUS.PLACE_UNITS;
       Platform.runLater(() -> {
@@ -642,7 +643,8 @@ public class UIGame extends Game {
   }
 
   private void renderingMap(GameMap gameMap) {
-    MapView mapView = new MapView(mainPageController, gameMap, this.polygonGetter, this.playerColor, this.colors);
+    MapView mapView = new MapView(mainPageController, gameMap, this.playerId, this.polygonGetter, this.playerColor,
+        this.colors);
     Platform.runLater(() -> {
       mapView.refresh();
     });
