@@ -68,6 +68,8 @@ public class UIGame extends Game {
 
   ArrayList<Color> colors;
 
+  Map<Territory, Map<String, String>> previouslySeenTerritories;
+
   /**
    * This method sets the scene of the game. It takes a Scene object as a
    * parameter and assigns it to the scene field.
@@ -162,6 +164,7 @@ public class UIGame extends Game {
     this.colors = new ArrayList<>(Arrays.asList(Color.AQUAMARINE, Color.AZURE, Color.VIOLET, Color.LIGHTCORAL));
 
     this.ordersHandler = new OrdersHandler(this.mainPageController);
+    this.previouslySeenTerritories = new HashMap<>();
   }
 
   /**
@@ -644,7 +647,7 @@ public class UIGame extends Game {
 
   private void renderingMap(GameMap gameMap) {
     MapView mapView = new MapView(mainPageController, gameMap, this.playerId, this.polygonGetter, this.playerColor,
-        this.colors);
+        this.colors, this.previouslySeenTerritories);
     Platform.runLater(() -> {
       mapView.refresh();
     });
