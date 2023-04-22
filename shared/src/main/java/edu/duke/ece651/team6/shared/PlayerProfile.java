@@ -9,9 +9,9 @@ public class PlayerProfile implements java.io.Serializable {
      * Construct PlayerProfile with an unique id
      * @param id
      */
-    public PlayerProfile(int id) {
+    public PlayerProfile(int id, String name) {
         this.id = id;
-        this.name = null;
+        this.name = name;
         this.socketKey = null;
     }
 

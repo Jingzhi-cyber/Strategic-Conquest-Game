@@ -1,12 +1,6 @@
 package edu.duke.ece651.team6.server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InvalidClassException;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +14,7 @@ import edu.duke.ece651.team6.shared.SocketKey;
  * connection from client socket", "send/receive stream to/from connected
  * client", "send/receive serializable obeject to/from connect client"
  */
-public class Server {
+public class Server implements Serializable {
   private List<SocketKey> clientSockets;
 
   private class RecvObjectThread implements Runnable {
@@ -99,8 +93,8 @@ public class Server {
    *                                found.
    */
   public Object recvObject(SocketKey key) throws IOException, ClassNotFoundException {
-    AccountManager m = AccountManager.getInstance();
-    Socket clientSocket = m.getSocket(key);
+    SocketManager s = SocketManager.getInstance();
+    Socket clientSocket = s.get(key);
     InputStream in = clientSocket.getInputStream();
     ObjectInputStream objectIn = new ObjectInputStream(in);
     return objectIn.readObject();
@@ -184,8 +178,9 @@ public class Server {
    *                                  interface.
    */
   public void sendObject(SocketKey key, Object object) throws IOException {
-    AccountManager m = AccountManager.getInstance();
-    Socket clientSocket = m.getSocket(key);
+    SocketManager s = SocketManager.getInstance();
+    Socket clientSocket = s.get(key);
+    System.out.println("Sending object to " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
     OutputStream out = clientSocket.getOutputStream();
     ObjectOutputStream objectOut = new ObjectOutputStream(out);
     objectOut.writeObject(object);
@@ -281,8 +276,8 @@ public class Server {
    * @throws IOException if an I/O error occurs when closing this socket.
    */
   public void closeClientSocket(SocketKey key) throws IOException {
-    AccountManager m = AccountManager.getInstance();
-    Socket clientSocket = m.getSocket(key);
+    SocketManager s = SocketManager.getInstance();
+    Socket clientSocket = s.get(key);
     clientSocket.close();
   }
 
