@@ -1,4 +1,4 @@
-package edu.duke.ece651.team6.server.repository;
+package edu.duke.ece651.team6.server;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;

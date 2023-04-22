@@ -42,8 +42,7 @@ public class Reconnector {
         userDisconnectedGames.get(username).remove(gameUUID);
         gameSockets.get(gameUUID).put(socket, username);
         if (gameSockets.get(gameUUID).size() == gameNum.get(gameUUID)) {
-            gr.returnToGame(gameUUID, gameSockets.get(gameUUID));
-            gameSockets.remove(gameUUID);
+            gr.returnToGame(gameUUID, gameSockets.remove(gameUUID));
         }
         return true;
     }
