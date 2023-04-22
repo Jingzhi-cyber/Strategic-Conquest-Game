@@ -168,7 +168,6 @@ public class Client {
       mainPageController.setUsername(username);
     });
     UIGame newGame = new UIGame(gameId, username, socketHandler, mainPageController);
-    newGame.updateGameStatus(ISSUE_ORDER);
     System.out.println("Back to a game successfully");
     uiGames.put(gameId, newGame);
     Thread gameThread = new Thread(new GameHandler(newGame));

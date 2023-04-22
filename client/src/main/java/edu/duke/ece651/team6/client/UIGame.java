@@ -32,9 +32,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.paint.Color;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.paint.Color;
 
 /**
  * The UIGame class represents one game with a user interface, which is
@@ -291,27 +291,40 @@ public class UIGame extends Game {
     System.out.println("Game status: " + gameStatus);
     if (this.gameStatus == GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER) {
       System.out.print("Waiting for other players to enter\n");
+      String initMsg = (String) socketHandler.recvObject();
+      System.out.println(initMsg);
+      if (initMsg.charAt(0) == 'C') {
+        setting = socketHandler.recvGameBasicSetting();
+        this.startingGameMap = setting.getGameMap();
+        this.gameStatus = GAME_STATUS.PLACE_UNITS;
+        Platform.runLater(() -> {
+          mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
+          mainPageController.updateGameStatus(this.gameStatus);
+        });
+        this.playerId = setting.getPlayerId();
+        this.startingGameMap = setting.getGameMap();
+        this.gameStatus = GAME_STATUS.PLACE_UNITS;
+        Platform.runLater(() -> {
+          mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
+          mainPageController.updateGameStatus(this.gameStatus);
+        });
 
-      System.out.println((String) socketHandler.recvObject());
-      setting = socketHandler.recvGameBasicSetting();
-      this.playerId = setting.getPlayerId();
-      this.startingGameMap = setting.getGameMap();
-      this.gameStatus = GAME_STATUS.PLACE_UNITS;
-      Platform.runLater(() -> {
-        mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
-        mainPageController.updateGameStatus(this.gameStatus);
-      });
+        Set<Territory> territories = setting.getAssignedTerritories();
 
-      Set<Territory> territories = setting.getAssignedTerritories();
+        // Platform.runLater(() -> updateMap(mainPageController.getMapPane(),
+        // setting.getGameMap().getTerritorySet()));
+        renderingMap(setting.getGameMap());
 
-      // Platform.runLater(() -> updateMap(mainPageController.getMapPane(),
-      // setting.getGameMap().getTerritorySet()));
-      renderingMap(setting.getGameMap());
+        territoryIterator = territories.iterator();
 
-      territoryIterator = territories.iterator();
-
-      while (gameStatus == GAME_STATUS.PLACE_UNITS) {
-        nextUnitPlacementPrompt();
+        while (gameStatus == GAME_STATUS.PLACE_UNITS) {
+          nextUnitPlacementPrompt();
+        }
+      } else {
+        gameStatus = GAME_STATUS.ISSUE_ORDER;
+        Platform.runLater(() -> {
+          mainPageController.updateGameStatus(gameStatus);
+        });
       }
     }
     refreshMap();
@@ -478,16 +491,21 @@ public class UIGame extends Game {
    * scene to the user
    */
   public void refreshMap() throws IOException, ClassNotFoundException {
-
-    Platform.runLater(() -> {
-      mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
-    });
-
+    System.out.println("Wait for GlobalMapInfo");
     GlobalMapInfo mapInfo = socketHandler.recvGlobalMapInfo();
     System.out.println("Mapinfo got");
     if (mapInfo.playerId != -1) {
       this.playerId = mapInfo.playerId;
     }
+    Platform.runLater(() -> {
+      mainPageController.setUsername(username + " (PlayerId " + this.playerId + ")");
+    });
+
+    // TODO not sure if the commit will be null if reconnecting?
+    renderingMap(mapInfo.getGameMap());
+    
+    // TODO Platform.runLater(() -> updateMap(mainPageController.getMapPane(),
+    // mapInfo.getGameMap().getTerritorySet()));
     // this.thisView = new UIGameView(mapInfo);
     // this.gameMap = mapInfo.getGameMap();
     this.startingGameMap = mapInfo.getGameMap();

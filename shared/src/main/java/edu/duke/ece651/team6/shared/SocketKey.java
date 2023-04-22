@@ -1,5 +1,7 @@
 package edu.duke.ece651.team6.shared;
 
-public class SocketKey {
+import java.io.Serializable;
+
+public class SocketKey implements Serializable {
     public SocketKey() {}
 }
