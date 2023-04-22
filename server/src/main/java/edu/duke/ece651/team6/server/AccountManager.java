@@ -1,14 +1,7 @@
 package edu.duke.ece651.team6.server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.Socket;
 import java.util.*;
-
-import dev.morphia.annotations.Entity;
-import edu.duke.ece651.team6.shared.SocketKey;
 
 /**
  * This class is a singelton. This class can manage all the user with their sockets. 
@@ -45,25 +38,6 @@ public class AccountManager implements Serializable {
         }
         String actualPassword = this.password.get(username);
         return actualPassword.equals(password);
-    }
-
-    private boolean isClosed(Socket socket) {
-        if (socket.isClosed()) {
-            return true;
-        }
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            reader.mark(1);
-            int ch = reader.read();
-            if (ch == -1) {
-                return true;
-            } else {
-                reader.reset();
-                return false;
-            }
-        } catch (IOException e) {
-            return true;
-        }
     }
 
     public void gameOver(String gameUUID) {

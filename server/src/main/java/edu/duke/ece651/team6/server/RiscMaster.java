@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.duke.ece651.team6.server.repository.MongoHero;
+import edu.duke.ece651.team6.server.MongoHero;
 import edu.duke.ece651.team6.shared.*;
 
 public class RiscMaster implements Master, Serializable {
