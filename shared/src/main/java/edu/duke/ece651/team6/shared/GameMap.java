@@ -342,16 +342,26 @@ public class GameMap implements java.io.Serializable, Cloneable {
   public Set<Territory> getVisibleTerritoriesByPlayerId(int playerId) {
     Set<Territory> visibleTerritories = new HashSet<Territory>();
     /**
-     * TODO: implement the visible rules:
+     * the visible rules:
      * 
-     * 1. Territories are visible if owned by that player 2. Territories are visible
-     * if it is a neighbor of territory that owned by that player 3. Territories are
-     * visible if it has at least 1 spy owned by that player on it 4. Territories
-     * that are cloaked by the owner without spies is invisible 5. Other territories
-     * should be invisible.
-     * 
+     * 1. Territories are visible if owned by that player 
+     * 2. Territories are visible if it is a neighbor of territory that owned by that player 
+     * 3. Territories are visible if it has at least 1 spy owned by that player on it 
+     * 4. Territories that are cloaked by the owner without spies is invisible 
+     * 5. Other territories should be invisible.
      */
-
+    Set<Territory> ownTerritories = getTerritorySetByPlayerId(playerId);
+    for (Territory t : ownTerritories) {
+      visibleTerritories.add(t);
+      for (Territory neighbor : getNeighborDist(t).keySet()) {
+        if (neighbor.getCloakedTurn() == 0) {
+          visibleTerritories.add(neighbor);
+        }
+      }
+    }
+    for (Territory t : getSpyingTerritoriesOfAPlayer(playerId)) {
+      visibleTerritories.add(t);
+    }
     return visibleTerritories;
   }
 
@@ -362,13 +372,15 @@ public class GameMap implements java.io.Serializable, Cloneable {
    * @param playerId the player who requests a set of their spying territories
    */
   public Set<Territory> getSpyingTerritoriesOfAPlayer(int playerId) {
-    Set<Territory> spyingTerritories = new HashSet<>();
-
-    // TODO: implement rules:
     // return a set of territories that the player (with playerId) has spies on (1,
     // 2, .. )
     // no need to filter out self-owned territories
-
+    Set<Territory> spyingTerritories = new HashSet<>();
+    for (Territory t : getTerritorySet()) {
+      if (t.getSpyNumByPlayerId(playerId) > 0) {
+        spyingTerritories.add(t);
+      }
+    }
     return spyingTerritories;
   } 
 }

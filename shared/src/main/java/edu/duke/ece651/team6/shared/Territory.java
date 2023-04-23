@@ -105,6 +105,16 @@ public class Territory implements java.io.Serializable, Cloneable {
     }
   }
 
+  public void removeUnit(int level, int num) {
+    Deque<Unit> units = this.units.get(level);
+    if (units.size() < num) {
+      throw new IllegalArgumentException("Illegal remove Unit: only has " + units.size() + " on level " + level + " but the required number is " + num);
+    }
+    for (int i = 0; i < num; i++) {
+      units.removeFirst();
+    }
+  }
+
   public String getName() {
     return this.name;
   }
@@ -403,13 +413,23 @@ public class Territory implements java.io.Serializable, Cloneable {
    */
   public void moveSpyTo(int playerId, Territory dest, int num) {
     /** 
-     * TODO: implement spy move order
+     * implement spy move order
      * 
      * 1. check if there is enough spy to move
      * 2. if the spy is on enemy's territory, can only move to adjacent territory
      * 3. if the spy is on owned territory, apply the same move rule as the units
      * 
      */
+    int spyNum = getSpyNumByPlayerId(playerId);
+    if (spyNum < num) {
+      throw new IllegalArgumentException("Illegal move spy order: only has " + spyNum + " spies but request number is " + num);
+    }
+    // NOTE: not able to check territory rule here, needs to be done in rulechecker
+    Deque<Spy> spies = this.spies.get(playerId);
+    for (int i = 0; i < spyNum; i++) {
+      spies.removeFirst();
+    }
+    dest.addSpy(playerId, num);
   }
 
   public void setCloakedTurn(int turn) {
