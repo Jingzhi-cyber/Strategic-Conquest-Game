@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.beans.binding.StringBinding;
-
 /* A structure contains all orders from one player, which will be sent back to server for */
 public class Commit implements java.io.Serializable {
   int playerId;
@@ -48,6 +46,11 @@ public class Commit implements java.io.Serializable {
     this.attacks = new ArrayList<>();
     this.research = null;
     this.upgrades = new ArrayList<>();
+
+    this.cloakTerritorys = new ArrayList<>();
+    this.generateSpys = new ArrayList<>();
+    this.moveSpys = new ArrayList<>();
+
     this.moveChecker = new SrcOwerIdRuleChecker(
         new SamePlayerPathRuleChecker(new MoveCostRuleChecker(new MoveUnitsRuleChecker(null), resource)), playerId);
     this.attackChecker = new SrcOwerIdRuleChecker(
@@ -222,16 +225,18 @@ public class Commit implements java.io.Serializable {
 
   /**
    * Perform cloak order
+   * 
    * @param gameMap
    */
   public void performCloakTerritory(GameMap gameMap) {
     for (CloakTerritoryOrder cloakTerritory : cloakTerritorys) {
       cloakTerritory.takeAction(gameMap);
-    } 
+    }
   }
 
   /**
    * Perform generate spy order
+   * 
    * @param gameMap
    */
   public void performGenerateSpyOrder(GameMap gameMap) {
@@ -273,7 +278,7 @@ public class Commit implements java.io.Serializable {
     for (CloakTerritoryOrder o : cloakTerritorys) {
       builder.append(o.toString() + " (Cost: " + 1 + ")\n");
     }
-    
+
     for (GenerateSpyOrder o : generateSpys) {
       builder.append(o.toString() + " (Cost: " + 1 + ")\n");
     }
