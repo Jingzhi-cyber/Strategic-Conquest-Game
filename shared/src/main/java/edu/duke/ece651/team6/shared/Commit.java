@@ -18,11 +18,17 @@ public class Commit implements java.io.Serializable {
   List<AttackOrder> attacks;
   ResearchOrder research;
   List<UpgradeOrder> upgrades;
+  List<CloakTerritoryOrder> cloakTerritorys;
+  List<GenerateSpyOrder> generateSpys;
+  List<MoveSpyOrder> moveSpys;
 
   OrderRuleChecker moveChecker;
   OrderRuleChecker attackChecker;
   OrderRuleChecker researchChecker;
   OrderRuleChecker upgradeChecker;
+  OrderRuleChecker cloakTerritoryRuleChecker;
+  OrderRuleChecker generateSpyRuleChecker;
+  OrderRuleChecker moveSpyRuleChecker;
 
   /**
    * Construct a Commit object with 4 params
@@ -49,6 +55,9 @@ public class Commit implements java.io.Serializable {
     this.researchChecker = new ResearchCostRuleChecker(null, resource);
     this.upgradeChecker = new UpgradeLevelRuleChecker(
         new UpgradeUnitRuleChecker(new UpgradeCostRuleChecker(null, resource)));
+    this.cloakTerritoryRuleChecker = new CloakTerritoryRuleChecker(null, resource);
+    this.generateSpyRuleChecker = new GenerateSpyRuleChecker(null, resource);
+    this.moveSpyRuleChecker = new MoveSpyRuleChecker(null, resource);
   }
 
   /* -------------- For client side usage --------------- */
@@ -124,67 +133,19 @@ public class Commit implements java.io.Serializable {
   }
 
   public void addCloakTerritoryOrder(CloakTerritoryOrder cloakTerritoryOrder) {
-    // TODO stub
-    return;
+    checkRules(cloakTerritoryRuleChecker, cloakTerritoryOrder, this.gameMap);
+    cloakTerritorys.add(cloakTerritoryOrder);
   }
 
   public void addGenerateSpyOrder(GenerateSpyOrder generateSpyOrder) {
-    // TODO stub
-    return;
+    checkRules(generateSpyRuleChecker, generateSpyOrder, this.gameMap);
+    generateSpys.add(generateSpyOrder);
   }
 
   public void addMoveSpyOrder(MoveSpyOrder moveSpyOrder) {
-    // TODO stub
-    return;
+    checkRules(moveSpyRuleChecker, moveSpyOrder, this.gameMap);
+    moveSpys.add(moveSpyOrder);
   }
-
-  // private String constructPrompt(String orderName, SimpleMove move, int
-  // remainingUnits) {
-  // return orderName + move.toString() + " cannot be performed, with " +
-  // remainingUnits + " remaining units";
-  // }
-
-  /*
-   * Deprecated check method Now all the rule checks are based on the cloned
-   * GameMap, the results of moves and attacks will be reflected immediately after
-   * it is added
-   */
-  // public void checkUsableUnitsAfterAllOrdersAreCollected() {
-  // // only check remaining units (not check > 0 here, check it with rule
-  // checker)
-  // Map<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
-  // for (MoveOrder move : moves) {
-  // if (!remainingUnits.containsKey(move.src)) {
-  // remainingUnits.put(move.src, move.src.getNumUnits());
-  // }
-
-  // if (remainingUnits.get(move.src) < move.numUnits) {
-  // throw new IllegalArgumentException(constructPrompt("Move", move,
-  // remainingUnits.get(move.src)));
-  // }
-  // remainingUnits.put(move.src, remainingUnits.get(move.src) - move.numUnits);
-  // remainingUnits.put(move.dest, remainingUnits.getOrDefault(move.dest,
-  // move.dest.getNumUnits()) + move.numUnits);
-  // }
-
-  // for (AttackOrder attack : attacks) {
-  // if (!remainingUnits.containsKey(attack.src)) {
-  // remainingUnits.put(attack.src, attack.src.getNumUnits());
-  // }
-
-  // if (remainingUnits.get(attack.src) < attack.numUnits) {
-  // throw new IllegalArgumentException(constructPrompt("Attack", attack,
-  // remainingUnits.get(attack.src)));
-  // }
-  // remainingUnits.put(attack.src, remainingUnits.get(attack.src) -
-  // attack.numUnits);
-  // // fixed a bug here: incorrect: as units attacked out are not reflected on
-  // the
-  // // dest units (are only updated after a war)
-  // // remainingUnits.put(attack.dest,remainingUnits.getOrDefault(attack.dest,
-  // // attack.dest.getNumUnits()) + attack.numUnits);
-  // }
-  // }
 
   /* ---------------- For server side usage ----------------- */
 
@@ -211,8 +172,6 @@ public class Commit implements java.io.Serializable {
     for (UpgradeOrder upgrade : upgrades) {
       checkRules(upgradeChecker, upgrade, gameMap);
     }
-
-    // checkUsableUnitsAfterAllOrdersAreCollected();
   }
 
   /**
@@ -261,6 +220,35 @@ public class Commit implements java.io.Serializable {
     }
   }
 
+  /**
+   * Perform cloak order
+   * @param gameMap
+   */
+  public void performCloakTerritory(GameMap gameMap) {
+    for (CloakTerritoryOrder cloakTerritory : cloakTerritorys) {
+      cloakTerritory.takeAction(gameMap);
+    } 
+  }
+
+  /**
+   * Perform generate spy order
+   * @param gameMap
+   */
+  public void performGenerateSpyOrder(GameMap gameMap) {
+    for (GenerateSpyOrder generateSpy : generateSpys) {
+      generateSpy.takeAction(gameMap);
+    }
+  }
+
+  /**
+   * Perform move spy order
+   */
+  public void performMoveSpyOrder(GameMap gameMap) {
+    for (MoveSpyOrder moveSpy : moveSpys) {
+      moveSpy.takeAction(gameMap);
+    }
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -280,6 +268,18 @@ public class Commit implements java.io.Serializable {
     for (UpgradeOrder o : upgrades) {
       builder.append(o.toString() + " (Cost: "
           + UnitManager.costToUpgrade(o.getNowLevel(), o.getTargetLevel()) * o.getNumUnits() + ")" + "\n");
+    }
+
+    for (CloakTerritoryOrder o : cloakTerritorys) {
+      builder.append(o.toString() + " (Cost: " + 1 + ")\n");
+    }
+    
+    for (GenerateSpyOrder o : generateSpys) {
+      builder.append(o.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    for (MoveSpyOrder o : moveSpys) {
+      builder.append(o.toString() + " (Cost: " + 1 + ")\n");
     }
     return builder.toString();
   }

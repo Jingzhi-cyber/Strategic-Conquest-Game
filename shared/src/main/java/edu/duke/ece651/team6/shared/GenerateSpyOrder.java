@@ -35,6 +35,7 @@ public class GenerateSpyOrder extends Order {
         int cost = 1;
         gameMap.consumeResource(territory.getOwnerId(), Constants.RESOURCE_TECH, cost);
         Territory t = gameMap.getTerritoryByName(territory.getName());
+        t.removeUnit(nowLevel, num);
         t.addSpy(playerId, num);
     }
 
