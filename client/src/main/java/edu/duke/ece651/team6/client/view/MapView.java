@@ -200,6 +200,7 @@ public class MapView {
    *                     on the game map.
    */
   protected void initializeMap(Pane mapPane, Set<Territory> allTerritories, Set<Territory> visibleTerritories) {
+
     for (Territory currTerritory : allTerritories) {
       int ownerID = currTerritory.getOwnerId();
       String name = currTerritory.getName();
@@ -243,7 +244,10 @@ public class MapView {
         setPolygonTooltip(currPolygon, tooltip);
         setPolygonMouseClick(currPolygon, currTerritory, false);
 
-        Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
+        String spiesView = constructSpiesView(currTerritory.getSpyNumByPlayerId(playerId));
+        System.out.println("Territory " + currTerritory.getName() + " SpiesView: " + spiesView);
+        String polygonText = name + spiesView + " (p" + ownerID + ")";
+        Text polygonInfo = setPolygonText(mapPane, currPolygon, polygonText);
 
         if (!previouslySeenTerritories.containsKey(currTerritory)) {
           previouslySeenTerritories.put(currTerritory, new HashMap<>());
@@ -251,7 +255,7 @@ public class MapView {
 
         previouslySeenTerritories.get(currTerritory).put("ownerID", String.valueOf(ownerID));
         previouslySeenTerritories.get(currTerritory).put("tooltip", tooltip);
-        previouslySeenTerritories.get(currTerritory).put("polygonText", name + " - " + ownerID);
+        previouslySeenTerritories.get(currTerritory).put("polygonText", polygonText);
 
         mapPane.getChildren().add(currPolygon);
         polygonInfo.toFront();
@@ -279,7 +283,6 @@ public class MapView {
                * 2. Display territories with their obsolete information that were previously
                * seen but now cannot be seen
                */
-              setPolygonMouseClick(polygon, currTerritory, true);
 
               String oldPolygonText = previouslySeenTerritories.get(currTerritory).get("polygonText");
               setPolygonText(mapPane, polygon, oldPolygonText);
@@ -287,6 +290,8 @@ public class MapView {
               Tooltip.uninstall(polygon, null);
               String oldTooltip = previouslySeenTerritories.get(currTerritory).get("tooltip");
               setPolygonTooltip(polygon, oldTooltip);
+
+              setPolygonMouseClick(polygon, currTerritory, true);
             }
           } else {
 
@@ -298,7 +303,10 @@ public class MapView {
             setPolygonColor(polygon, ownerID);
             setPolygonMouseClick(polygon, currTerritory, false);
 
-            String polygonText = name + " - " + ownerID;
+            String spiesView = constructSpiesView(currTerritory.getSpyNumByPlayerId(playerId));
+            System.out.println("Terrtory " + currTerritory.getName() + " SpiesView: " + spiesView);
+
+            String polygonText = name + spiesView + " (p" + ownerID + ")";
             setPolygonText(mapPane, polygon, polygonText); // TODO greyed out if not visible
 
             Tooltip.uninstall(polygon, null);
@@ -321,10 +329,28 @@ public class MapView {
     }
   }
 
+  private String constructSpiesView(int num) {
+    String result = "";
+    for (int i = 0; i < num; i++) {
+      result += "* ";
+    }
+    return result;
+  }
+
+  private void printTerritories(Set<Territory> territories) {
+    for (Territory t : territories) {
+      System.out.print(t.getName() + " ");
+    }
+    System.out.println();
+  }
+
   public void refresh() {
     Pane mapPane = mainPageController.getMapPane();
     Set<Territory> allTerritories = gameMap.getTerritorySet();
     Set<Territory> visiableTerritories = gameMap.getVisibleTerritoriesByPlayerId(playerId);
+
+    System.out.println("Visible territories for player " + playerId + ":");
+    printTerritories(visiableTerritories);
 
     if (mapPane.getChildren().isEmpty()) {
       initializeMap(mapPane, allTerritories, visiableTerritories);
