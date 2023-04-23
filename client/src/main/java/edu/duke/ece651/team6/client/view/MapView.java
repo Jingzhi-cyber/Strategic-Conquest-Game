@@ -335,7 +335,7 @@ public class MapView {
   private String constructSpiesView(int num) {
     String result = "";
     for (int i = 0; i < num; i++) {
-      result += "* ";
+      result += "*";
     }
     return result;
   }
