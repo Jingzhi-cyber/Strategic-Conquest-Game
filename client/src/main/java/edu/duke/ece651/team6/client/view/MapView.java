@@ -93,8 +93,9 @@ public class MapView {
       info2 = previouslySeenTerritories.get(territory).get("info2");
       info3 = previouslySeenTerritories.get(territory).get("info3");
     } else {
-      info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
-          + territory.getFood() + "\nTech prod: " + territory.getTechnology();
+      int mySpyNum = territory.getSpyNumByPlayerId(playerId);
+      info1 = " Territory: " + territory.getName() + "\n OwnerID: " + territory.getOwnerId() + " \n" + " Food prod: "
+          + territory.getFood() + "\n Tech prod: " + territory.getTechnology() + "\n My Spies: " + mySpyNum;
       info2 = getNeighborDistance(territory);
       info3 = getUnitsNumberByLevel(territory);
 
@@ -238,13 +239,14 @@ public class MapView {
         // info
         setPolygonColor(currPolygon, ownerID);
 
-        String tooltip = "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
-            + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
-            + currTerritory.getTechnology();
+        int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId);
+        String tooltip = " Territory: " + name + "\n OwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
+            + getUnitsNumberByLevel(currTerritory) + " Food prod: " + currTerritory.getFood() + "\n Tech prod: "
+            + currTerritory.getTechnology() + "\n My Spies: " + mySpyNum;
         setPolygonTooltip(currPolygon, tooltip);
         setPolygonMouseClick(currPolygon, currTerritory, false);
 
-        String spiesView = constructSpiesView(currTerritory.getSpyNumByPlayerId(playerId));
+        String spiesView = constructSpiesView(mySpyNum);
         System.out.println("Territory " + currTerritory.getName() + " SpiesView: " + spiesView);
         String polygonText = name + spiesView + " (p" + ownerID + ")";
         Text polygonInfo = setPolygonText(mapPane, currPolygon, polygonText);
@@ -283,7 +285,6 @@ public class MapView {
                * 2. Display territories with their obsolete information that were previously
                * seen but now cannot be seen
                */
-
               String oldPolygonText = previouslySeenTerritories.get(currTerritory).get("polygonText");
               setPolygonText(mapPane, polygon, oldPolygonText);
 
@@ -303,16 +304,18 @@ public class MapView {
             setPolygonColor(polygon, ownerID);
             setPolygonMouseClick(polygon, currTerritory, false);
 
-            String spiesView = constructSpiesView(currTerritory.getSpyNumByPlayerId(playerId));
+            int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId);
+            String spiesView = constructSpiesView(mySpyNum);
             System.out.println("Terrtory " + currTerritory.getName() + " SpiesView: " + spiesView);
 
             String polygonText = name + spiesView + " (p" + ownerID + ")";
             setPolygonText(mapPane, polygon, polygonText); // TODO greyed out if not visible
 
             Tooltip.uninstall(polygon, null);
-            String tooltip = "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
-                + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
-                + currTerritory.getTechnology();
+            String tooltip = " Territory: " + name + "\n OwnerID: " + ownerID + "\n"
+                + getNeighborDistance(currTerritory) + getUnitsNumberByLevel(currTerritory) + " Food prod: "
+                + currTerritory.getFood() + "\n Tech prod: " + currTerritory.getTechnology() + "\n My Spies: "
+                + mySpyNum;
             setPolygonTooltip(polygon, tooltip);
 
             // 3.2. store their info
