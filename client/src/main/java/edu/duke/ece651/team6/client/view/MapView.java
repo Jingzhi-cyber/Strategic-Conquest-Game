@@ -219,7 +219,8 @@ public class MapView {
         if (!previouslySeenTerritories.containsKey(currTerritory)) {
           // 1. never visible
           mapPane.getChildren().add(currPolygon);
-          // return;
+          // only display territory name
+          setPolygonText(mapPane, currPolygon, currTerritory.getName());
         } else {
           // 2. previously visiable : display obselete information
           // int oldId =
@@ -239,7 +240,8 @@ public class MapView {
         // info
         setPolygonColor(currPolygon, ownerID);
 
-        int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId, true) + currTerritory.getSpyNumByPlayerId(ownerID, false);
+        int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId, true)
+            + currTerritory.getSpyNumByPlayerId(ownerID, false);
         String tooltip = " Territory: " + name + "\n OwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
             + getUnitsNumberByLevel(currTerritory) + " Food prod: " + currTerritory.getFood() + "\n Tech prod: "
             + currTerritory.getTechnology() + "\n My Spies: " + mySpyNum;
@@ -279,6 +281,8 @@ public class MapView {
             greyOutPolygon(polygon);
             if (!previouslySeenTerritories.containsKey(currTerritory)) {
               /* 1. never visible */
+              // only display territory name
+              setPolygonText(mapPane, polygon, currTerritory.getName());
               continue;
             } else {
               /*
@@ -304,7 +308,8 @@ public class MapView {
             setPolygonColor(polygon, ownerID);
             setPolygonMouseClick(polygon, currTerritory, false);
 
-            int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId, true) + currTerritory.getSpyNumByPlayerId(playerId, false);
+            int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId, true)
+                + currTerritory.getSpyNumByPlayerId(playerId, false);
             String spiesView = constructSpiesView(mySpyNum);
             System.out.println("Terrtory " + currTerritory.getName() + " SpiesView: " + spiesView);
 
