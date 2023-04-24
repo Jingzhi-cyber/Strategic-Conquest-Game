@@ -17,7 +17,7 @@ public class Territory implements java.io.Serializable, Cloneable {
   private final String name;
   private int ownerId;
   private List<Deque<Unit>> units;
-  private Map<Integer, Deque<Spy>> spies;
+  private Map<Integer, Map<String, List<Spy>>> spies;
   private final int numLevel;
   private WarZone warZone;
   private boolean underWar;
@@ -94,7 +94,19 @@ public class Territory implements java.io.Serializable, Cloneable {
         sameLevelUnits.add((Unit) unit.clone());
       }
     }
-    territory.spies.putAll(this.spies);
+    territory.setCloakedTurn(this.cloakedTurns);
+    territory.spies = new HashMap<Integer, Map<String, List<Spy>>>();
+    for (int playerId : this.spies.keySet()) {
+      territory.spies.put(playerId, new HashMap<String, List<Spy>>());
+      territory.spies.get(playerId).put("canMove", new ArrayList<Spy>());
+      territory.spies.get(playerId).put("cannotMove", new ArrayList<Spy>());
+      for (Spy s : this.spies.get(playerId).get("canMove")) {
+        territory.spies.get(playerId).get("canMove").add((Spy) s.clone());
+      }
+      for (Spy s : this.spies.get(playerId).get("cannotMove")) {
+        territory.spies.get(playerId).get("cannotMove").add((Spy) s.clone());
+      }
+    }
     return territory;
   }
 
@@ -266,6 +278,14 @@ public class Territory implements java.io.Serializable, Cloneable {
     if (cloakedTurns > 0) {
       cloakedTurns--;
     }
+    for (int playerId : spies.keySet()) {
+      Map<String, List<Spy>> spy = spies.get(playerId);
+      int numSpyCannotMove = spy.get("cannotMove").size();
+      spy.get("cannotMove").clear();
+      for (int i = 0; i < numSpyCannotMove; i++) {
+        spy.get("canMove").add(new Spy(playerId));
+      }
+    }
   }
 
   /**
@@ -378,17 +398,27 @@ public class Territory implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Add spy owned by the player to this territory
+   * Add spy owned by playerId to this territory
    * @param playerId
    * @param num the number of spy
    */
   public void addSpy(int playerId, int num) {
     if (!this.spies.containsKey(playerId)) {
-      this.spies.put(playerId, new LinkedList<Spy>());
+      this.spies.put(playerId, new HashMap<String, List<Spy>>());
+      spies.get(playerId).put("canMove", new ArrayList<Spy>());
+      spies.get(playerId).put("cannotMove", new ArrayList<Spy>());
     }
-    Deque<Spy> spy = this.spies.get(playerId);
+    Map<String, List<Spy>> spyList = spies.get(playerId);
+    boolean canMove = playerId == this.ownerId ? true : false;
     for (int i = 0; i < num; i++) {
-      spy.add(new Spy(playerId));
+      Spy newspy = new Spy(playerId);
+      newspy.setCanMove(canMove);
+      if (canMove) {
+        spyList.get("canMove").add(newspy);
+      }
+      else {
+        spyList.get("cannotMove").add(newspy);
+      }
     }
   }
 
@@ -397,12 +427,12 @@ public class Territory implements java.io.Serializable, Cloneable {
    * @param playerId
    * @return the number of spies
    */
-  public int getSpyNumByPlayerId(int playerId) {
-    Deque<Spy> spy = this.spies.getOrDefault(playerId, null);
+  public int getSpyNumByPlayerId(int playerId, boolean canMove) {
+    Map<String, List<Spy>> spy = this.spies.getOrDefault(playerId, null);
     if (spy == null) {
       return 0;
     }
-    return spy.size();
+    return canMove ? spy.get("canMove").size() : spy.get("cannotMove").size();
   }
 
   /**
@@ -420,14 +450,14 @@ public class Territory implements java.io.Serializable, Cloneable {
      * 3. if the spy is on owned territory, apply the same move rule as the units
      * 
      */
-    int spyNum = getSpyNumByPlayerId(playerId);
+    int spyNum = getSpyNumByPlayerId(playerId, true);
     if (spyNum < num) {
-      throw new IllegalArgumentException("Illegal move spy order: only has " + spyNum + " spies but request number is " + num);
+      throw new IllegalArgumentException("Illegal move spy order: only has " + spyNum + " spies that can still move but request number is " + num);
     }
     // NOTE: not able to check territory rule here, needs to be done in rulechecker
-    Deque<Spy> spies = this.spies.get(playerId);
-    for (int i = 0; i < spyNum; i++) {
-      spies.removeFirst();
+    List<Spy> spies = this.spies.get(playerId).get("canMove");
+    for (int i = 0; i < num; i++) {
+      spies.remove(0);
     }
     dest.addSpy(playerId, num);
   }

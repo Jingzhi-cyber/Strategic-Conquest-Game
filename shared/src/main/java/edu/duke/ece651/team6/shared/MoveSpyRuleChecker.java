@@ -17,10 +17,10 @@ public class MoveSpyRuleChecker extends OrderRuleChecker {
         Territory from = moveSpy.src;
         Territory to = moveSpy.dest;
         int num = moveSpy.num;
-        int spyNum = from.getSpyNumByPlayerId(playerId);
+        int spyNum = from.getSpyNumByPlayerId(playerId, true);
         int cost = 1;
         if (num > spyNum) {
-            return "Invalid MoveSpy Order: only has " + spyNum + "Spies on the territory but requires " + num + "spies";
+            return "Invalid MoveSpy Order: only has " + spyNum + "Spies on the territory that can still move but requires " + num + "spies";
         }
         if (from.getOwnerId() != playerId) {
             if (!theMap.getNeighborDist(from).keySet().contains(to)) {

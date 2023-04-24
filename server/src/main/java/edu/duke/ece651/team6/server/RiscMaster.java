@@ -402,13 +402,13 @@ public class RiscMaster implements Master, Serializable {
       c.performMoves(this.gameMap);
     }
     for (Commit c : commits) {
-      c.performCloakTerritory(gameMap);
+      c.performCloakTerritory(this.gameMap);
     }
     for (Commit c : commits) {
-      c.performGenerateSpyOrder(gameMap);
+      c.performGenerateSpyOrder(this.gameMap);
     }
     for (Commit c : commits) {
-      c.performMoveSpyOrder(gameMap);
+      c.performMoveSpyOrder(this.gameMap);
     }
     for (Commit c : commits) {
       c.performAttacks(this.gameMap);
