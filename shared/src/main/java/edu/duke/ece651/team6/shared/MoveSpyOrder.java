@@ -21,5 +21,11 @@ public class MoveSpyOrder extends Order {
         // TODO: calculate cost
         int cost = 1;
         gameMap.consumeResource(playerId, Constants.RESOURCE_FOOD, cost);
-      }
+    }
+
+    @Override
+    public String toString() {
+        String str = getName() + "{ from: " + src.toString() + ", to: " + dest.toString() + " num: " + num + "}";
+        return str;
+    }
 }

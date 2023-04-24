@@ -362,6 +362,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     for (Territory t : getSpyingTerritoriesOfAPlayer(playerId)) {
       visibleTerritories.add(t);
     }
+    System.out.println("GameMap getVisibleTerritoryByPlayerId: " + visibleTerritories.toString());
     return visibleTerritories;
   }
 
@@ -377,7 +378,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     // no need to filter out self-owned territories
     Set<Territory> spyingTerritories = new HashSet<>();
     for (Territory t : getTerritorySet()) {
-      if (t.getSpyNumByPlayerId(playerId) > 0) {
+      if (t.getSpyNumByPlayerId(playerId, true) + t.getSpyNumByPlayerId(playerId, false) > 0) {
         spyingTerritories.add(t);
       }
     }

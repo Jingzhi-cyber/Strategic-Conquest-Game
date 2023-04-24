@@ -4,18 +4,30 @@ import java.io.Serializable;
 
 public class Spy implements Serializable, Cloneable {
     private int ownerId;
+    private boolean canMove;
 
     public Spy(int ownerId) {
         this.ownerId = ownerId;
+        this.canMove = true;
     }
 
     public int getOwnerId() {
         return this.ownerId;
     }
 
+    public boolean canMove() {
+        return this.canMove;
+    }
+
+    public void setCanMove(boolean canMove) {
+        this.canMove = canMove;
+    }
+
     @Override
     public Object clone() {
-        return new Spy(this.ownerId);
+        Spy spy = new Spy(this.ownerId);
+        spy.setCanMove(this.canMove);
+        return spy;
     }
 
     @Override

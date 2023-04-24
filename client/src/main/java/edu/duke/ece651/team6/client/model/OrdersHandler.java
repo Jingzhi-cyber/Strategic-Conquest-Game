@@ -313,7 +313,7 @@ public class OrdersHandler {
       return; // User cancelled the dialog
     }
 
-    int spyNum = src.getSpyNumByPlayerId(playerId);
+    int spyNum = src.getSpyNumByPlayerId(playerId, true) + src.getSpyNumByPlayerId(playerId, false);
     List<Integer> numList = new ArrayList<>();
     for (int i = 1; i <= spyNum; i++) {
       numList.add(i);

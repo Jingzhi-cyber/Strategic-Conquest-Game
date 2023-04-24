@@ -93,7 +93,7 @@ public class MapView {
       info2 = previouslySeenTerritories.get(territory).get("info2");
       info3 = previouslySeenTerritories.get(territory).get("info3");
     } else {
-      int mySpyNum = territory.getSpyNumByPlayerId(playerId);
+      int mySpyNum = territory.getSpyNumByPlayerId(playerId, true) + territory.getSpyNumByPlayerId(playerId, false);
       info1 = " Territory: " + territory.getName() + "\n OwnerID: " + territory.getOwnerId() + " \n" + " Food prod: "
           + territory.getFood() + "\n Tech prod: " + territory.getTechnology() + "\n My Spies: " + mySpyNum;
       info2 = getNeighborDistance(territory);
@@ -239,7 +239,7 @@ public class MapView {
         // info
         setPolygonColor(currPolygon, ownerID);
 
-        int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId);
+        int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId, true) + currTerritory.getSpyNumByPlayerId(ownerID, false);
         String tooltip = " Territory: " + name + "\n OwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
             + getUnitsNumberByLevel(currTerritory) + " Food prod: " + currTerritory.getFood() + "\n Tech prod: "
             + currTerritory.getTechnology() + "\n My Spies: " + mySpyNum;
@@ -304,7 +304,7 @@ public class MapView {
             setPolygonColor(polygon, ownerID);
             setPolygonMouseClick(polygon, currTerritory, false);
 
-            int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId);
+            int mySpyNum = currTerritory.getSpyNumByPlayerId(playerId, true) + currTerritory.getSpyNumByPlayerId(playerId, false);
             String spiesView = constructSpiesView(mySpyNum);
             System.out.println("Terrtory " + currTerritory.getName() + " SpiesView: " + spiesView);
 
