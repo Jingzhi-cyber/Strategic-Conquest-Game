@@ -293,7 +293,23 @@ public class UIGame extends Game {
       System.out.print("Waiting for other players to enter\n");
       String initMsg = (String) socketHandler.recvObject();
       System.out.println(initMsg);
+      if (!"Connected to the server!".equals(initMsg)) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        Platform.runLater(() -> {
+          Alert connectedToServer = new Alert(Alert.AlertType.INFORMATION);
+          connectedToServer.setTitle("New message arrives");
+          connectedToServer.setHeaderText("Successfully returned to a game!");
+          connectedToServer.setContentText(
+                  "Alert: server was powered off.. The commit you made may be lost");
+          Optional<?> result = connectedToServer.showAndWait();
+          if (result.isPresent()) {
+            future.complete(true);
+          }
+        });
+        future.get();
+      }
       if (initMsg.charAt(0) == 'C') {
+        // first connection or reconnect to place units phase
         setting = socketHandler.recvGameBasicSetting();
         this.startingGameMap = setting.getGameMap();
         this.gameStatus = GAME_STATUS.PLACE_UNITS;
@@ -302,12 +318,14 @@ public class UIGame extends Game {
           mainPageController.updateGameStatus(this.gameStatus);
         });
         this.playerId = setting.getPlayerId();
-        this.startingGameMap = setting.getGameMap();
-        this.gameStatus = GAME_STATUS.PLACE_UNITS;
-        Platform.runLater(() -> {
-          mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
-          mainPageController.updateGameStatus(this.gameStatus);
-        });
+
+        // this.startingGameMap = setting.getGameMap();
+        // this.gameStatus = GAME_STATUS.PLACE_UNITS;
+        // Platform.runLater(() -> {
+        // mainPageController.setUsername(username + " (PlayerId " +
+        // setting.getPlayerId() + ")");
+        // mainPageController.updateGameStatus(this.gameStatus);
+        // });
 
         Set<Territory> territories = setting.getAssignedTerritories();
 
@@ -321,10 +339,12 @@ public class UIGame extends Game {
           nextUnitPlacementPrompt();
         }
       } else {
+        // reconnect to issue_order phase
         gameStatus = GAME_STATUS.ISSUE_ORDER;
         Platform.runLater(() -> {
           mainPageController.updateGameStatus(gameStatus);
         });
+
       }
     }
     refreshMap();
@@ -503,7 +523,7 @@ public class UIGame extends Game {
 
     // TODO not sure if the commit will be null if reconnecting?
     renderingMap(mapInfo.getGameMap());
-    
+
     // TODO Platform.runLater(() -> updateMap(mainPageController.getMapPane(),
     // mapInfo.getGameMap().getTerritorySet()));
     // this.thisView = new UIGameView(mapInfo);
