@@ -13,9 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AccountManagerTest {
 
-    @Disabled
     @Test
-    public void testManager() throws IOException {
+    public void testManager() {
         AccountManager am = new AccountManager();
         assertTrue(am.register("hello", "hello"));
         assertFalse(am.register("hello", "hello"));
