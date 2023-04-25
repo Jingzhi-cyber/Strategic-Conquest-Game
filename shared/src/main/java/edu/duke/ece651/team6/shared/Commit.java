@@ -19,6 +19,7 @@ public class Commit implements java.io.Serializable {
   List<CloakTerritoryOrder> cloakTerritorys;
   List<GenerateSpyOrder> generateSpys;
   List<MoveSpyOrder> moveSpys;
+  CloakResearchOrder cloakResearchOrder;
 
   OrderRuleChecker moveChecker;
   OrderRuleChecker attackChecker;
@@ -27,6 +28,7 @@ public class Commit implements java.io.Serializable {
   OrderRuleChecker cloakTerritoryRuleChecker;
   OrderRuleChecker generateSpyRuleChecker;
   OrderRuleChecker moveSpyRuleChecker;
+  OrderRuleChecker cloakResearchRuleChecker;
 
   /**
    * Construct a Commit object with 4 params
@@ -61,6 +63,7 @@ public class Commit implements java.io.Serializable {
     this.cloakTerritoryRuleChecker = new CloakTerritoryRuleChecker(null, resource);
     this.generateSpyRuleChecker = new GenerateSpyRuleChecker(null, resource);
     this.moveSpyRuleChecker = new MoveSpyRuleChecker(null, resource);
+    this.cloakResearchRuleChecker = new CloakResearchRuleChecker(null, resource);
   }
 
   /* -------------- For client side usage --------------- */
@@ -148,6 +151,14 @@ public class Commit implements java.io.Serializable {
   public void addMoveSpyOrder(MoveSpyOrder moveSpyOrder) {
     checkRules(moveSpyRuleChecker, moveSpyOrder, this.gameMap);
     moveSpys.add(moveSpyOrder);
+  }
+
+  public void addCloackResearchOrder(CloakResearchOrder cloakResearchOrder) {
+    if (this.cloakResearchOrder != null) {
+      throw new IllegalArgumentException("Invalid cloakResearch: can only have one cloak research order in one turn");
+    }
+    checkRules(cloakResearchRuleChecker, cloakResearchOrder, this.gameMap);
+    this.cloakResearchOrder = cloakResearchOrder;
   }
 
   /* ---------------- For server side usage ----------------- */

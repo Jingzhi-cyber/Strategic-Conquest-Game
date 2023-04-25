@@ -19,6 +19,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
   private int territoryNum;
   private Map<Integer, Map<String, Integer>> resources;
   private Map<Integer, Integer> maxTechLevel;
+  private Map<Integer, Boolean> enableCloak;
 
   /**
    * Construct a GameMap by injecting a adjacent list
@@ -34,6 +35,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     this.territoryNum = this.weightedAdjList.size();
     this.resources = new HashMap<>();
     this.maxTechLevel = new HashMap<>();
+    this.enableCloak = new HashMap<>();
   }
 
   public GameMap(Map<Territory, Map<Territory, Double>> distMap, boolean useDist) {
@@ -53,6 +55,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     this.territoryNum = this.weightedAdjList.size();
     this.resources = new HashMap<>();
     this.maxTechLevel = new HashMap<>();
+    this.enableCloak = new HashMap<>();
   }
 
   @Override
@@ -78,6 +81,10 @@ public class GameMap implements java.io.Serializable, Cloneable {
       }
     }
     gameMap.maxTechLevel.putAll(this.maxTechLevel);
+    gameMap.enableCloak = new HashMap<Integer, Boolean>();
+    for (int playerId : this.enableCloak.keySet()) {
+      gameMap.enableCloak.put(playerId, this.enableCloak.get(playerId));
+    }
     return gameMap;
   }
 
@@ -384,4 +391,16 @@ public class GameMap implements java.io.Serializable, Cloneable {
     }
     return spyingTerritories;
   } 
+
+  public boolean enableCloakForPlayerId(int playerId) {
+    if (this.enableCloak.containsKey(playerId)) {
+      return false;
+    }
+    this.enableCloak.put(playerId, true);
+    return true;
+  }
+
+  public boolean isEnabledCloakOfPlayerId(int playerId) {
+    return this.enableCloak.containsKey(playerId);
+  }
 }
