@@ -13,6 +13,10 @@ public class CloakTerritoryRuleChecker extends OrderRuleChecker {
     @Override
     protected String checkMyRule(Order order, GameMap theMap) {
         CloakTerritoryOrder cloak = (CloakTerritoryOrder) order;
+        int playerId = cloak.getTerritory().getOwnerId();
+        if (!theMap.isEnabledCloakOfPlayerId(playerId)) {
+            return "Invalid cloak: this player has not researched cloak";
+        }
         int cost = 1;
         int currTech = resource.get(Constants.RESOURCE_TECH);
         if (currTech < cost) {
