@@ -312,6 +312,8 @@ public class GameMap implements java.io.Serializable, Cloneable {
           resource.get(Constants.RESOURCE_FOOD) + newResource.get(Constants.RESOURCE_FOOD));
       resource.put(Constants.RESOURCE_TECH,
           resource.get(Constants.RESOURCE_TECH) + newResource.get(Constants.RESOURCE_TECH));
+      resource.put(Constants.RESOURCE_CIVIL,
+          resource.get(Constants.RESOURCE_CIVIL) + newResource.get(Constants.RESOURCE_CIVIL));
     }
   }
 
@@ -337,6 +339,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     Map<String, Integer> defaultVal = new HashMap<>();
     defaultVal.put(Constants.RESOURCE_FOOD, 0);
     defaultVal.put(Constants.RESOURCE_TECH, 0);
+    defaultVal.put(Constants.RESOURCE_CIVIL, 0);
     return this.resources.getOrDefault(playerId, defaultVal);
   }
 
