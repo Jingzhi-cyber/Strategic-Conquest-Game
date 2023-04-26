@@ -361,13 +361,20 @@ public class GameMap implements java.io.Serializable, Cloneable {
     for (Territory t : ownTerritories) {
       visibleTerritories.add(t);
       for (Territory neighbor : getNeighborDist(t).keySet()) {
-        if (neighbor.getCloakedTurn() == 0) {
+        if (neighbor.getCloakedTurn() == 0 && !neighbor.getGapGenerated()) {
           visibleTerritories.add(neighbor);
         }
       }
     }
     for (Territory t : getSpyingTerritoriesOfAPlayer(playerId)) {
-      visibleTerritories.add(t);
+      if (!t.getGapGenerated()) {
+        visibleTerritories.add(t);
+      }
+    }
+    for (Territory t : getTerritorySet()) {
+      if (t.getVisiblePlayer().contains(playerId) && !t.getGapGenerated()) {
+        visibleTerritories.add(t);
+      }
     }
     System.out.println("GameMap getVisibleTerritoryByPlayerId: " + visibleTerritories.toString());
     return visibleTerritories;
