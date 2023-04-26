@@ -299,8 +299,7 @@ public class UIGame extends Game {
           Alert connectedToServer = new Alert(Alert.AlertType.INFORMATION);
           connectedToServer.setTitle("New message arrives");
           connectedToServer.setHeaderText("Successfully returned to a game!");
-          connectedToServer.setContentText(
-                  "Alert: server was powered off.. The commit you made may be lost");
+          connectedToServer.setContentText("Alert: server was powered off.. The commit you made may be lost");
           Optional<?> result = connectedToServer.showAndWait();
           if (result.isPresent()) {
             future.complete(true);
@@ -617,6 +616,30 @@ public class UIGame extends Game {
     prepWorkBeforeNewOrder();
 
     this.ordersHandler.handleSuperShieldOrder(currentCommit, playerId);
+  }
+
+  public void constructDefenseInfrasOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleDefenseInfrasOrder(currentCommit, playerId);
+  }
+
+  public void constructEiminateFogOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleEliminateFogOrder(currentCommit, playerId);
+  }
+
+  public void constructGapGeneratorOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleGapGeneratorOrder(currentCommit, playerId);
+  }
+
+  public void constructNuclearHitOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleNuclearHitOrder(currentCommit, playerId);
   }
 
   /**

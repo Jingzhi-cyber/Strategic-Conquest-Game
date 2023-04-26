@@ -333,15 +333,16 @@ public class OrdersHandler {
   public void handleSanBingOrder(Commit currentCommit, int playerId) throws ExecutionException, InterruptedException {
 
     Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, false), playerId,
-            "San Bing", "Which territory do you want to attack units from").get();
+        "San Bing", "Which territory do you want to attack units from").get();
 
     if (src == null) {
       // mainPageController.showError("Must specify a territory to attack from");
       return; // User cancelled the dialog
     }
 
-    Territory dest = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getEnemyTerritorySetByPlayerId(playerId),
-            playerId, "San Bing", "Which territory do you want to attack units to").get();
+    Territory dest = showTerritorySelectionDialog(
+        currentCommit.getCurrentGameMap().getEnemyTerritorySetByPlayerId(playerId), playerId, "San Bing",
+        "Which territory do you want to attack units to").get();
 
     if (dest == null) {
       // mainPageController.showError("Must specify a territory to attack units to");
@@ -351,13 +352,13 @@ public class OrdersHandler {
     int[] numUnitsByLevel = new int[Constants.MAX_LEVEL + 1];
 
     Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "San Bing",
-            "Which level of units do you want to attack?").get();
+        "Which level of units do you want to attack?").get();
     if (selectedLevel == null) {
       // mainPageController.showError("Must specify a level to attack");
       return; // User cancelled the dialog
     }
     Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them are used as San Bing?")
-            .get();
+        .get();
 
     if (numUnits == null) {
       // mainPageController.showError("Must specify the number of units to attack");
@@ -373,9 +374,10 @@ public class OrdersHandler {
     }
   }
 
-  public void handleSuperShieldOrder(Commit currentCommit, int playerId) throws ExecutionException, InterruptedException {
-    Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId), playerId,
-            "San Bing", "Which territory do you want to use Super Shield:").get();
+  public void handleSuperShieldOrder(Commit currentCommit, int playerId)
+      throws ExecutionException, InterruptedException {
+    Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId),
+        playerId, "San Bing", "Which territory do you want to use Super Shield:").get();
 
     if (src == null) {
       // mainPageController.showError("Must specify a territory to attack from");
@@ -383,6 +385,60 @@ public class OrdersHandler {
     }
     SuperShieldOrder superShield = new SuperShieldOrder(src);
     currentCommit.addSuperShieldOrder(superShield);
+  }
+
+  public void handleDefenseInfrasOrder(Commit currentCommit, int playerId)
+      throws ExecutionException, InterruptedException {
+    // TODO: can only perform defense infrastructure on self-owned territories,
+    // right?
+    Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId),
+        playerId, "DefenseInfras Order", "Which territory do you want to use DefenseInfras on: ").get();
+
+    if (src == null) {
+      return; // User cancelled the dialog
+    }
+    DefenseInfrasOrder defenseInfrasOrder = new DefenseInfrasOrder(src);
+    currentCommit.addDefenseInfrasOrder(defenseInfrasOrder);
+  }
+
+  public void handleEliminateFogOrder(Commit currentCommit, int playerId)
+      throws ExecutionException, InterruptedException {
+    // TODO: can perform eliminate fog order on any territories, right?
+    Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySet(), playerId,
+        "Eliminate Fog Order", "Which territory do you want to eliminate fog?").get();
+
+    if (src == null) {
+      return; // User cancelled the dialog
+    }
+    EliminateFogOrder eliminateFogOrder = new EliminateFogOrder(src, playerId);
+    currentCommit.addEliminateFogOrder(eliminateFogOrder);
+  }
+
+  public void handleGapGeneratorOrder(Commit currentCommit, int playerId)
+      throws ExecutionException, InterruptedException {
+    // TODO: can perform gap generator order on self-owned territories, right?
+    Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId),
+        playerId, "Gap Generator Order", "Which territory do you want to generate a gap to prevent from seeing?").get();
+
+    if (src == null) {
+      return; // User cancelled the dialog
+    }
+    GapGeneratorOrder gapGeneratorOrder = new GapGeneratorOrder(src);
+    currentCommit.addGapGeneratorOrder(gapGeneratorOrder);
+  }
+
+  public void handleNuclearHitOrder(Commit currentCommit, int playerId)
+      throws ExecutionException, InterruptedException {
+    // TODO: can perform Nuclear Hit order on enemy territories, right?
+    Territory src = showTerritorySelectionDialog(
+        currentCommit.getCurrentGameMap().getEnemyTerritorySetByPlayerId(playerId), playerId, "Nuclear Hit Order",
+        "Which territory do you want to perform a Nuclear Hit Order?").get();
+
+    if (src == null) {
+      return; // User cancelled the dialog
+    }
+    NuclearHitOrder nuclearHitOrder = new NuclearHitOrder(src, playerId);
+    currentCommit.addNuclearHitOrder(nuclearHitOrder);
   }
 
   /* --------------------------------------------------------------- */

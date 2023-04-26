@@ -241,6 +241,34 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
+      case "Defense Infrastructure":
+        try {
+          uiGame.constructDefenseInfrasOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Eiminate Fog":
+        try {
+          uiGame.constructEiminateFogOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Gap Generator":
+        try {
+          uiGame.constructGapGeneratorOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Nuclear Hit":
+        try {
+          uiGame.constructNuclearHitOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
       default:
         // Handle null / unexpected input - impossible
     }
@@ -328,7 +356,8 @@ public class MainPageController extends Controller implements Initializable {
     // this.mainPageScene = resetCommitButton.getScene();
 
     ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade", "Cloak",
-        "Generate Spies", "Move Spies", "San Bing", "Super Shield");
+        "Generate Spies", "Move Spies", "San Bing", "Super Shield", "Defense Infrastructure", "Eiminate Fog",
+        "Gap Generator", "Nuclear Hit");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
 
