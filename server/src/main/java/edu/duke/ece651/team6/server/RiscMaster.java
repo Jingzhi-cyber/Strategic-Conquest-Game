@@ -393,6 +393,9 @@ public class RiscMaster implements Master, Serializable {
    */
   private void executeCommits(List<Commit> commits) {
     for (Commit c : commits) {
+      c.performSuperShieldOrder(gameMap);
+    }
+    for (Commit c : commits) {
       c.performUpgrade(gameMap);
     }
     for (Commit c : commits) {
@@ -412,6 +415,9 @@ public class RiscMaster implements Master, Serializable {
     }
     for (Commit c : commits) {
       c.performAttacks(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performSanBingOrder(this.gameMap);
     }
     for (Commit c : commits) {
       c.performNuclearHitOrder(gameMap);

@@ -430,10 +430,10 @@ public class UIGame extends Game {
    * @throws ClassNotFoundException If the class of a serialized object could not
    *                                be found.
    */
-  public void submitCommit() {
+  public void submitCommit() throws ExecutionException, InterruptedException {
     /* -------- Show a confirmation dialog with the orders-------- */
     String ordersString = this.currentCommit.toString();
-    AtomicBoolean buttonOK = new AtomicBoolean(false);
+    CompletableFuture<Boolean> future = new CompletableFuture<>();
     Platform.runLater(() -> {
       Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
 
@@ -456,54 +456,42 @@ public class UIGame extends Game {
       Optional<ButtonType> confirmOrder = confirmationDialog.showAndWait();
 
       if (confirmOrder.isPresent() && confirmOrder.get() == ButtonType.OK) {
-        buttonOK.set(true);
+        future.complete(true);
+      } else {
+        future.complete(false);
       }
     });
-    class MyTask extends Task<Void> {
-
-      final UIGame game;
-
-      MyTask(UIGame game) {
-        this.game = game;
-      }
-
-      @Override
-      protected Void call() throws Exception {
-        while (!buttonOK.get()) {
-          Thread.sleep(100);
-        }
-        try {
-          game.socketHandler.sendCommit(game.currentCommit);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        System.out.println("Successfully sent a commit to the server");
-        game.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
-        Platform.runLater(() -> {
-          game.mainPageController.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
-          game.mainPageController.setPlayTurnsButtonsDisabled(true);
-        });
-        try {
-          // socketHandler.recvGameResult();
-          String status = game.receiveGameResult();
-          Platform.runLater(() -> {
-            game.mainPageController.updateGameStatus(game.gameStatus);
-          });
-          System.out.println("Successfully received game result");
-
-          if (Constants.GAME_OVER.equals(status)) {
-            return null;
-          }
-          game.refreshMap();
-          System.out.println("Successfully refreshed map");
-        } catch (IOException | ClassNotFoundException e) {
-          e.printStackTrace();
-          game.mainPageController.showError(e.getMessage());
-        }
-        return null;
-      }
+    if (future.get().equals(false)) {
+      return;
     }
-    new Thread(new MyTask(this)).start();
+    try {
+      socketHandler.sendCommit(currentCommit);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    System.out.println("Successfully sent a commit to the server");
+    updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+    Platform.runLater(() -> {
+      mainPageController.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+      mainPageController.setPlayTurnsButtonsDisabled(true);
+    });
+    try {
+      // socketHandler.recvGameResult();
+      String status = receiveGameResult();
+      Platform.runLater(() -> {
+        mainPageController.updateGameStatus(gameStatus);
+      });
+      System.out.println("Successfully received game result");
+
+      if (Constants.GAME_OVER.equals(status)) {
+        return;
+      }
+      refreshMap();
+      System.out.println("Successfully refreshed map");
+    } catch (IOException | ClassNotFoundException e) {
+      e.printStackTrace();
+      mainPageController.showError(e.getMessage());
+    }
   }
 
   /**
@@ -617,6 +605,18 @@ public class UIGame extends Game {
     prepWorkBeforeNewOrder();
 
     this.ordersHandler.handleMoveSpyOrder(currentCommit, playerId);
+  }
+
+  public void constructSanBingOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleSanBingOrder(currentCommit, playerId);
+  }
+
+  public void constructSuperShieldOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleSuperShieldOrder(currentCommit, playerId);
   }
 
   /**

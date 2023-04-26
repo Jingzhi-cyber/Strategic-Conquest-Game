@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Queue;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class GameMap implements java.io.Serializable, Cloneable {
   /**
@@ -116,6 +117,12 @@ public class GameMap implements java.io.Serializable, Cloneable {
       }
     }
     return playerTerritories;
+  }
+
+  public Set<Territory> getEnemyTerritorySetByPlayerId(int playerId) {
+    return weightedAdjList.keySet().stream()
+            .filter(territory -> territory.getOwnerId() != playerId)
+            .collect(Collectors.toSet());
   }
 
   /**
@@ -293,6 +300,18 @@ public class GameMap implements java.io.Serializable, Cloneable {
   public int findPathWithLowestCost(Territory src, Territory dest) {
     MinCostPathCalculator minCostPathCalculator = new MinCostPathCalculator(weightedAdjList);
     return minCostPathCalculator.calculateMinCostPath(src, dest);
+  }
+
+  /**
+   * Calculate the minimum cost of the path between src and dest that does not care about the territories' owner
+   * 
+   * @param src
+   * @param dest
+   * @return minimum cost
+   */
+  public int findUltimatePathWithLowestCost(Territory src, Territory dest) {
+    MinCostPathCalculator minCostPathCalculator = new MinCostPathCalculator(weightedAdjList);
+    return minCostPathCalculator.calculateUltimateMinCostPath(src, dest);
   }
 
   /**

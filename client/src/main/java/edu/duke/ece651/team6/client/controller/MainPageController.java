@@ -22,6 +22,7 @@ import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import edu.duke.ece651.team6.shared.GameMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -219,10 +220,24 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
-       case "Move Spies":
+      case "Move Spies":
         try {
           uiGame.constructMoveSpyOrder();
         } catch (IOException | InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "San Bing":
+        try {
+          uiGame.constructSanBingOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Super Shield":
+        try {
+          uiGame.constructSuperShieldOrder();
+        } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
         break;
@@ -239,7 +254,13 @@ public class MainPageController extends Controller implements Initializable {
    */
   @FXML
   public void submitOrders() {
-    uiGame.submitCommit();
+    new Thread(new Task<Void>() {
+      @Override
+      protected Void call() throws Exception {
+        uiGame.submitCommit();
+        return null;
+      }
+    }).start();
   }
 
   /**
@@ -307,7 +328,7 @@ public class MainPageController extends Controller implements Initializable {
     // this.mainPageScene = resetCommitButton.getScene();
 
     ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade", "Cloak",
-        "Generate Spies", "Move Spies");
+        "Generate Spies", "Move Spies", "San Bing", "Super Shield");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
 
