@@ -23,7 +23,12 @@ public class Territory implements java.io.Serializable, Cloneable {
   private boolean underWar;
   private int food;
   private int technology;
+  private int civilization;
   private int cloakedTurns;
+  private boolean defenseInfras;
+  private boolean absoluteDefence;
+  private boolean gapGenerated;
+  private Set<Integer> visibleToPlayers;
   private List<Edge> edges;
   private List<Point2D> points;
   private int[] color;
@@ -45,7 +50,12 @@ public class Territory implements java.io.Serializable, Cloneable {
     underWar = false;
     food = 5;
     technology = 5;
+    civilization = 1;
     cloakedTurns = 0;
+    this.defenseInfras = false;
+    this.absoluteDefence = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers = new HashSet<Integer>();
   }
 
   public Territory(String name, int ownerId) {
@@ -58,7 +68,12 @@ public class Territory implements java.io.Serializable, Cloneable {
     underWar = false;
     food = 5;
     technology = 5;
+    civilization = 1;
     cloakedTurns = 0;
+    this.defenseInfras = false;
+    this.absoluteDefence = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers = new HashSet<Integer>();
   }
 
   /**
@@ -82,12 +97,24 @@ public class Territory implements java.io.Serializable, Cloneable {
     underWar = false;
     food = 5;
     technology = 5;
+    civilization = 1;
     cloakedTurns = 0;
+    this.defenseInfras = false;
+    this.absoluteDefence = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers = new HashSet<Integer>();
   }
 
   @Override
   public Object clone() {
     Territory territory = new Territory(this.name, this.ownerId);
+    territory.civilization = this.civilization;
+    territory.defenseInfras = this.defenseInfras;
+    territory.absoluteDefence = this.absoluteDefence;
+    territory.gapGenerated = this.gapGenerated;
+    for (int playerId : this.visibleToPlayers) {
+      territory.visibleToPlayers.add(playerId);
+    }
     for (int i = 0; i < numLevel; i++) {
       Deque<Unit> sameLevelUnits = territory.units.get(i);
       for (Unit unit : this.units.get(i)) {
@@ -273,6 +300,10 @@ public class Territory implements java.io.Serializable, Cloneable {
       warZone.startWar();
       underWar = false;
       warZone = null;
+      this.civilization = 0;
+    }
+    else {
+      this.civilization++;
     }
     recover();
     if (cloakedTurns > 0) {
@@ -286,6 +317,10 @@ public class Territory implements java.io.Serializable, Cloneable {
         spy.get("canMove").add(new Spy(playerId));
       }
     }
+    this.defenseInfras = false;
+    this.absoluteDefence = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers.clear();
   }
 
   /**
@@ -468,6 +503,52 @@ public class Territory implements java.io.Serializable, Cloneable {
 
   public int getCloakedTurn() {
     return this.cloakedTurns;
+  }
+
+  public int getCivilization() {
+    return this.civilization;
+  }
+
+  public void setDefenseInfras() {
+    this.defenseInfras = true;
+  }
+
+  public boolean getDefenseInfras() {
+    return this.defenseInfras;
+  }
+
+  public void setAbsoluteDefence() {
+    this.absoluteDefence = true;
+  }
+
+  public boolean getAbsoluteDefence() {
+    return this.absoluteDefence;
+  }
+
+  public void setGapGenerated() {
+    this.gapGenerated = true;
+  }
+
+  public boolean getGapGenerated() {
+    return this.gapGenerated;
+  }
+
+  public void addVisiblePlayer(int playerId) {
+    this.visibleToPlayers.add(playerId);
+  } 
+
+  public Set<Integer> getVisiblePlayer() {
+    return this.visibleToPlayers;
+  }
+
+  public boolean hitByNuclearWeapon(int playerId) {
+    if (this.absoluteDefence) {
+      return false;
+    }
+    this.civilization = 0;
+    unitsInit();
+    this.ownerId = playerId;
+    return true;
   }
 
   public void addEdge(Edge e) {

@@ -20,6 +20,8 @@ public class Constants {
 
   public static final String RESOURCE_TECH = "technology";
 
+  public static final String RESOURCE_CIVIL = "civilization";
+
   public static final Map<Integer, Integer> researchCosts = new HashMap<Integer, Integer>() {
     {
       put(1, 2);

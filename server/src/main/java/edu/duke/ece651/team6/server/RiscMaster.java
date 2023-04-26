@@ -399,10 +399,10 @@ public class RiscMaster implements Master, Serializable {
       c.performResearch(this.gameMap);
     }
     for (Commit c : commits) {
-      c.performMoves(this.gameMap);
+      c.performCloakResearchOrder(gameMap);
     }
     for (Commit c : commits) {
-      c.performCloakTerritory(this.gameMap);
+      c.performMoves(this.gameMap);
     }
     for (Commit c : commits) {
       c.performGenerateSpyOrder(this.gameMap);
@@ -413,9 +413,24 @@ public class RiscMaster implements Master, Serializable {
     for (Commit c : commits) {
       c.performAttacks(this.gameMap);
     }
+    for (Commit c : commits) {
+      c.performNuclearHitOrder(gameMap);
+    }
     Set<Territory> territories = this.gameMap.getTerritorySet();
     for (Territory territory : territories) {
       territory.update();
+    }
+    for (Commit c : commits) {
+      c.performCloakTerritory(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performDefenseInfrasOrder(gameMap);
+    }
+    for (Commit c : commits) {
+      c.performEliminateFogOrder(gameMap);
+    }
+    for (Commit c : commits) {
+      c.performGapGeneratorOrder(gameMap);
     }
     System.out.println("Commits execution finished!");
   }

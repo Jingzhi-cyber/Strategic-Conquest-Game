@@ -20,6 +20,10 @@ public class Commit implements java.io.Serializable {
   List<GenerateSpyOrder> generateSpys;
   List<MoveSpyOrder> moveSpys;
   CloakResearchOrder cloakResearchOrder;
+  NuclearHitOrder nuclearHitOrder;
+  DefenseInfrasOrder defenseInfrasOrder;
+  EliminateFogOrder eliminateFogOrder;
+  GapGeneratorOrder gapGeneratorOrder;
 
   OrderRuleChecker moveChecker;
   OrderRuleChecker attackChecker;
@@ -29,6 +33,10 @@ public class Commit implements java.io.Serializable {
   OrderRuleChecker generateSpyRuleChecker;
   OrderRuleChecker moveSpyRuleChecker;
   OrderRuleChecker cloakResearchRuleChecker;
+  OrderRuleChecker nuclearHitRuleChecker;
+  OrderRuleChecker defenseInfrasRuleChecker;
+  OrderRuleChecker eliminateFogRuleChecker;
+  OrderRuleChecker gapGeneratOrderRuleChecker;
 
   /**
    * Construct a Commit object with 4 params
@@ -52,6 +60,11 @@ public class Commit implements java.io.Serializable {
     this.cloakTerritorys = new ArrayList<>();
     this.generateSpys = new ArrayList<>();
     this.moveSpys = new ArrayList<>();
+    this.cloakResearchOrder = null;
+    this.nuclearHitOrder = null;
+    this.defenseInfrasOrder = null;
+    this.eliminateFogOrder = null;
+    this.gapGeneratorOrder = null;
 
     this.moveChecker = new SrcOwerIdRuleChecker(
         new SamePlayerPathRuleChecker(new MoveCostRuleChecker(new MoveUnitsRuleChecker(null), resource)), playerId);
@@ -64,6 +77,10 @@ public class Commit implements java.io.Serializable {
     this.generateSpyRuleChecker = new GenerateSpyRuleChecker(null, resource);
     this.moveSpyRuleChecker = new MoveSpyRuleChecker(null, resource);
     this.cloakResearchRuleChecker = new CloakResearchRuleChecker(null, resource);
+    this.nuclearHitRuleChecker = new NuclearHitRuleChecker(null, resource);
+    this.defenseInfrasRuleChecker = new DefenseInfrasRuleChecker(null, resource);
+    this.eliminateFogRuleChecker = new EliminateFogRuleChecker(null, resource);
+    this.gapGeneratOrderRuleChecker = new GapGeneratorRuleChecker(null, resource);
   }
 
   /* -------------- For client side usage --------------- */
@@ -159,6 +176,38 @@ public class Commit implements java.io.Serializable {
     }
     checkRules(cloakResearchRuleChecker, cloakResearchOrder, this.gameMap);
     this.cloakResearchOrder = cloakResearchOrder;
+  }
+
+  public void addNuclearHitOrder(NuclearHitOrder nuclearHitOrder) {
+    if (this.nuclearHitOrder != null) {
+      throw new IllegalArgumentException("Invalid nuclearHit: can only have one nuclearHit order in one turn");
+    }
+    checkRules(nuclearHitRuleChecker, nuclearHitOrder, this.gameMap);
+    this.nuclearHitOrder = nuclearHitOrder;
+  }
+
+  public void addDefenseInfrasOrder(DefenseInfrasOrder defenseInfrasOrder) {
+    if (this.defenseInfrasOrder != null) {
+      throw new IllegalArgumentException("Invalid defenseInfras: can only have one defenseInfras order in one turn");
+    }
+    checkRules(defenseInfrasRuleChecker, defenseInfrasOrder, this.gameMap);
+    this.defenseInfrasOrder = defenseInfrasOrder;
+  }
+
+  public void addEliminateFogOrder(EliminateFogOrder eliminateFogOrder) {
+    if (this.eliminateFogOrder != null) {
+      throw new IllegalArgumentException("Invalid eliminateFog: can only have one eliminateFog order in one turn");
+    }
+    checkRules(eliminateFogRuleChecker, eliminateFogOrder, this.gameMap);
+    this.eliminateFogOrder = eliminateFogOrder;
+  }
+
+  public void addGapGeneratorOrder(GapGeneratorOrder gapGeneratorOrder) {
+    if (this.gapGeneratorOrder != null) {
+      throw new IllegalArgumentException("Invalid gapGenerator: can only have one gapGenerator order in one turn");
+    }
+    checkRules(gapGeneratOrderRuleChecker, gapGeneratorOrder, this.gameMap);
+    this.gapGeneratorOrder = gapGeneratorOrder;
   }
 
   /* ---------------- For server side usage ----------------- */
@@ -265,6 +314,36 @@ public class Commit implements java.io.Serializable {
     }
   }
 
+  public void performCloakResearchOrder(GameMap gameMap) {
+    if (cloakResearchOrder != null) {
+      cloakResearchOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performNuclearHitOrder(GameMap gameMap) {
+    if (nuclearHitOrder != null) {
+      nuclearHitOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performDefenseInfrasOrder(GameMap gameMap) {
+    if (defenseInfrasOrder != null) {
+      defenseInfrasOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performEliminateFogOrder(GameMap gameMap) {
+    if (eliminateFogOrder != null) {
+      eliminateFogOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performGapGeneratorOrder(GameMap gameMap) {
+    if (gapGeneratorOrder != null) {
+      gapGeneratorOrder.takeAction(gameMap);
+    }
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -297,6 +376,27 @@ public class Commit implements java.io.Serializable {
     for (MoveSpyOrder o : moveSpys) {
       builder.append(o.toString() + " (Cost: " + 1 + ")\n");
     }
+
+    if (cloakResearchOrder != null) {
+      builder.append(cloakResearchOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (nuclearHitOrder != null) {
+      builder.append(nuclearHitOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (defenseInfrasOrder != null) {
+      builder.append(defenseInfrasOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (eliminateFogOrder != null) {
+      builder.append(eliminateFogOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (gapGeneratorOrder != null) {
+      builder.append(gapGeneratorOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
     return builder.toString();
   }
 
