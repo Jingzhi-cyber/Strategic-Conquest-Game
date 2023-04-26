@@ -8,6 +8,10 @@ public class CostCalculator {
         return gameMap.findPathWithLowestCost(simpleMove.src, simpleMove.dest) * simpleMove.getTotalUnits() * MOVE_CONSTANT;
     }
 
+    public static int calculateUltimateMoveCost(SimpleMove simpleMove, GameMap gameMap) {
+        return gameMap.findUltimatePathWithLowestCost(simpleMove.src, simpleMove.dest) * simpleMove.getTotalUnits() * MOVE_CONSTANT;
+    }
+
     public static int calculateAttackCost(SimpleMove simpleMove, GameMap gameMap) {
         // TODO: change this function
         return gameMap.getNeighborDist(simpleMove.src).get(simpleMove.dest) * simpleMove.getTotalUnits() * ATTACK_CONSTANT;

@@ -10,17 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.Controller;
-import edu.duke.ece651.team6.shared.AttackOrder;
-import edu.duke.ece651.team6.shared.CloakTerritoryOrder;
-import edu.duke.ece651.team6.shared.Commit;
-import edu.duke.ece651.team6.shared.Constants;
-import edu.duke.ece651.team6.shared.GameMap;
-import edu.duke.ece651.team6.shared.GenerateSpyOrder;
-import edu.duke.ece651.team6.shared.MoveOrder;
-import edu.duke.ece651.team6.shared.MoveSpyOrder;
-import edu.duke.ece651.team6.shared.ResearchOrder;
-import edu.duke.ece651.team6.shared.Territory;
-import edu.duke.ece651.team6.shared.UpgradeOrder;
+import edu.duke.ece651.team6.shared.*;
 import javafx.scene.control.ChoiceDialog;
 
 public class OrdersHandler {
@@ -338,6 +328,61 @@ public class OrdersHandler {
       mainPageController.showError(e.getMessage());
       return;
     }
+  }
+
+  public void handleSanBingOrder(Commit currentCommit, int playerId) throws ExecutionException, InterruptedException {
+
+    Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, false), playerId,
+            "San Bing", "Which territory do you want to attack units from").get();
+
+    if (src == null) {
+      // mainPageController.showError("Must specify a territory to attack from");
+      return; // User cancelled the dialog
+    }
+
+    Territory dest = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getEnemyTerritorySetByPlayerId(playerId),
+            playerId, "San Bing", "Which territory do you want to attack units to").get();
+
+    if (dest == null) {
+      // mainPageController.showError("Must specify a territory to attack units to");
+      return; // User cancelled the dialog
+    }
+
+    int[] numUnitsByLevel = new int[Constants.MAX_LEVEL + 1];
+
+    Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "San Bing",
+            "Which level of units do you want to attack?").get();
+    if (selectedLevel == null) {
+      // mainPageController.showError("Must specify a level to attack");
+      return; // User cancelled the dialog
+    }
+    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them are used as San Bing?")
+            .get();
+
+    if (numUnits == null) {
+      // mainPageController.showError("Must specify the number of units to attack");
+      return; // User cancelled the dialog
+    }
+
+    numUnitsByLevel[selectedLevel] = numUnits;
+    SanBingOrder sanBing = new SanBingOrder(src, dest, numUnitsByLevel);
+    try {
+      currentCommit.addSanBingOrder(sanBing);
+    } catch (IllegalArgumentException e) {
+      mainPageController.showError(e.getMessage());
+    }
+  }
+
+  public void handleSuperShieldOrder(Commit currentCommit, int playerId) throws ExecutionException, InterruptedException {
+    Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId), playerId,
+            "San Bing", "Which territory do you want to use Super Shield:").get();
+
+    if (src == null) {
+      // mainPageController.showError("Must specify a territory to attack from");
+      return; // User cancelled the dialog
+    }
+    SuperShieldOrder superShield = new SuperShieldOrder(src);
+    currentCommit.addSuperShieldOrder(superShield);
   }
 
   /* --------------------------------------------------------------- */

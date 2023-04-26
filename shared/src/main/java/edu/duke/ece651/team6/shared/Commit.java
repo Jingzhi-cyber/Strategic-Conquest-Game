@@ -19,6 +19,8 @@ public class Commit implements java.io.Serializable {
   List<CloakTerritoryOrder> cloakTerritorys;
   List<GenerateSpyOrder> generateSpys;
   List<MoveSpyOrder> moveSpys;
+  SanBingOrder sanBings;
+  SuperShieldOrder superShield;
   CloakResearchOrder cloakResearchOrder;
   NuclearHitOrder nuclearHitOrder;
   DefenseInfrasOrder defenseInfrasOrder;
@@ -32,6 +34,8 @@ public class Commit implements java.io.Serializable {
   OrderRuleChecker cloakTerritoryRuleChecker;
   OrderRuleChecker generateSpyRuleChecker;
   OrderRuleChecker moveSpyRuleChecker;
+  OrderRuleChecker sanBingRuleChecker;
+  OrderRuleChecker superShieldRuleChecker;
   OrderRuleChecker cloakResearchRuleChecker;
   OrderRuleChecker nuclearHitRuleChecker;
   OrderRuleChecker defenseInfrasRuleChecker;
@@ -60,6 +64,8 @@ public class Commit implements java.io.Serializable {
     this.cloakTerritorys = new ArrayList<>();
     this.generateSpys = new ArrayList<>();
     this.moveSpys = new ArrayList<>();
+    this.sanBings = null;
+    this.superShield = null;
     this.cloakResearchOrder = null;
     this.nuclearHitOrder = null;
     this.defenseInfrasOrder = null;
@@ -76,6 +82,9 @@ public class Commit implements java.io.Serializable {
     this.cloakTerritoryRuleChecker = new CloakTerritoryRuleChecker(null, resource);
     this.generateSpyRuleChecker = new GenerateSpyRuleChecker(null, resource);
     this.moveSpyRuleChecker = new MoveSpyRuleChecker(null, resource);
+    this.sanBingRuleChecker =
+            new SrcOwerIdRuleChecker(new SanBingCostRuleChecker(new AttackUnitsRuleChecker(null), resource), playerId);
+    this.superShieldRuleChecker = new SuperShieldRuleChecker(null, resource);
     this.cloakResearchRuleChecker = new CloakResearchRuleChecker(null, resource);
     this.nuclearHitRuleChecker = new NuclearHitRuleChecker(null, resource);
     this.defenseInfrasRuleChecker = new DefenseInfrasRuleChecker(null, resource);
@@ -168,6 +177,22 @@ public class Commit implements java.io.Serializable {
   public void addMoveSpyOrder(MoveSpyOrder moveSpyOrder) {
     checkRules(moveSpyRuleChecker, moveSpyOrder, this.gameMap);
     moveSpys.add(moveSpyOrder);
+  }
+
+  public void addSanBingOrder(SanBingOrder sanBingOrder) {
+    if (this.sanBings != null) {
+      throw new IllegalArgumentException("Invalid sanbing: can only have one sanbing order in one turn");
+    }
+    checkRules(sanBingRuleChecker, sanBingOrder, this.gameMap);
+    sanBings = sanBingOrder;
+  }
+
+  public void addSuperShieldOrder(SuperShieldOrder superShieldOrder) {
+    if (this.superShield != null) {
+      throw new IllegalArgumentException("Invalid superSheild: can only have one superSheild order in one turn");
+    }
+    checkRules(superShieldRuleChecker, superShieldOrder, gameMap);
+    superShield = superShieldOrder;
   }
 
   public void addCloackResearchOrder(CloakResearchOrder cloakResearchOrder) {
@@ -314,6 +339,18 @@ public class Commit implements java.io.Serializable {
     }
   }
 
+  public void performSanBingOrder(GameMap gameMap) {
+    if (this.sanBings != null) {
+      this.sanBings.takeAction(gameMap);
+    }
+  }
+
+  public void performSuperShieldOrder(GameMap gameMap) {
+    if (this.superShield != null) {
+      this.superShield.takeAction(gameMap);
+    }
+  }
+
   public void performCloakResearchOrder(GameMap gameMap) {
     if (cloakResearchOrder != null) {
       cloakResearchOrder.takeAction(gameMap);
@@ -377,6 +414,13 @@ public class Commit implements java.io.Serializable {
       builder.append(o.toString() + " (Cost: " + 1 + ")\n");
     }
 
+    if (this.sanBings != null) {
+      builder.append(sanBings.toString() + " (Cost: " + CostCalculator.calculateUltimateMoveCost((SimpleMove)sanBings, gameMap) + ")\n");
+    }
+
+    if (this.superShield != null) {
+      builder.append(superShield.toString() + " (Cost: " + 1 + ")\n");
+    }
     if (cloakResearchOrder != null) {
       builder.append(cloakResearchOrder.toString() + " (Cost: " + 1 + ")\n");
     }
