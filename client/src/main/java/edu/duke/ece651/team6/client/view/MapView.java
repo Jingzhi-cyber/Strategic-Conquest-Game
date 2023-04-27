@@ -45,6 +45,7 @@ public class MapView {
     this.colors = colors;
 
     this.previouslySeenTerritories = previouslySeenTerritories;
+
   }
 
   /**
@@ -267,6 +268,14 @@ public class MapView {
     }
   }
 
+  /**
+   * 
+   * Updates the display of territories on the map.
+   * 
+   * @param mapPane            The pane containing the map.
+   * @param allTerritories     Set of all territories.
+   * @param visibleTerritories Set of territories currently visible.
+   */
   protected void updateMap(Pane mapPane, Set<Territory> allTerritories, Set<Territory> visibleTerritories) {
     for (Territory currTerritory : allTerritories) {
       int ownerID = currTerritory.getOwnerId();
@@ -337,6 +346,13 @@ public class MapView {
     }
   }
 
+  /**
+   * 
+   * Constructs a string representation of spies based on the given number.
+   * 
+   * @param num The number of spies.
+   * @return The string representation of spies.
+   */
   private String constructSpiesView(int num) {
     String result = "";
     for (int i = 0; i < num; i++) {
@@ -345,6 +361,12 @@ public class MapView {
     return result;
   }
 
+  /**
+   * 
+   * Prints the names of territories in the given set.
+   * 
+   * @param territories The set of territories to print.
+   */
   private void printTerritories(Set<Territory> territories) {
     for (Territory t : territories) {
       System.out.print(t.getName() + " ");
@@ -352,6 +374,10 @@ public class MapView {
     System.out.println();
   }
 
+  /**
+   * 
+   * Refreshes the map display.
+   */
   public void refresh() {
     Pane mapPane = mainPageController.getMapPane();
     Set<Territory> allTerritories = gameMap.getTerritorySet();

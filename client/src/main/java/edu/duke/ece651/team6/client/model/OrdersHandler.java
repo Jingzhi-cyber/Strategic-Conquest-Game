@@ -7,10 +7,28 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.Controller;
-import edu.duke.ece651.team6.shared.*;
+import edu.duke.ece651.team6.shared.AttackOrder;
+import edu.duke.ece651.team6.shared.CloakTerritoryOrder;
+import edu.duke.ece651.team6.shared.Commit;
+import edu.duke.ece651.team6.shared.Constants;
+import edu.duke.ece651.team6.shared.DefenseInfrasOrder;
+import edu.duke.ece651.team6.shared.EliminateFogOrder;
+import edu.duke.ece651.team6.shared.GameMap;
+import edu.duke.ece651.team6.shared.GapGeneratorOrder;
+import edu.duke.ece651.team6.shared.GenerateSpyOrder;
+import edu.duke.ece651.team6.shared.MoveOrder;
+import edu.duke.ece651.team6.shared.MoveSpyOrder;
+import edu.duke.ece651.team6.shared.NuclearHitOrder;
+import edu.duke.ece651.team6.shared.Order;
+import edu.duke.ece651.team6.shared.ResearchOrder;
+import edu.duke.ece651.team6.shared.SanBingOrder;
+import edu.duke.ece651.team6.shared.SuperShieldOrder;
+import edu.duke.ece651.team6.shared.Territory;
+import edu.duke.ece651.team6.shared.UpgradeOrder;
 import javafx.scene.control.ChoiceDialog;
 
 public class OrdersHandler {
@@ -221,15 +239,22 @@ public class OrdersHandler {
 
   /* ---------------------- Cloak and Spy -------------------- */
 
+  /**
+   * 
+   * Handles a cloak order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws IOException          If an I/O error occurs.
+   * @throws InterruptedException If the operation is interrupted.
+   * @throws ExecutionException   If an error occurs during execution.
+   */
   public void handleCloakOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
     // Show a dialog to get the source territory from the user
     Territory territory = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, true), playerId,
-        "On which territory do you want to cloak?", "Choose a territory").get(); // true/false
-    // both okay if
-    // src is null
+        "On which territory do you want to cloak?", "Choose a territory").get();
     if (territory == null) {
-      // mainPageController.showError("Must specify a territory to units");
       return; // User cancelled the dialog
     }
 
@@ -244,6 +269,16 @@ public class OrdersHandler {
     }
   }
 
+  /**
+   * 
+   * Handles a generate spy order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws IOException          If an I/O error occurs.
+   * @throws InterruptedException If the operation is interrupted.
+   * @throws ExecutionException   If an error occurs during execution.
+   */
   public void handleGenerateSpyOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
     // Show a dialog to get the source territory from the user
@@ -252,7 +287,6 @@ public class OrdersHandler {
     // both okay if
     // src is null
     if (src == null) {
-      // mainPageController.showError("Must specify a territory to generate spies");
       return; // User cancelled the dialog
     }
 
@@ -260,7 +294,6 @@ public class OrdersHandler {
     Integer selectedNowLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL - 1, src, "Upgrade Order",
         "From which level do you want to generate spies?").get();
     if (selectedNowLevel == null) {
-      // mainPageController.showError("Must specify a level to generate spies");
       return; // User cancelled the dialog
     }
 
@@ -268,8 +301,6 @@ public class OrdersHandler {
     Integer numUnits = showNumberOfUnitsSelectionDialog(selectedNowLevel, src,
         "How many spies do you want to generate from them?").get();
     if (numUnits == null) {
-      // mainPageController.showError("Must specify the number of units to generate
-      // spies");
       return;
     }
 
@@ -284,6 +315,16 @@ public class OrdersHandler {
     }
   }
 
+  /**
+   * 
+   * Handles a move spy order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws IOException          If an I/O error occurs.
+   * @throws InterruptedException If the operation is interrupted.
+   * @throws ExecutionException   If an error occurs during execution.
+   */
   public void handleMoveSpyOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
     Territory src = showTerritorySelectionDialog(
@@ -299,7 +340,6 @@ public class OrdersHandler {
         playerId, "Move Spies Order", "Which territory do you want to move spies to?").get();
 
     if (dest == null) {
-      // mainPageController.showError("Must specify a territory to move spies to");
       return; // User cancelled the dialog
     }
 
@@ -314,7 +354,6 @@ public class OrdersHandler {
         "How many of them do you want to move?").get();
 
     if (numUnits == null) {
-      // mainPageController.showError("Must specify the number of spies to move");
       return; // User cancelled the dialog
     }
 
@@ -330,13 +369,21 @@ public class OrdersHandler {
     }
   }
 
+  /**
+   * 
+   * Handles a San Bing order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws ExecutionException   If an error occurs during execution.
+   * @throws InterruptedException If the operation is interrupted.
+   */
   public void handleSanBingOrder(Commit currentCommit, int playerId) throws ExecutionException, InterruptedException {
 
     Territory src = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, false), playerId,
         "San Bing", "Which territory do you want to attack units from").get();
 
     if (src == null) {
-      // mainPageController.showError("Must specify a territory to attack from");
       return; // User cancelled the dialog
     }
 
@@ -345,7 +392,6 @@ public class OrdersHandler {
         "Which territory do you want to attack units to").get();
 
     if (dest == null) {
-      // mainPageController.showError("Must specify a territory to attack units to");
       return; // User cancelled the dialog
     }
 
@@ -354,14 +400,12 @@ public class OrdersHandler {
     Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "San Bing",
         "Which level of units do you want to attack?").get();
     if (selectedLevel == null) {
-      // mainPageController.showError("Must specify a level to attack");
       return; // User cancelled the dialog
     }
     Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them are used as San Bing?")
         .get();
 
     if (numUnits == null) {
-      // mainPageController.showError("Must specify the number of units to attack");
       return; // User cancelled the dialog
     }
 
@@ -374,6 +418,15 @@ public class OrdersHandler {
     }
   }
 
+  /**
+   * 
+   * Handles a Super Shield order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws ExecutionException   If an error occurs during execution.
+   * @throws InterruptedException If the operation is interrupted.
+   */
   public void handleSuperShieldOrder(Commit currentCommit, int playerId)
       throws ExecutionException, InterruptedException {
     Territory src = showTerritorySelectionDialog(currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId),
@@ -387,6 +440,15 @@ public class OrdersHandler {
     currentCommit.addSuperShieldOrder(superShield);
   }
 
+  /**
+   * 
+   * Handles a Defense Infrastructure order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws ExecutionException   If an error occurs during execution.
+   * @throws InterruptedException If the operation is interrupted.
+   */
   public void handleDefenseInfrasOrder(Commit currentCommit, int playerId)
       throws ExecutionException, InterruptedException {
     // TODO: can only perform defense infrastructure on self-owned territories,
@@ -401,6 +463,15 @@ public class OrdersHandler {
     currentCommit.addDefenseInfrasOrder(defenseInfrasOrder);
   }
 
+  /**
+   * 
+   * Handles an Eliminate Fog order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws ExecutionException   If an error occurs during execution.
+   * @throws InterruptedException If the operation is interrupted.
+   */
   public void handleEliminateFogOrder(Commit currentCommit, int playerId)
       throws ExecutionException, InterruptedException {
     // TODO: can perform eliminate fog order on any territories, right?
@@ -414,6 +485,15 @@ public class OrdersHandler {
     currentCommit.addEliminateFogOrder(eliminateFogOrder);
   }
 
+  /**
+   * 
+   * Handles a Gap Generator order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws ExecutionException   If an error occurs during execution.
+   * @throws InterruptedException If the operation is interrupted.
+   */
   public void handleGapGeneratorOrder(Commit currentCommit, int playerId)
       throws ExecutionException, InterruptedException {
     // TODO: can perform gap generator order on self-owned territories, right?
@@ -427,19 +507,55 @@ public class OrdersHandler {
     currentCommit.addGapGeneratorOrder(gapGeneratorOrder);
   }
 
+  /**
+   * 
+   * Handles a Nuclear Hit order for a specific player and commit.
+   * 
+   * @param currentCommit The commit to which the order is applied.
+   * @param playerId      The ID of the player making the order.
+   * @throws ExecutionException   If an error occurs during execution.
+   * @throws InterruptedException If the operation is interrupted.
+   */
   public void handleNuclearHitOrder(Commit currentCommit, int playerId)
       throws ExecutionException, InterruptedException {
     // TODO: can perform Nuclear Hit order on enemy territories, right?
     Territory src = showTerritorySelectionDialog(
         currentCommit.getCurrentGameMap().getEnemyTerritorySetByPlayerId(playerId), playerId, "Nuclear Hit Order",
         "Which territory do you want to perform a Nuclear Hit Order?").get();
-
     if (src == null) {
       return; // User cancelled the dialog
     }
     NuclearHitOrder nuclearHitOrder = new NuclearHitOrder(src, playerId);
     currentCommit.addNuclearHitOrder(nuclearHitOrder);
   }
+
+  // public void handleNuclearHitOrder(Commit currentCommit, int playerId)
+  // throws ExecutionException, InterruptedException {
+  // Set<Territory> territories =
+  // currentCommit.getCurrentGameMap().getEnemyTerritorySetByPlayerId(playerId);
+  // NuclearHitOrder nuclearHitOrder = handleOrder(playerId, territories, "Nuclear
+  // Hit Order",
+  // "Which territory do you want to perform a Nuclear Hit Order?",
+  // NuclearHitOrder::new);
+  // if (nuclearHitOrder != null) {
+  // currentCommit.addNuclearHitOrder(nuclearHitOrder);
+  // }
+  // }
+
+  // public <T extends Order> T handleOrder(int playerId, Set<Territory>
+  // territories, String title, String content,
+  // BiFunction<Territory, Integer, T> orderConstructor) throws
+  // ExecutionException, InterruptedException {
+  // Territory src = showTerritorySelectionDialog(territories, playerId, title,
+  // content).get();
+
+  // if (src == null) {
+  // return null; // User cancelled the dialog
+  // }
+
+  // T order = orderConstructor.apply(src, playerId);
+  // return order;
+  // }
 
   /* --------------------------------------------------------------- */
 
@@ -464,7 +580,7 @@ public class OrdersHandler {
    * @return a CompletableFuture that completes with the selected territory or
    *         null if the user cancelled the dialog
    */
-  private CompletableFuture<Territory> showTerritorySelectionDialog(Set<Territory> territories, int playerId,
+  public CompletableFuture<Territory> showTerritorySelectionDialog(Set<Territory> territories, int playerId,
       String title, String content) {
     CompletableFuture<Territory> future = new CompletableFuture<>();
 
@@ -519,7 +635,7 @@ public class OrdersHandler {
    *         level or a null value if the user cancels or if the list of available
    *         levels is empty
    */
-  private CompletableFuture<Integer> showUnitLevelSelectionDialog(int inclusiveLowerLevel, int inclusiveUpperLevel,
+  public CompletableFuture<Integer> showUnitLevelSelectionDialog(int inclusiveLowerLevel, int inclusiveUpperLevel,
       Territory src, String title, String content) {
     CompletableFuture<Integer> future = new CompletableFuture<>();
 
@@ -565,7 +681,7 @@ public class OrdersHandler {
    * @return a CompletableFuture that completes with the selected number of units,
    *         or null if there are no units available to upgrade
    */
-  private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
+  public CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
       String title) {
 
     List<Integer> nums = new ArrayList<>();
@@ -602,7 +718,7 @@ public class OrdersHandler {
     // return future;
   }
 
-  private CompletableFuture<Integer> showNumberSelectionDialog(List<Integer> nums, String errorMessage, String title,
+  public CompletableFuture<Integer> showNumberSelectionDialog(List<Integer> nums, String errorMessage, String title,
       String content) {
     CompletableFuture<Integer> future = new CompletableFuture<>();
     if (nums.isEmpty()) {
@@ -643,7 +759,7 @@ public class OrdersHandler {
    * @param move true if the order is a move, false if it is an attack
    * @return a set of territories that can be selected for issuing the order
    */
-  private Set<Territory> getTerritories(Commit currentCommit, int playerId, Territory src, boolean move) {
+  public Set<Territory> getTerritories(Commit currentCommit, int playerId, Territory src, boolean move) {
     GameMap newestGameMap = currentCommit.getCurrentGameMap();
     if (src == null) {
       return newestGameMap.getTerritorySetByPlayerId(playerId).stream().filter(territory -> territory.getNumUnits() > 0)
@@ -654,6 +770,7 @@ public class OrdersHandler {
       if (move) {
         return newestGameMap.getHasPathSelfTerritories(src);
       } else {
+        // attack
         return newestGameMap.getEnemyNeighbors(src);
       }
     }
