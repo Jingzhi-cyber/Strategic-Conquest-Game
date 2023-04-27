@@ -243,7 +243,8 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
+              .get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
@@ -539,6 +540,8 @@ public class UIGame extends Game {
           this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
 
       mainPageController.setPlayTurnsButtonsDisabled(false);
+      this.mainPageController.prepareToDrawOneCard();
+
     });
 
     if (this.hasLost) {

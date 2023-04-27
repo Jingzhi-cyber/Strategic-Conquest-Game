@@ -20,6 +20,7 @@ import edu.duke.ece651.team6.client.UIGame;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import edu.duke.ece651.team6.shared.GameMap;
+import edu.duke.ece651.team6.shared.Card;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -30,9 +31,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.scene.input.MouseEvent;
 
 /**
  * 
@@ -77,11 +83,25 @@ public class MainPageController extends Controller implements Initializable {
   @FXML
   Text territoryInfoText3;
 
+  @FXML
+  ProgressBar cardDrawProgressBar;
+
+  @FXML
+  Button cardDrawButton;
+
+  @FXML
+  TextField cardNameTextField;
+
+  @FXML
+  TextField cardDescriptionTextField;
+
   private GameLounge gameLounge;
 
   private UIGame uiGame;
 
   private Scene mainPageScene;
+
+  private Card drawedCard;
 
   @FXML
   Button resetCommitButton;
@@ -341,6 +361,19 @@ public class MainPageController extends Controller implements Initializable {
   }
 
   /**
+   * set a tooltip to a button with the given text
+   * 
+   * @param button is the button to combined the tooptip with
+   * @param text   is the text shown in the tooptip
+   */
+  protected void setButtonToolTip(Button button, String text) {
+    Tooltip tooltip = new Tooltip(text);
+    Font font = Font.font("Arial", 18);
+    tooltip.setFont(font);
+    Tooltip.install(button, tooltip);
+  }
+
+  /**
    * 
    * Initializes the MainPageController GUI by setting up the order menu and
    * disabling play turns buttons if the game status is not ISSUE_ORDER. It also
@@ -363,11 +396,19 @@ public class MainPageController extends Controller implements Initializable {
 
     if (uiGame.getStatus() != GAME_STATUS.ISSUE_ORDER) {
       setPlayTurnsButtonsDisabled(true);
+      this.cardDrawButton.setDisable(true);
+
     }
 
     techResourcesLabel.setText("Tech resources: 0 (units)");
     foodResourcesLabel.setText("Food resources: 0 (units)");
     techLevelLabel.setText("Maximum tech level: 0");
+
+    String text = "Every round you have ONE chance to draw a card\n";
+    text += "There are 6 types of cards: \n";
+    text += "     San Bing,  Super Shield, Defense Infrastructure, Eiminate Fog, and Nuclear Hit\n";
+    text += "or you may have bad luck the get no card (　◜◡‾)";
+    setButtonToolTip(this.cardDrawButton, text);
   }
 
   /**
@@ -519,5 +560,94 @@ public class MainPageController extends Controller implements Initializable {
    */
   public void setUsername(String username) {
     this.usernameLabel.setText(username);
+  }
+
+  /**
+   * Set the value in the TextField of the card name to a string
+   * 
+   * @param cardName is the value to be set
+   */
+  public void setCardName(String cardName) {
+    this.cardNameTextField.setText(cardName);
+  }
+
+  /**
+   * Set the value in the TextField of the card description to a string
+   * 
+   * @param cardDiscription is the value to be set
+   */
+  public void setCardDescription(String cardDiscription) {
+    this.cardDescriptionTextField.setText(cardDiscription);
+  }
+
+  private void startProgressBar(ProgressBar progressBar, String cardName, String cardDescription) {
+
+    // Create a task to update the progress bar
+    Task<Void> task = new Task<Void>() {
+      @Override
+      protected Void call() throws Exception {
+        for (int i = 0; i <= 100; i++) {
+          updateProgress(i, 100);
+          Thread.sleep(10);
+        }
+        return null;
+      }
+    };
+
+    // Bind the progress bar to the task
+    progressBar.progressProperty().bind(task.progressProperty());
+
+    // When the task is complete, set the text fields and unbind the progress bar
+    task.setOnSucceeded(event -> {
+      this.cardNameTextField.setText(cardName);
+      this.cardDescriptionTextField.setText(cardDescription);
+      progressBar.progressProperty().unbind();
+    });
+
+    // Start the task
+    Thread thread = new Thread(task);
+    thread.setDaemon(true);
+    thread.start();
+  }
+
+  /**
+   * ActionListener for drawCardButton. When this button is clicked,
+   * Card.chouOneCard() will be called and set the current drawedCard to its
+   * return value. Then display the card info to textfileds and disable the
+   * button, since there is only one change to draw a card for one round.
+   * 
+   * @param event is the {@link MouseEvent}
+   */
+  @FXML
+  protected void clickDrawCardButton(MouseEvent event) {
+    Card drawedCard = Card.chouOneCard();
+    this.drawedCard = drawedCard;
+    String name = "test_name";
+    String description = "test_description";
+
+    startProgressBar(cardDrawProgressBar, name, description);
+
+    this.cardDrawButton.setDisable(true);
+  }
+
+  /**
+   * get the current drawedCard
+   * 
+   * @return the drawedCard
+   */
+  public Card getDrawedCard() {
+    return this.drawedCard;
+  }
+
+  /**
+   * This function is used to re-open the draw card button and clear the values in
+   * the name and description textfields.
+   * This funtion should be called at the very beginning of each round
+   */
+  public void prepareToDrawOneCard() {
+    this.cardDrawButton.setDisable(false);
+    this.cardNameTextField.clear();
+    this.cardDescriptionTextField.clear();
+    this.cardDrawProgressBar.setProgress(0.0);
   }
 }
