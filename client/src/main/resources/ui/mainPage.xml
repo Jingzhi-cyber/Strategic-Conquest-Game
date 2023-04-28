@@ -15,6 +15,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import java.lang.Double?>
@@ -195,7 +196,12 @@
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <TextField fx:id="cardDescriptionTextField" editable="false" layoutX="118.0" layoutY="315.0" prefHeight="106.0" prefWidth="234.0" />
+            <TextArea fx:id="cardDescriptionTextArea" editable="false" wrapText="true" layoutX="118.0" layoutY="296.0" prefHeight="122.0" prefWidth="234.0" />
+            <Button fx:id="cardUseButton" layoutX="23.0" layoutY="454.0" mnemonicParsing="false" onMouseClicked="#clickUseCardButton" text="Use card">
+               <font>
+                  <Font name="Arial" size="14.0" />
+               </font>
+            </Button>
          </children>
       </AnchorPane>
     </children>
