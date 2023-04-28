@@ -252,7 +252,8 @@ public class OrdersHandler {
   public void handleCloakOrder(Commit currentCommit, int playerId)
       throws IOException, InterruptedException, ExecutionException {
     // Show a dialog to get the source territory from the user
-    Territory territory = showTerritorySelectionDialog(getTerritories(currentCommit, playerId, null, true), playerId,
+    Territory territory = showTerritorySelectionDialog(
+        currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(playerId), playerId,
         "On which territory do you want to cloak?", "Choose a territory").get();
     if (territory == null) {
       return; // User cancelled the dialog
