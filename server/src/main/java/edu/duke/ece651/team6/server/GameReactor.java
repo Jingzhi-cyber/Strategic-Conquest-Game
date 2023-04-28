@@ -182,8 +182,12 @@ public class GameReactor {
         @Override
         public void run() {
             try {
-                mongoHero.storeObject(riscMaster, gameUUID);
                 riscMaster.init();
+                if (riscMaster.status.equals("ENTER")) {
+                    riscMaster.assignTerritory();
+                    riscMaster.status = "INIT";
+                    mongoHero.storeObject(riscMaster, gameUUID);
+                }
                 if (riscMaster.status.equals("INIT")) {
                     riscMaster.setUpGameBasicSettings();
                     riscMaster.status = "BEGIN";
