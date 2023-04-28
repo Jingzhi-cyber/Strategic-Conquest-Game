@@ -120,7 +120,7 @@ public class MinCostPathCalculator {
             if (visited.contains(neighbor)) {
                 continue;
             }
-            btFunc(neighbor, dest, cost + distToNeighbors.get(neighbor), currPath);
+            ultimateBtFunc(neighbor, dest, cost + distToNeighbors.get(neighbor), currPath);
         }
         visited.remove(src);
         currPath.removeLast();

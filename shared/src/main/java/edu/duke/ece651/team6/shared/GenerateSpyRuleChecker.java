@@ -17,6 +17,9 @@ public class GenerateSpyRuleChecker extends OrderRuleChecker {
         int nowLevel = generateSpy.getNowLevel();
         int num = generateSpy.getNum();
         int currNum = t.getUnitsNumByLevel(nowLevel);
+        if (nowLevel == 0) {
+            return "Invalid generate spy order: must generate spy from at least level 1";
+        }
         if (num > currNum) {
             return "Invalid generate spy order: the territory only has " + currNum + "units at level " + nowLevel + "but requires " + num + "units";
         }
