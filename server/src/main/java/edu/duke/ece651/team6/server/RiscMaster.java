@@ -26,6 +26,7 @@ public class RiscMaster implements Master, Serializable {
   private final List<PlayerProfile> playerProfiles;
   private final Set<Integer> losers;
   public String status;
+  private Map<Integer, Set<Territory>> assignedTerritoryMap;
 
   /**
    * Construct a RiscMaster by passing a server - Mainly for testing
@@ -48,7 +49,7 @@ public class RiscMaster implements Master, Serializable {
     this.disconnectedList = new HashSet<>();
     this.playerProfiles = new ArrayList<>();
     this.losers = new HashSet<>();
-    this.status = "INIT";
+    this.status = "ENTER";
   }
 
   /**
@@ -87,19 +88,14 @@ public class RiscMaster implements Master, Serializable {
     System.out.println("RiscMaster.server initialize player connection finished!");
   }
 
-  /**
-   * Set up the GameMap before starting the game
-   * - Send assigned Territories to each player
-   * - Receive players' placement of units to their territories
-   */
-  public void setUpGameBasicSettings() {
+  public void assignTerritory() {
     /**
      * Randomly assign same amount of Territories to players
      * Send GameBasicSetting including territories and total units available for
      * placement to players
      */
     LinkedList<Set<Territory>> assignedTerritoryList = new LinkedList<>(generateRandomTerritoryAssignment());
-    Map<Integer, Set<Territory>> assignedTerritoryMap = new HashMap<>();
+    assignedTerritoryMap = new HashMap<>();
     for (int playerId = 0; playerId < playerNum; playerId++) {
       Set<Territory> assignedTerritories = assignedTerritoryList.poll();
       assignedTerritoryMap.put(playerId, assignedTerritories);
@@ -107,6 +103,17 @@ public class RiscMaster implements Master, Serializable {
         t.setOwnerId(playerId);
       }
     }
+  }
+
+  /**
+   * Set up the GameMap before starting the game
+   * - Send assigned Territories to each player
+   * - Receive players' placement of units to their territories
+   */
+  public void setUpGameBasicSettings() {
+    /**
+     * Send GameBasicSetting including territories and total units available for
+     * placement to players */
     for (int playerId = 0; playerId < playerNum; playerId++) {
       Set<Territory> assignedTerritories = assignedTerritoryMap.get(playerId);
       GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, this.gameMap, assignedTerritories,
@@ -114,7 +121,6 @@ public class RiscMaster implements Master, Serializable {
       safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
     }
     gameMap.initMaxTechLevel();
-
     /**
      * Receive unit placement from player
      * Check if that placement is valid (already checked in client side)

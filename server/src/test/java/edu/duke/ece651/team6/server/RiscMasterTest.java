@@ -51,10 +51,16 @@ public class RiscMasterTest {
         gameBasicSetting.initializeUnitPlacement(map);
         when(this.server.recvObject(any(SocketKey.class))).thenReturn(gameBasicSetting);
         riscMaster.init();
-        assertDoesNotThrow(()->riscMaster.setUpGameBasicSettings());
+        assertDoesNotThrow(()-> {
+            riscMaster.assignTerritory();
+            riscMaster.setUpGameBasicSettings();
+        });
         when(this.server.recvObject(any(SocketKey.class))).thenReturn(null);
         riscMaster.init();
-        assertDoesNotThrow(()->riscMaster.setUpGameBasicSettings());
+        assertDoesNotThrow(()-> {
+            riscMaster.assignTerritory();
+            riscMaster.setUpGameBasicSettings();
+        });
     }
 
     @Test
