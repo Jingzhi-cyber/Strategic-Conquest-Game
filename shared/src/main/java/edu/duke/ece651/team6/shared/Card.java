@@ -55,6 +55,6 @@ public class Card {
         return new Card(cards[i], i, texts[i]);
       }
     }
-    return new Card("No card here!", -1, "You bad luck! HHHHH!\nPool you. Better luck next time.");
+    return new Card("No card here!", -1, "You bad luck! HHHHH!\nPoor you. Better luck next time.");
   }
 }
