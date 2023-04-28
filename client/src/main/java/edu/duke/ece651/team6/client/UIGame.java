@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.duke.ece651.team6.client.controller.MainPageController;
 import edu.duke.ece651.team6.client.model.GameLounge;
@@ -27,7 +26,6 @@ import edu.duke.ece651.team6.shared.PolygonGetter;
 import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.Territory;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -588,6 +586,12 @@ public class UIGame extends Game {
     prepWorkBeforeNewOrder();
 
     this.ordersHandler.handleUpgradeOrder(currentCommit, playerId);
+  }
+
+    public void constructResearchCloakTerritoryOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleResearchCloakOrder(currentCommit, playerId);
   }
 
   public void constructCloakTerritoryOrder() throws IOException, InterruptedException, ExecutionException {

@@ -234,6 +234,9 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
+      case "Research Cloak":
+        uiGame.constructResearchCloakTerritoryOrder();
+        break;
       case "Cloak":
         uiGame.constructCloakTerritoryOrder();
         break;
@@ -400,8 +403,8 @@ public class MainPageController extends Controller implements Initializable {
 
     // this.mainPageScene = resetCommitButton.getScene();
 
-    ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade", "Cloak",
-        "Generate Spies", "Move Spies",
+    ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade",
+        "Research Cloak", "Cloak", "Generate Spies", "Move Spies",
         // TODO remove
         "Paratroopers", "Super Shield", "Defense Infrastructure", "Eiminate Fog", "Gap Generator", "Nuclear Hit");
     orderMenu.setItems(items);

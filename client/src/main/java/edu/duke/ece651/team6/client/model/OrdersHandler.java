@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.Controller;
 import edu.duke.ece651.team6.shared.AttackOrder;
+import edu.duke.ece651.team6.shared.CloakResearchOrder;
 import edu.duke.ece651.team6.shared.CloakTerritoryOrder;
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.Constants;
@@ -238,6 +239,19 @@ public class OrdersHandler {
   }
 
   /* ---------------------- Cloak and Spy -------------------- */
+
+  public void handleResearchCloakOrder(Commit currentCommit, int playerId)
+      throws IOException, InterruptedException, ExecutionException {
+    // Create and execute the upgrade order
+    CloakResearchOrder cloakResearch = new CloakResearchOrder(playerId);
+
+    try {
+      currentCommit.addCloackResearchOrder(cloakResearch);
+    } catch (IllegalArgumentException e) {
+      mainPageController.showError(e.getMessage());
+      return;
+    }
+  }
 
   /**
    * 
