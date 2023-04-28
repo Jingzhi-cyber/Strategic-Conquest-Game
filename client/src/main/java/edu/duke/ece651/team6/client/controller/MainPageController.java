@@ -32,6 +32,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.AnchorPane;
@@ -93,7 +94,10 @@ public class MainPageController extends Controller implements Initializable {
   TextField cardNameTextField;
 
   @FXML
-  TextField cardDescriptionTextField;
+  TextArea cardDescriptionTextArea;
+
+  @FXML
+  Button cardUseButton;
 
   private GameLounge gameLounge;
 
@@ -358,6 +362,12 @@ public class MainPageController extends Controller implements Initializable {
     this.placeOrderButton.setDisable(disable);
     this.submitOrdersButton.setDisable(disable);
     this.orderMenu.setDisable(disable);
+    if (disable) {
+      this.cardDrawButton.setDisable(true);
+      this.cardUseButton.setDisable(true);
+    } else {
+      prepareToDrawOneCard();
+    }
   }
 
   /**
@@ -577,7 +587,7 @@ public class MainPageController extends Controller implements Initializable {
    * @param cardDiscription is the value to be set
    */
   public void setCardDescription(String cardDiscription) {
-    this.cardDescriptionTextField.setText(cardDiscription);
+    this.cardDescriptionTextArea.setText(cardDiscription);
   }
 
   private void startProgressBar(ProgressBar progressBar, String cardName, String cardDescription) {
@@ -600,7 +610,10 @@ public class MainPageController extends Controller implements Initializable {
     // When the task is complete, set the text fields and unbind the progress bar
     task.setOnSucceeded(event -> {
       this.cardNameTextField.setText(cardName);
-      this.cardDescriptionTextField.setText(cardDescription);
+      this.cardDescriptionTextArea.setText(cardDescription);
+      if (!cardName.equals("No card here!")) {
+        this.cardUseButton.setDisable(false);
+      }
       progressBar.progressProperty().unbind();
     });
 
@@ -622,8 +635,8 @@ public class MainPageController extends Controller implements Initializable {
   protected void clickDrawCardButton(MouseEvent event) {
     Card drawedCard = Card.chouOneCard();
     this.drawedCard = drawedCard;
-    String name = "test_name";
-    String description = "test_description";
+    String name = drawedCard.getName();
+    String description = drawedCard.getDescription();
 
     startProgressBar(cardDrawProgressBar, name, description);
 
@@ -647,7 +660,61 @@ public class MainPageController extends Controller implements Initializable {
   public void prepareToDrawOneCard() {
     this.cardDrawButton.setDisable(false);
     this.cardNameTextField.clear();
-    this.cardDescriptionTextField.clear();
+    this.cardDescriptionTextArea.clear();
     this.cardDrawProgressBar.setProgress(0.0);
+    this.cardUseButton.setDisable(true);
   }
+
+  @FXML
+  protected void clickUseCardButton(MouseEvent event) throws IOException, InterruptedException, ExecutionException {
+    String cardName = this.drawedCard.getName();
+    switch (cardName) {
+      case "SanBing":
+        try {
+          uiGame.constructSanBingOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Free from attack":
+        try {
+          uiGame.constructSuperShieldOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Defense infrastructure":
+        try {
+          uiGame.constructDefenseInfrasOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Eliminate fog":
+        try {
+          uiGame.constructEiminateFogOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Gap generator":
+        try {
+          uiGame.constructGapGeneratorOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Nuclear Hit":
+        try {
+          uiGame.constructNuclearHitOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      default:
+        // Handle null / unexpected input - impossible
+    }
+    this.cardUseButton.setDisable(true);
+  }
+
 }

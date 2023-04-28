@@ -540,7 +540,6 @@ public class UIGame extends Game {
           this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
 
       mainPageController.setPlayTurnsButtonsDisabled(false);
-      this.mainPageController.prepareToDrawOneCard();
 
     });
 
