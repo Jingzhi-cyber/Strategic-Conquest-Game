@@ -389,7 +389,11 @@ public class Commit implements java.io.Serializable {
     }
 
     for (AttackOrder o : attacks) {
-      builder.append(o.toString() + " (Cost: " + CostCalculator.calculateAttackCost(o, gameMap) + ")" + "\n");
+      int cost = CostCalculator.calculateAttackCost(o, gameMap);
+      if (o.dest.getDefenseInfras()) {
+        cost += 100;
+      }
+      builder.append(o.toString() + " (Cost: " + cost + ")" + "\n");
     }
 
     if (research != null) {
