@@ -247,6 +247,7 @@ public class OrdersHandler {
 
     try {
       currentCommit.addCloackResearchOrder(cloakResearch);
+      mainPageController.showSuccess("Successfully placed a cloak research order");
     } catch (IllegalArgumentException e) {
       mainPageController.showError(e.getMessage());
       return;
