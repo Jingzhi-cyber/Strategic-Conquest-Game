@@ -251,7 +251,9 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
-      case "San Bing":
+
+      // TODO: remove
+      case "Paratroopers":
         try {
           uiGame.constructSanBingOrder();
         } catch (InterruptedException | ExecutionException e) {
@@ -399,8 +401,9 @@ public class MainPageController extends Controller implements Initializable {
     // this.mainPageScene = resetCommitButton.getScene();
 
     ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade", "Cloak",
-        "Generate Spies", "Move Spies", "San Bing", "Super Shield", "Defense Infrastructure", "Eiminate Fog",
-        "Gap Generator", "Nuclear Hit");
+        "Generate Spies", "Move Spies",
+        // TODO remove
+        "Paratroopers", "Super Shield", "Defense Infrastructure", "Eiminate Fog", "Gap Generator", "Nuclear Hit");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
 
@@ -654,8 +657,8 @@ public class MainPageController extends Controller implements Initializable {
 
   /**
    * This function is used to re-open the draw card button and clear the values in
-   * the name and description textfields.
-   * This funtion should be called at the very beginning of each round
+   * the name and description textfields. This funtion should be called at the
+   * very beginning of each round
    */
   public void prepareToDrawOneCard() {
     this.cardDrawButton.setDisable(false);
@@ -669,42 +672,42 @@ public class MainPageController extends Controller implements Initializable {
   protected void clickUseCardButton(MouseEvent event) throws IOException, InterruptedException, ExecutionException {
     String cardName = this.drawedCard.getName();
     switch (cardName) {
-      case "SanBing":
+      case "Paratroopers":
         try {
           uiGame.constructSanBingOrder();
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
         break;
-      case "Free from attack":
+      case "Super Shield":
         try {
           uiGame.constructSuperShieldOrder();
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
         break;
-      case "Defense infrastructure":
+      case "Defense Infrastructure":
         try {
           uiGame.constructDefenseInfrasOrder();
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
         break;
-      case "Eliminate fog":
+      case "Eliminate Fog":
         try {
           uiGame.constructEiminateFogOrder();
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
         break;
-      case "Gap generator":
+      case "Gap Generator":
         try {
           uiGame.constructGapGeneratorOrder();
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
         break;
-      case "Nuclear Hit":
+      case "Nuclear Weapon":
         try {
           uiGame.constructNuclearHitOrder();
         } catch (InterruptedException | ExecutionException e) {

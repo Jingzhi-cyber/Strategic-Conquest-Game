@@ -7,23 +7,10 @@ public class Card {
   private final int code;
   private final String description;
 
-  private final static String[] cards = {
-      "SanBing",
-      "Nuclear weapon",
-      "Defense infrastructure",
-      "Free from attack",
-      "Eliminate fog",
-      "Gap generator"
-  };
+  private final static String[] cards = { "Paratroopers", "Nuclear Weapon", "Defense Infrastructure", "Super Shield",
+      "Eliminate Fog", "Gap Generator" };
 
-  private final static double[] probability = {
-      0.2,
-      0.01,
-      0.1,
-      0.2,
-      0.1,
-      0.1
-  };
+  private final static double[] probability = { 0.2, 0.01, 0.1, 0.2, 0.1, 0.1 };
 
   private final static String[] texts = {
       "You can launch a team of paratroopers at a \"remote\" territory, limited by the costs associated with the attack.",
@@ -31,8 +18,7 @@ public class Card {
       "You can modify the attack/defense costs associated with a territory.",
       "You can enhance the defense capabilities of a specific territory, so that no enemy can occupy this territory for one turn",
       "You can remove the fog of war from a chosen territory for a single turn.",
-      "You can make a territory hidden from seeing by enemies even when an enemy has a spy on it"
-  };
+      "You can make a territory hidden from seeing by enemies even when an enemy has a spy on it" };
 
   private static double[] cumulativeProbability = null;
 

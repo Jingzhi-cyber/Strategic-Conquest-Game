@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class CardTest {
   @Test
   void basicTest() {
-    Card card = new Card("SanBing", 0, "cool");
-    assertEquals("SanBing", card.getName());
+    Card card = new Card("Paratroopers", 0, "cool");
+    assertEquals("Paratroopers", card.getName());
     assertEquals(0, card.getCode());
     assertEquals("cool", card.getDescription());
     for (int i = 0; i < 1000; i++) {
