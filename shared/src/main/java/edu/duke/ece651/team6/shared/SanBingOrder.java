@@ -18,7 +18,7 @@ public class SanBingOrder extends SimpleMove {
         Territory from = gameMap.getTerritoryByName(src.getName());
         Territory to = gameMap.getTerritoryByName(dest.getName());
         from.attack(to, numUnitsByLevel);
-        int cost = CostCalculator.calculateMoveCost(this, gameMap);
+        int cost = 1;
         gameMap.consumeResource(from.getOwnerId(), Constants.RESOURCE_FOOD, cost);
     }
 }

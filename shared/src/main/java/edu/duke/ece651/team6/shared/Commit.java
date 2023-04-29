@@ -419,7 +419,7 @@ public class Commit implements java.io.Serializable {
     }
 
     if (this.sanBings != null) {
-      builder.append(sanBings.toString() + " (Cost: " + CostCalculator.calculateUltimateMoveCost((SimpleMove)sanBings, gameMap) + ")\n");
+      builder.append(sanBings.toString() + " (Cost: " + 1 + ")\n");
     }
 
     if (this.superShield != null) {

@@ -12,7 +12,7 @@ public class SanBingCostRuleChecker extends OrderRuleChecker {
 
     @Override
     protected String checkMyRule(Order move, GameMap theMap) {
-        int cost = CostCalculator.calculateUltimateMoveCost((SimpleMove) move, theMap);
+        int cost = 1;
         int currFood = resource.getOrDefault(Constants.RESOURCE_FOOD, 0);
         if (cost > currFood) {
             return "Invalid move: the expected cost of San Bing is: " + cost + " but you have " + currFood + " food left";
