@@ -249,7 +249,6 @@ public class UIGame extends Game {
               mainPageController.showError("Must specify unit number to place on " + currentTerritory.getName());
             });
           }
-
         }
         try {
           setting.decreaseUnitsBy(numUnits);

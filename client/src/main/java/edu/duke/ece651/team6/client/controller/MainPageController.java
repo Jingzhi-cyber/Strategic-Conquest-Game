@@ -291,7 +291,7 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
-      case "Nuclear Hit":
+      case "Nuclear Weapon":
         try {
           uiGame.constructNuclearHitOrder();
         } catch (InterruptedException | ExecutionException e) {
@@ -406,7 +406,7 @@ public class MainPageController extends Controller implements Initializable {
     ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade",
         "Research Cloak", "Cloak", "Generate Spies", "Move Spies",
         // TODO remove
-        "Paratroopers", "Super Shield", "Defense Infrastructure", "Eiminate Fog", "Gap Generator", "Nuclear Hit");
+        "Paratroopers", "Super Shield", "Defense Infrastructure", "Eiminate Fog", "Gap Generator", "Nuclear Weapon");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
 
@@ -422,7 +422,7 @@ public class MainPageController extends Controller implements Initializable {
 
     String text = "Every round you have ONE chance to draw a card\n";
     text += "There are 6 types of cards: \n";
-    text += "     San Bing,  Super Shield, Defense Infrastructure, Eiminate Fog, and Nuclear Hit\n";
+    text += "  Paratroopers, Super Shield, Defense Infrastructure, Eiminate Fog, and Nuclear Weapon\n";
     text += "or you may have bad luck the get no card (　◜◡‾)";
     setButtonToolTip(this.cardDrawButton, text);
   }
