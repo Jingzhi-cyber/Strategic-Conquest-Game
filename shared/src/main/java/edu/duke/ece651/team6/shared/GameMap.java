@@ -120,9 +120,8 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   public Set<Territory> getEnemyTerritorySetByPlayerId(int playerId) {
-    return weightedAdjList.keySet().stream()
-            .filter(territory -> territory.getOwnerId() != playerId)
-            .collect(Collectors.toSet());
+    return weightedAdjList.keySet().stream().filter(territory -> territory.getOwnerId() != playerId)
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -142,50 +141,6 @@ public class GameMap implements java.io.Serializable, Cloneable {
    */
   public Map<Territory, Integer> getNeighborDist(Territory territory) {
     return weightedAdjList.get(territory);
-  }
-  
-  /**
-   * 
-   * Finds all enemy territories that are directly connected to the given source
-   * territory. The result is a set of all enemy territories that are directly
-   * connected to the source territory.
-   *
-   * @param src the source territory for which to find connected enemy territories
-   * @return a set of all enemy territories that are directly connected to the
-   *         source territory
-   */
-  public Set<Territory> getEnemyNeighbors(Territory src) {
-    Set<Territory> enemyNeighs = new HashSet<>();
-    Set<Territory> allNeighs = getNeighborDist(src).keySet();
-    for (Territory neigh : allNeighs) {
-      if (neigh.getOwnerId() != src.getOwnerId()) {
-        enemyNeighs.add(neigh);
-      }
-    }
-    return enemyNeighs;
-  }
-
-  /**
-   * 
-   * Returns a set of self-owned territories that are reachable from the given
-   * source territory via a path owned by the same player. This method uses the
-   * hasSamePlayerPath() method to check if a path between the source and each
-   * potential territory exists and is owned by the same player as the source. If
-   * a reachable territory is found, it is added to the result set.
-   *
-   * @param src the source territory
-   * @return a set of self-owned territories reachable from the source territory
-   */
-  public Set<Territory> getHasPathSelfTerritories(Territory src) {
-    Set<Territory> hasPathSelfTerritories = new HashSet<>();
-    Set<Territory> selfTerritories = getTerritorySetByPlayerId(src.getOwnerId());
-    for (Territory self : selfTerritories) {
-      if (hasSamePlayerPath(src, self)) {
-        hasPathSelfTerritories.add(self);
-      }
-    }
-    return hasPathSelfTerritories;
-
   }
 
   /**
@@ -347,7 +302,8 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   /**
-   * Calculate the minimum cost of the path between src and dest that does not care about the territories' owner
+   * Calculate the minimum cost of the path between src and dest that does not
+   * care about the territories' owner
    * 
    * @param src
    * @param dest
@@ -417,11 +373,11 @@ public class GameMap implements java.io.Serializable, Cloneable {
     /**
      * the visible rules:
      * 
-     * 1. Territories are visible if owned by that player 
-     * 2. Territories are visible if it is a neighbor of territory that owned by that player 
-     * 3. Territories are visible if it has at least 1 spy owned by that player on it 
-     * 4. Territories that are cloaked by the owner without spies is invisible 
-     * 5. Other territories should be invisible.
+     * 1. Territories are visible if owned by that player 2. Territories are visible
+     * if it is a neighbor of territory that owned by that player 3. Territories are
+     * visible if it has at least 1 spy owned by that player on it 4. Territories
+     * that are cloaked by the owner without spies is invisible 5. Other territories
+     * should be invisible.
      */
     Set<Territory> ownTerritories = getTerritorySetByPlayerId(playerId);
     for (Territory t : ownTerritories) {
@@ -463,7 +419,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
       }
     }
     return spyingTerritories;
-  } 
+  }
 
   public boolean enableCloakForPlayerId(int playerId) {
     if (this.enableCloak.containsKey(playerId)) {
