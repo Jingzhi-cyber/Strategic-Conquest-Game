@@ -189,6 +189,50 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   /**
+   * 
+   * Finds all enemy territories that are directly connected to the given source
+   * territory. The result is a set of all enemy territories that are directly
+   * connected to the source territory.
+   *
+   * @param src the source territory for which to find connected enemy territories
+   * @return a set of all enemy territories that are directly connected to the
+   *         source territory
+   */
+  public Set<Territory> getEnemyNeighbors(Territory src) {
+    Set<Territory> enemyNeighs = new HashSet<>();
+    Set<Territory> allNeighs = getNeighborDist(src).keySet();
+    for (Territory neigh : allNeighs) {
+      if (neigh.getOwnerId() != src.getOwnerId()) {
+        enemyNeighs.add(neigh);
+      }
+    }
+    return enemyNeighs;
+  }
+
+  /**
+   * 
+   * Returns a set of self-owned territories that are reachable from the given
+   * source territory via a path owned by the same player. This method uses the
+   * hasSamePlayerPath() method to check if a path between the source and each
+   * potential territory exists and is owned by the same player as the source. If
+   * a reachable territory is found, it is added to the result set.
+   *
+   * @param src the source territory
+   * @return a set of self-owned territories reachable from the source territory
+   */
+  public Set<Territory> getHasPathSelfTerritories(Territory src) {
+    Set<Territory> hasPathSelfTerritories = new HashSet<>();
+    Set<Territory> selfTerritories = getTerritorySetByPlayerId(src.getOwnerId());
+    for (Territory self : selfTerritories) {
+      if (hasSamePlayerPath(src, self)) {
+        hasPathSelfTerritories.add(self);
+      }
+    }
+    return hasPathSelfTerritories;
+
+  }
+
+  /**
    * Initialize maximum technology level for all players (start for 1)
    */
   public void initMaxTechLevel() {
