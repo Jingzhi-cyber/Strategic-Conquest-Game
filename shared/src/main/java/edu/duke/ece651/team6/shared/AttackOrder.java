@@ -17,6 +17,9 @@ public class AttackOrder extends SimpleMove {
     Territory to = gameMap.getTerritoryByName(dest.getName());
     from.attack(to, numUnitsByLevel);
     int cost = CostCalculator.calculateAttackCost(this, gameMap);
+    if (to.getDefenseInfras()) {
+      cost += 100;
+    }
     gameMap.consumeResource(from.getOwnerId(), Constants.RESOURCE_FOOD, cost);
   }
 }

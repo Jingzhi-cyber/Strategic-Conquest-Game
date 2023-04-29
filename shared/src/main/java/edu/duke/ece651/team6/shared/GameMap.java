@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Queue;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class GameMap implements java.io.Serializable, Cloneable {
   /**
@@ -19,6 +20,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
   private int territoryNum;
   private Map<Integer, Map<String, Integer>> resources;
   private Map<Integer, Integer> maxTechLevel;
+  private Map<Integer, Boolean> enableCloak;
 
   /**
    * Construct a GameMap by injecting a adjacent list
@@ -34,6 +36,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     this.territoryNum = this.weightedAdjList.size();
     this.resources = new HashMap<>();
     this.maxTechLevel = new HashMap<>();
+    this.enableCloak = new HashMap<>();
   }
 
   public GameMap(Map<Territory, Map<Territory, Double>> distMap, boolean useDist) {
@@ -53,6 +56,7 @@ public class GameMap implements java.io.Serializable, Cloneable {
     this.territoryNum = this.weightedAdjList.size();
     this.resources = new HashMap<>();
     this.maxTechLevel = new HashMap<>();
+    this.enableCloak = new HashMap<>();
   }
 
   @Override
@@ -78,6 +82,10 @@ public class GameMap implements java.io.Serializable, Cloneable {
       }
     }
     gameMap.maxTechLevel.putAll(this.maxTechLevel);
+    gameMap.enableCloak = new HashMap<Integer, Boolean>();
+    for (int playerId : this.enableCloak.keySet()) {
+      gameMap.enableCloak.put(playerId, this.enableCloak.get(playerId));
+    }
     return gameMap;
   }
 
@@ -111,6 +119,12 @@ public class GameMap implements java.io.Serializable, Cloneable {
     return playerTerritories;
   }
 
+  public Set<Territory> getEnemyTerritorySetByPlayerId(int playerId) {
+    return weightedAdjList.keySet().stream()
+            .filter(territory -> territory.getOwnerId() != playerId)
+            .collect(Collectors.toSet());
+  }
+
   /**
    * Get number of territories in the map
    * 
@@ -128,6 +142,50 @@ public class GameMap implements java.io.Serializable, Cloneable {
    */
   public Map<Territory, Integer> getNeighborDist(Territory territory) {
     return weightedAdjList.get(territory);
+  }
+  
+  /**
+   * 
+   * Finds all enemy territories that are directly connected to the given source
+   * territory. The result is a set of all enemy territories that are directly
+   * connected to the source territory.
+   *
+   * @param src the source territory for which to find connected enemy territories
+   * @return a set of all enemy territories that are directly connected to the
+   *         source territory
+   */
+  public Set<Territory> getEnemyNeighbors(Territory src) {
+    Set<Territory> enemyNeighs = new HashSet<>();
+    Set<Territory> allNeighs = getNeighborDist(src).keySet();
+    for (Territory neigh : allNeighs) {
+      if (neigh.getOwnerId() != src.getOwnerId()) {
+        enemyNeighs.add(neigh);
+      }
+    }
+    return enemyNeighs;
+  }
+
+  /**
+   * 
+   * Returns a set of self-owned territories that are reachable from the given
+   * source territory via a path owned by the same player. This method uses the
+   * hasSamePlayerPath() method to check if a path between the source and each
+   * potential territory exists and is owned by the same player as the source. If
+   * a reachable territory is found, it is added to the result set.
+   *
+   * @param src the source territory
+   * @return a set of self-owned territories reachable from the source territory
+   */
+  public Set<Territory> getHasPathSelfTerritories(Territory src) {
+    Set<Territory> hasPathSelfTerritories = new HashSet<>();
+    Set<Territory> selfTerritories = getTerritorySetByPlayerId(src.getOwnerId());
+    for (Territory self : selfTerritories) {
+      if (hasSamePlayerPath(src, self)) {
+        hasPathSelfTerritories.add(self);
+      }
+    }
+    return hasPathSelfTerritories;
+
   }
 
   /**
@@ -289,6 +347,18 @@ public class GameMap implements java.io.Serializable, Cloneable {
   }
 
   /**
+   * Calculate the minimum cost of the path between src and dest that does not care about the territories' owner
+   * 
+   * @param src
+   * @param dest
+   * @return minimum cost
+   */
+  public int findUltimatePathWithLowestCost(Territory src, Territory dest) {
+    MinCostPathCalculator minCostPathCalculator = new MinCostPathCalculator(weightedAdjList);
+    return minCostPathCalculator.calculateUltimateMinCostPath(src, dest);
+  }
+
+  /**
    * Update players' resource
    * 
    * @param newResources
@@ -305,6 +375,8 @@ public class GameMap implements java.io.Serializable, Cloneable {
           resource.get(Constants.RESOURCE_FOOD) + newResource.get(Constants.RESOURCE_FOOD));
       resource.put(Constants.RESOURCE_TECH,
           resource.get(Constants.RESOURCE_TECH) + newResource.get(Constants.RESOURCE_TECH));
+      resource.put(Constants.RESOURCE_CIVIL,
+          resource.get(Constants.RESOURCE_CIVIL) + newResource.get(Constants.RESOURCE_CIVIL));
     }
   }
 
@@ -330,6 +402,78 @@ public class GameMap implements java.io.Serializable, Cloneable {
     Map<String, Integer> defaultVal = new HashMap<>();
     defaultVal.put(Constants.RESOURCE_FOOD, 0);
     defaultVal.put(Constants.RESOURCE_TECH, 0);
+    defaultVal.put(Constants.RESOURCE_CIVIL, 0);
     return this.resources.getOrDefault(playerId, defaultVal);
+  }
+
+  /**
+   * Get the visible set of territories to a player
+   * 
+   * @param playerId
+   * @return visible set of territories
+   */
+  public Set<Territory> getVisibleTerritoriesByPlayerId(int playerId) {
+    Set<Territory> visibleTerritories = new HashSet<Territory>();
+    /**
+     * the visible rules:
+     * 
+     * 1. Territories are visible if owned by that player 
+     * 2. Territories are visible if it is a neighbor of territory that owned by that player 
+     * 3. Territories are visible if it has at least 1 spy owned by that player on it 
+     * 4. Territories that are cloaked by the owner without spies is invisible 
+     * 5. Other territories should be invisible.
+     */
+    Set<Territory> ownTerritories = getTerritorySetByPlayerId(playerId);
+    for (Territory t : ownTerritories) {
+      visibleTerritories.add(t);
+      for (Territory neighbor : getNeighborDist(t).keySet()) {
+        if (neighbor.getCloakedTurn() == 0 && !neighbor.getGapGenerated()) {
+          visibleTerritories.add(neighbor);
+        }
+      }
+    }
+    for (Territory t : getSpyingTerritoriesOfAPlayer(playerId)) {
+      if (!t.getGapGenerated()) {
+        visibleTerritories.add(t);
+      }
+    }
+    for (Territory t : getTerritorySet()) {
+      if (t.getVisiblePlayer().contains(playerId) && !t.getGapGenerated()) {
+        visibleTerritories.add(t);
+      }
+    }
+    System.out.println("GameMap getVisibleTerritoryByPlayerId: " + visibleTerritories.toString());
+    return visibleTerritories;
+  }
+
+  /**
+   * Get a set of territories that a player has spies on, including self-owned
+   * territories as long as their spies are on them
+   * 
+   * @param playerId the player who requests a set of their spying territories
+   */
+  public Set<Territory> getSpyingTerritoriesOfAPlayer(int playerId) {
+    // return a set of territories that the player (with playerId) has spies on (1,
+    // 2, .. )
+    // no need to filter out self-owned territories
+    Set<Territory> spyingTerritories = new HashSet<>();
+    for (Territory t : getTerritorySet()) {
+      if (t.getSpyNumByPlayerId(playerId, true) + t.getSpyNumByPlayerId(playerId, false) > 0) {
+        spyingTerritories.add(t);
+      }
+    }
+    return spyingTerritories;
+  } 
+
+  public boolean enableCloakForPlayerId(int playerId) {
+    if (this.enableCloak.containsKey(playerId)) {
+      return false;
+    }
+    this.enableCloak.put(playerId, true);
+    return true;
+  }
+
+  public boolean isEnabledCloakOfPlayerId(int playerId) {
+    return this.enableCloak.containsKey(playerId);
   }
 }

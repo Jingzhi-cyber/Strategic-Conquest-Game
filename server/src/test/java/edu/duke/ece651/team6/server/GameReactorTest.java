@@ -105,6 +105,29 @@ public class GameReactorTest {
         gr.close();
     }
 
+    @Test
+    void testNewGame() throws IOException {
+        GameReactor gr = new GameReactor(8877, 5);
+        new Thread(new RunTheGame(gr)).start();
+        Socket s = new Socket("localhost", 8877);
+        OutputStream os = s.getOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(os);
+        oos.writeObject("a b -2");
+        s = new Socket("localhost", 8877);
+        os = s.getOutputStream();
+        oos = new ObjectOutputStream(os);
+        oos.writeObject("a b 2");
+
+        Socket s2 = new Socket("localhost", 8877);
+        OutputStream os2 = s2.getOutputStream();
+        ObjectOutputStream oos2 = new ObjectOutputStream(os2);
+        oos2.writeObject("b b -2");
+        s2 = new Socket("localhost", 8877);
+        os2 = s2.getOutputStream();
+        oos2 = new ObjectOutputStream(os2);
+        oos2.writeObject("b b 2");
+    }
+
     private class RunTheGame implements Runnable {
 
         GameReactor gr;

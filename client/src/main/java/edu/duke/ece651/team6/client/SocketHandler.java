@@ -251,6 +251,7 @@ public class SocketHandler {
    */
   public GameBasicSetting recvGameBasicSetting() throws IOException, ClassNotFoundException {
     // sendObject(message); // TODO: remove?
+    System.out.println("Try to receive game basic setting");
     return receiveSpecifiedObject(GameBasicSetting.class);
   }
 

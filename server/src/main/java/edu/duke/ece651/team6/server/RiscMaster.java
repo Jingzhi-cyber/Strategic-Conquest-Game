@@ -1,6 +1,7 @@
 package edu.duke.ece651.team6.server;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,20 +11,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.duke.ece651.team6.server.MongoHero;
 import edu.duke.ece651.team6.shared.*;
 
-public class RiscMaster implements Master {
+public class RiscMaster implements Master, Serializable {
 
-  private final Server server;
+  private Server server;
   private final int playerNum;
   private final GameMap gameMap;
   private final int territoryNum;
   private final int availableUnits;
-  private final AccountManager m;
   private final Set<Integer> disconnectedList;
 
   private final List<PlayerProfile> playerProfiles;
   private final Set<Integer> losers;
+  public String status;
+  private Map<Integer, Set<Territory>> assignedTerritoryMap;
 
   /**
    * Construct a RiscMaster by passing a server - Mainly for testing
@@ -33,20 +36,20 @@ public class RiscMaster implements Master {
    * @param gameMap
    * @throws IOException
    */
-  public RiscMaster(Server server, int playerNum, GameMap gameMap) throws IOException {
+  public RiscMaster(Server server, int playerNum, GameMap gameMap) {
     if (playerNum < 2 || playerNum > 4) {
       throw new IllegalArgumentException(
-          "player number needs to be between 2 - 4 but is " + Integer.toString(playerNum));
+          "player number needs to be between 2 - 4 but is " + playerNum);
     }
     this.playerNum = playerNum;
     this.server = server;
     this.gameMap = gameMap;
     this.territoryNum = this.gameMap.getTerritoryNum();
     this.availableUnits = Constants.UNITS_PER_PLAYER;
-    this.m = AccountManager.getInstance();
     this.disconnectedList = new HashSet<>();
     this.playerProfiles = new ArrayList<>();
-    this.losers = new HashSet<Integer>();
+    this.losers = new HashSet<>();
+    this.status = "ENTER";
   }
 
   /**
@@ -60,16 +63,46 @@ public class RiscMaster implements Master {
      * - Generate an unique player id to constuct a PlayerProfile, set the
      * corresponding socket, update playerProfiles
      */
+    SocketManager socketManager = SocketManager.getInstance();
     System.out.println("RiscMaster.server initializing connection to players...");
     List<SocketKey> clientSockets = server.getClientSockets();
     int playerId = 0;
-    for (SocketKey key : clientSockets) {
-      PlayerProfile playerProfile = new PlayerProfile(playerId);
-      playerId++;
-      playerProfile.setSocket(key);
-      playerProfiles.add(playerProfile);
+    System.out.println("playerProfiles size: " + playerProfiles.size());
+    if (playerProfiles.size() != 0) {
+      for (SocketKey key : clientSockets) {
+        String username = socketManager.getUsername(key);
+        for (PlayerProfile playerProfile : playerProfiles) {
+          if (playerProfile.getName().equals(username)) {
+            playerProfile.setSocket(key);
+          }
+        }
+      }
+    } else {
+      for (SocketKey key : clientSockets) {
+        PlayerProfile playerProfile = new PlayerProfile(playerId, socketManager.getUsername(key));
+        playerId++;
+        playerProfile.setSocket(key);
+        playerProfiles.add(playerProfile);
+      }
     }
     System.out.println("RiscMaster.server initialize player connection finished!");
+  }
+
+  public void assignTerritory() {
+    /**
+     * Randomly assign same amount of Territories to players
+     * Send GameBasicSetting including territories and total units available for
+     * placement to players
+     */
+    LinkedList<Set<Territory>> assignedTerritoryList = new LinkedList<>(generateRandomTerritoryAssignment());
+    assignedTerritoryMap = new HashMap<>();
+    for (int playerId = 0; playerId < playerNum; playerId++) {
+      Set<Territory> assignedTerritories = assignedTerritoryList.poll();
+      assignedTerritoryMap.put(playerId, assignedTerritories);
+      for (Territory t : assignedTerritories) {
+        t.setOwnerId(playerId);
+      }
+    }
   }
 
   /**
@@ -79,19 +112,8 @@ public class RiscMaster implements Master {
    */
   public void setUpGameBasicSettings() {
     /**
-     * Randomly assign same amount of Territories to players
      * Send GameBasicSetting including territories and total units available for
-     * placement to players
-     */
-    LinkedList<Set<Territory>> assignedTerritoryList = new LinkedList<>(generateRandomTerritoryAssignment());
-    Map<Integer, Set<Territory>> assignedTerritoryMap = new HashMap<>();
-    for (int playerId = 0; playerId < playerNum; playerId++) {
-      Set<Territory> assignedTerritories = assignedTerritoryList.poll();
-      assignedTerritoryMap.put(playerId, assignedTerritories);
-      for (Territory t : assignedTerritories) {
-        t.setOwnerId(playerId);
-      }
-    }
+     * placement to players */
     for (int playerId = 0; playerId < playerNum; playerId++) {
       Set<Territory> assignedTerritories = assignedTerritoryMap.get(playerId);
       GameBasicSetting gameBasicSetting = new GameBasicSetting(playerId, playerNum, this.gameMap, assignedTerritories,
@@ -99,7 +121,6 @@ public class RiscMaster implements Master {
       safeSendObjectToPlayer(playerId, gameBasicSetting, "GameBasicSetting");
     }
     gameMap.initMaxTechLevel();
-
     /**
      * Receive unit placement from player
      * Check if that placement is valid (already checked in client side)
@@ -156,7 +177,7 @@ public class RiscMaster implements Master {
      * client side)
      * Execute the commits
      */
-    List<Object> objects = new ArrayList<Object>();
+    List<Object> objects = new ArrayList<>();
     for (int playerId = 0; playerId < playerNum; playerId++) {
       if (disconnectedList.contains(playerId) || losers.contains(playerId)) {
         continue;
@@ -237,7 +258,6 @@ public class RiscMaster implements Master {
   public void finish() throws IOException {
     for (int playerId = 0; playerId < playerNum; playerId++) {
       server.closeClientSocket(playerProfiles.get(playerId).getSocket());
-      m.remove(playerProfiles.get(playerId).getSocket());
     }
     System.out.println("Game Ends.");
   }
@@ -310,7 +330,7 @@ public class RiscMaster implements Master {
    */
   private GlobalMapInfo createGlobalMapInfo() {
     GlobalMapInfo globalMapInfo = new GlobalMapInfo(this.gameMap);
-    Set<Integer> playerIds = new HashSet<Integer>();
+    Set<Integer> playerIds = new HashSet<>();
     for (PlayerProfile playerProfile : playerProfiles) {
       playerIds.add(playerProfile.getId());
     }
@@ -357,7 +377,7 @@ public class RiscMaster implements Master {
   /**
    * Create GameMap info according to a specific player
    * 
-   * @param player
+   * @param playerId
    * @return player's territory1 - territory1's neighbors' names
    *         player's territory2 - territory2's neighbors' names
    */
@@ -369,8 +389,7 @@ public class RiscMaster implements Master {
         info.put(t, gameMap.getNeighborDist(t));
       }
     }
-    PlayerMapInfo playerMapInfo = new PlayerMapInfo(playerId, info);
-    return playerMapInfo;
+    return new PlayerMapInfo(playerId, info);
   }
 
   /**
@@ -380,20 +399,50 @@ public class RiscMaster implements Master {
    */
   private void executeCommits(List<Commit> commits) {
     for (Commit c : commits) {
+      c.performSuperShieldOrder(gameMap);
+    }
+    for (Commit c : commits) {
       c.performUpgrade(gameMap);
     }
     for (Commit c : commits) {
       c.performResearch(this.gameMap);
     }
     for (Commit c : commits) {
+      c.performCloakResearchOrder(gameMap);
+    }
+    for (Commit c : commits) {
       c.performMoves(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performGenerateSpyOrder(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performMoveSpyOrder(this.gameMap);
     }
     for (Commit c : commits) {
       c.performAttacks(this.gameMap);
     }
+    for (Commit c : commits) {
+      c.performSanBingOrder(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performNuclearHitOrder(gameMap);
+    }
     Set<Territory> territories = this.gameMap.getTerritorySet();
     for (Territory territory : territories) {
       territory.update();
+    }
+    for (Commit c : commits) {
+      c.performCloakTerritory(this.gameMap);
+    }
+    for (Commit c : commits) {
+      c.performDefenseInfrasOrder(gameMap);
+    }
+    for (Commit c : commits) {
+      c.performEliminateFogOrder(gameMap);
+    }
+    for (Commit c : commits) {
+      c.performGapGeneratorOrder(gameMap);
     }
     System.out.println("Commits execution finished!");
   }
@@ -439,5 +488,9 @@ public class RiscMaster implements Master {
       System.out.println("name: " + t.getName() + " ownerId: " + t.getOwnerId() + " numUnits: " + t.getNumUnits());
     }
     System.out.println("---------------Master Side Game Map Ends---------------");
+  }
+
+  public void setServer(Server server) {
+    this.server = server;
   }
 }

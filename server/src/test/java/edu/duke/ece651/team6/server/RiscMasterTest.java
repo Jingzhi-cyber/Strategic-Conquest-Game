@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 
 import edu.duke.ece651.team6.shared.*;
 
-
 public class RiscMasterTest {
     private final Server server = mock(Server.class);
     private GameMap gameMap;
@@ -28,14 +27,13 @@ public class RiscMasterTest {
     public void setUp() throws IOException, ClassNotFoundException {
         // Testing: Use SimpleMap
         SimpleMap simpleMap = new SimpleMap();
-        AccountManager m = AccountManager.getInstance();
+        SocketManager sm = SocketManager.getInstance();
         gameMap = new GameMap(simpleMap.getAdjList());
         assertThrows(IllegalArgumentException.class, ()->new RiscMaster(server, 0, gameMap));
         this.riscMaster = new RiscMaster(server, 2, gameMap);
         List<SocketKey> clientSockets = new ArrayList<>();
-        for (int i = 0; i < 2; ++i) {
-            clientSockets.add(m.add("test", new Socket()));
-        }
+        clientSockets.add(sm.add(new Socket(), "A"));
+        clientSockets.add(sm.add(new Socket(), "B"));
         when(this.server.getClientSockets()).thenReturn(clientSockets);
     }
 
@@ -53,10 +51,16 @@ public class RiscMasterTest {
         gameBasicSetting.initializeUnitPlacement(map);
         when(this.server.recvObject(any(SocketKey.class))).thenReturn(gameBasicSetting);
         riscMaster.init();
-        assertDoesNotThrow(()->riscMaster.setUpGameBasicSettings());
+        assertDoesNotThrow(()-> {
+            riscMaster.assignTerritory();
+            riscMaster.setUpGameBasicSettings();
+        });
         when(this.server.recvObject(any(SocketKey.class))).thenReturn(null);
         riscMaster.init();
-        assertDoesNotThrow(()->riscMaster.setUpGameBasicSettings());
+        assertDoesNotThrow(()-> {
+            riscMaster.assignTerritory();
+            riscMaster.setUpGameBasicSettings();
+        });
     }
 
     @Test
@@ -82,7 +86,6 @@ public class RiscMasterTest {
         assertDoesNotThrow(()->riscMaster.playOneTurn());
     }
 
-    @Disabled
     @Test
     public void testCheckResult() throws ClassNotFoundException, IOException {
         riscMaster.init();
@@ -96,7 +99,7 @@ public class RiscMasterTest {
         t.setOwnerId(2); // To simulate someone loses but not ending the game
         assertDoesNotThrow(()->riscMaster.playOneTurn());
         t.setOwnerId(1);
-        assertDoesNotThrow(()->riscMaster.playOneTurn());
+        assertThrows(Exception.class, ()->riscMaster.playOneTurn());
     }
 
     @Test

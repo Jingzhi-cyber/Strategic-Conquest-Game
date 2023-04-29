@@ -3,9 +3,11 @@ package edu.duke.ece651.team6.shared;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javafx.scene.paint.Color;
@@ -15,14 +17,21 @@ public class Territory implements java.io.Serializable, Cloneable {
   private final String name;
   private int ownerId;
   private List<Deque<Unit>> units;
+  private Map<Integer, Map<String, List<Spy>>> spies;
   private final int numLevel;
   private WarZone warZone;
   private boolean underWar;
   private int food;
   private int technology;
+  private int civilization;
+  private int cloakedTurns;
+  private boolean defenseInfras;
+  private boolean gapGenerated;
+  private Set<Integer> visibleToPlayers;
   private List<Edge> edges;
   private List<Point2D> points;
   private int[] color;
+  private boolean superShield = false;
 
   public Territory() {
     this("Default Territory");
@@ -36,10 +45,16 @@ public class Territory implements java.io.Serializable, Cloneable {
     this.ownerId = -1;
     numLevel = 7;
     unitsInit();
+    this.spies = new HashMap<>();
     warZone = null;
     underWar = false;
     food = 5;
     technology = 5;
+    civilization = 1;
+    cloakedTurns = 0;
+    this.defenseInfras = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers = new HashSet<Integer>();
   }
 
   public Territory(String name, int ownerId) {
@@ -47,10 +62,16 @@ public class Territory implements java.io.Serializable, Cloneable {
     this.ownerId = ownerId;
     numLevel = 7;
     unitsInit();
+    this.spies = new HashMap<>();
     warZone = null;
     underWar = false;
     food = 5;
     technology = 5;
+    civilization = 1;
+    cloakedTurns = 0;
+    this.defenseInfras = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers = new HashSet<Integer>();
   }
 
   /**
@@ -69,19 +90,45 @@ public class Territory implements java.io.Serializable, Cloneable {
     numLevel = 7;
     unitsInit();
     this.units.get(0).addAll(UnitManager.newUnits(units));
+    this.spies = new HashMap<>();
     warZone = null;
     underWar = false;
     food = 5;
     technology = 5;
+    civilization = 1;
+    cloakedTurns = 0;
+    this.defenseInfras = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers = new HashSet<Integer>();
   }
 
   @Override
   public Object clone() {
     Territory territory = new Territory(this.name, this.ownerId);
+    territory.civilization = this.civilization;
+    territory.defenseInfras = this.defenseInfras;
+    territory.superShield = this.superShield;
+    territory.gapGenerated = this.gapGenerated;
+    for (int playerId : this.visibleToPlayers) {
+      territory.visibleToPlayers.add(playerId);
+    }
     for (int i = 0; i < numLevel; i++) {
       Deque<Unit> sameLevelUnits = territory.units.get(i);
       for (Unit unit : this.units.get(i)) {
         sameLevelUnits.add((Unit) unit.clone());
+      }
+    }
+    territory.setCloakedTurn(this.cloakedTurns);
+    territory.spies = new HashMap<Integer, Map<String, List<Spy>>>();
+    for (int playerId : this.spies.keySet()) {
+      territory.spies.put(playerId, new HashMap<String, List<Spy>>());
+      territory.spies.get(playerId).put("canMove", new ArrayList<Spy>());
+      territory.spies.get(playerId).put("cannotMove", new ArrayList<Spy>());
+      for (Spy s : this.spies.get(playerId).get("canMove")) {
+        territory.spies.get(playerId).get("canMove").add((Spy) s.clone());
+      }
+      for (Spy s : this.spies.get(playerId).get("cannotMove")) {
+        territory.spies.get(playerId).get("cannotMove").add((Spy) s.clone());
       }
     }
     return territory;
@@ -91,6 +138,16 @@ public class Territory implements java.io.Serializable, Cloneable {
     units = new ArrayList<>();
     for (int i = 0; i < numLevel; i++) {
       units.add(new LinkedList<>());
+    }
+  }
+
+  public void removeUnit(int level, int num) {
+    Deque<Unit> units = this.units.get(level);
+    if (units.size() < num) {
+      throw new IllegalArgumentException("Illegal remove Unit: only has " + units.size() + " on level " + level + " but the required number is " + num);
+    }
+    for (int i = 0; i < num; i++) {
+      units.removeFirst();
     }
   }
 
@@ -148,6 +205,9 @@ public class Territory implements java.io.Serializable, Cloneable {
    * @param army which attackes this territory.
    */
   private void attackedBy(Army army) {
+    if (superShield) {
+      return;
+    }
     if (!underWar) {
       underWar = true;
       warZone = new RoundFight(this);
@@ -232,6 +292,9 @@ public class Territory implements java.io.Serializable, Cloneable {
    * all attacks done.
    */
   public void update() {
+    if (superShield) {
+      superShield = false;
+    }
     if (underWar) {
       int[] allUnitsNum = getAllUnitsNum();
       if (!Arrays.equals(allUnitsNum, new int[numLevel])) {
@@ -240,8 +303,26 @@ public class Territory implements java.io.Serializable, Cloneable {
       warZone.startWar();
       underWar = false;
       warZone = null;
+      this.civilization = 0;
+    }
+    else {
+      this.civilization++;
     }
     recover();
+    if (cloakedTurns > 0) {
+      cloakedTurns--;
+    }
+    for (int playerId : spies.keySet()) {
+      Map<String, List<Spy>> spy = spies.get(playerId);
+      int numSpyCannotMove = spy.get("cannotMove").size();
+      spy.get("cannotMove").clear();
+      for (int i = 0; i < numSpyCannotMove; i++) {
+        spy.get("canMove").add(new Spy(playerId));
+      }
+    }
+    this.defenseInfras = false;
+    this.gapGenerated = false;
+    this.visibleToPlayers.clear();
   }
 
   /**
@@ -351,6 +432,117 @@ public class Territory implements java.io.Serializable, Cloneable {
     Unit unit = units.get(now).poll();
     UnitManager.upgrade(unit, target);
     units.get(target).add(unit);
+  }
+
+  /**
+   * Add spy owned by playerId to this territory
+   * @param playerId
+   * @param num the number of spy
+   */
+  public void addSpy(int playerId, int num) {
+    if (!this.spies.containsKey(playerId)) {
+      this.spies.put(playerId, new HashMap<String, List<Spy>>());
+      spies.get(playerId).put("canMove", new ArrayList<Spy>());
+      spies.get(playerId).put("cannotMove", new ArrayList<Spy>());
+    }
+    Map<String, List<Spy>> spyList = spies.get(playerId);
+    boolean canMove = playerId == this.ownerId ? true : false;
+    for (int i = 0; i < num; i++) {
+      Spy newspy = new Spy(playerId);
+      newspy.setCanMove(canMove);
+      if (canMove) {
+        spyList.get("canMove").add(newspy);
+      }
+      else {
+        spyList.get("cannotMove").add(newspy);
+      }
+    }
+  }
+
+  /**
+   * Get the number of spy owned by a player on the territory
+   * @param playerId
+   * @return the number of spies
+   */
+  public int getSpyNumByPlayerId(int playerId, boolean canMove) {
+    Map<String, List<Spy>> spy = this.spies.getOrDefault(playerId, null);
+    if (spy == null) {
+      return 0;
+    }
+    return canMove ? spy.get("canMove").size() : spy.get("cannotMove").size();
+  }
+
+  /**
+   * Move spy to another territory
+   * @param playerId is the playerId that makes this order
+   * @param dest is the destination territory
+   * @param num is the number of spies
+   */
+  public void moveSpyTo(int playerId, Territory dest, int num) {
+    /** 
+     * implement spy move order
+     * 
+     * 1. check if there is enough spy to move
+     * 2. if the spy is on enemy's territory, can only move to adjacent territory
+     * 3. if the spy is on owned territory, apply the same move rule as the units
+     * 
+     */
+    int spyNum = getSpyNumByPlayerId(playerId, true);
+    if (spyNum < num) {
+      throw new IllegalArgumentException("Illegal move spy order: only has " + spyNum + " spies that can still move but request number is " + num);
+    }
+    // NOTE: not able to check territory rule here, needs to be done in rulechecker
+    List<Spy> spies = this.spies.get(playerId).get("canMove");
+    for (int i = 0; i < num; i++) {
+      spies.remove(0);
+    }
+    dest.addSpy(playerId, num);
+  }
+
+  public void setCloakedTurn(int turn) {
+    this.cloakedTurns = turn;
+  }
+
+  public int getCloakedTurn() {
+    return this.cloakedTurns;
+  }
+
+  public int getCivilization() {
+    return this.civilization;
+  }
+
+  public void setDefenseInfras() {
+    this.defenseInfras = true;
+  }
+
+  public boolean getDefenseInfras() {
+    return this.defenseInfras;
+  }
+
+  public void setGapGenerated() {
+    this.gapGenerated = true;
+  }
+
+  public boolean getGapGenerated() {
+    return this.gapGenerated;
+  }
+
+  public void addVisiblePlayer(int playerId) {
+    this.visibleToPlayers.add(playerId);
+  } 
+
+  public Set<Integer> getVisiblePlayer() {
+    return this.visibleToPlayers;
+  }
+
+  public boolean hitByNuclearWeapon(int playerId) {
+    if (this.superShield) {
+      return false;
+    }
+    this.civilization = 0;
+    unitsInit();
+    this.ownerId = playerId;
+    return true;
   }
 
   public void addEdge(Edge e) {
@@ -469,4 +661,8 @@ public class Territory implements java.io.Serializable, Cloneable {
     }
     return color;
   }
+
+    public void addSuperShield() {
+        this.superShield = true;
+    }
 }

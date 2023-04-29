@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,43 +11,28 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import edu.duke.ece651.team6.client.controller.MainPageController;
 import edu.duke.ece651.team6.client.model.GameLounge;
-import edu.duke.ece651.team6.shared.AttackOrder;
+import edu.duke.ece651.team6.client.model.OrdersHandler;
+import edu.duke.ece651.team6.client.view.MapView;
 import edu.duke.ece651.team6.shared.Commit;
 import edu.duke.ece651.team6.shared.Constants;
 import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import edu.duke.ece651.team6.shared.GameBasicSetting;
 import edu.duke.ece651.team6.shared.GameMap;
 import edu.duke.ece651.team6.shared.GlobalMapInfo;
-import edu.duke.ece651.team6.shared.MoveOrder;
-import edu.duke.ece651.team6.shared.PlayerMapInfo;
 import edu.duke.ece651.team6.shared.PolygonGetter;
-import edu.duke.ece651.team6.shared.ResearchOrder;
 import edu.duke.ece651.team6.shared.Result;
 import edu.duke.ece651.team6.shared.Territory;
-import edu.duke.ece651.team6.shared.UpgradeOrder;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.scene.Scene;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Polygon;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.scene.paint.Color;
-import javafx.scene.text.FontWeight;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.control.Tooltip;
+import javafx.scene.paint.Color;
 
 /**
  * The UIGame class represents one game with a user interface, which is
@@ -62,15 +46,11 @@ public class UIGame extends Game {
 
   int gameId; // unique for games that are of each player
 
-  Integer playerId;
+  Integer playerId = -1;
 
   String username;
 
   Scene scene;
-
-  // GameMap gameMap;
-
-  MapView thisView = null;
 
   GAME_STATUS gameStatus;
 
@@ -85,6 +65,8 @@ public class UIGame extends Game {
   Map<Integer, Color> playerColor;
 
   ArrayList<Color> colors;
+
+  Map<Territory, Map<String, String>> previouslySeenTerritories;
 
   /**
    * This method sets the scene of the game. It takes a Scene object as a
@@ -149,6 +131,8 @@ public class UIGame extends Game {
     this.mainPageController = mainPageController;
   }
 
+  OrdersHandler ordersHandler;
+
   /**
    * Constructor: UIGame(int gameId, String username, SocketHandler socketHandler,
    * MainPageController mainPageController) This constructor initializes a new
@@ -170,14 +154,15 @@ public class UIGame extends Game {
     this.username = username;
     this.gameStatus = GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER;
     this.resource = new HashMap<>();
-    // Initialize the controller, e.g., by loading the FXML file
-    // this.unitPlacementController = unitPlacementController;// TODO
-    // this.unitPlacementController.setUIGame(this);
     this.mainPageController = mainPageController;
     this.mainPageController.setUiGame(this);
+
     this.polygonGetter = new PolygonGetter();
     this.playerColor = new HashMap<>();
     this.colors = new ArrayList<>(Arrays.asList(Color.AQUAMARINE, Color.AZURE, Color.VIOLET, Color.LIGHTCORAL));
+
+    this.ordersHandler = new OrdersHandler(this.mainPageController);
+    this.previouslySeenTerritories = new HashMap<>();
   }
 
   /**
@@ -200,14 +185,16 @@ public class UIGame extends Game {
     this.gameStatus = gameStatus;
   }
 
-  /* ----------1. Handling Unit Placement ----------- */
+  /* ------------------------------------------------------------ */
+  /* ----------------- Unit Placement UI ------------------- */
+  /* ------------------------------------------------------------ */
+
   private final Map<Territory, Integer> territoryToNumUnitMapping = new HashMap<>();
   private Iterator<Territory> territoryIterator;
   private Territory currentTerritory;
 
   List<Integer> constructIntegersFrom0UpTo(int maxInteger) {
     List<Integer> intList = new ArrayList<>();
-    // TODO <=
     for (int i = 0; i <= maxInteger; i++) {
       intList.add(i);
     }
@@ -254,14 +241,14 @@ public class UIGame extends Game {
 
           numUnits = showSelectionDialog(remainingUnits, "No items available for selection.", "Unit Placement",
               "Player " + this.username + ", how many units do you want to place on the " + currentTerritory.getName()
-                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)").get();
+                  + " territory? (" + setting.getRemainingNumUnits() + " remaining)")
+              .get();
 
           if (numUnits == null) {
             Platform.runLater(() -> {
               mainPageController.showError("Must specify unit number to place on " + currentTerritory.getName());
             });
           }
-
         }
         try {
           setting.decreaseUnitsBy(numUnits);
@@ -290,6 +277,10 @@ public class UIGame extends Game {
     }
   }
 
+  /* ------------------------------------------------------------ */
+  /* ----------------- Entry Point ------------------- */
+  /* ------------------------------------------------------------ */
+
   /**
    * This method receives initial Territory information from the server And
    * display UI to the user so that user interact to input units information
@@ -298,29 +289,67 @@ public class UIGame extends Game {
     System.out.println("Game status: " + gameStatus);
     if (this.gameStatus == GAME_STATUS.WAIT_OTHER_PLAYERS_TO_ENTER) {
       System.out.print("Waiting for other players to enter\n");
+      String initMsg = (String) socketHandler.recvObject();
+      System.out.println(initMsg);
+      if (!"Connected to the server!".equals(initMsg)) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        Platform.runLater(() -> {
+          Alert connectedToServer = new Alert(Alert.AlertType.INFORMATION);
+          connectedToServer.setTitle("New message arrives");
+          connectedToServer.setHeaderText("Successfully returned to a game!");
+          connectedToServer.setContentText("Alert: server was powered off.. The commit you made may be lost");
+          Optional<?> result = connectedToServer.showAndWait();
+          if (result.isPresent()) {
+            future.complete(true);
+          }
+        });
+        future.get();
+      }
+      if (initMsg.charAt(0) == 'C') {
+        // first connection or reconnect to place units phase
+        setting = socketHandler.recvGameBasicSetting();
+        this.startingGameMap = setting.getGameMap();
+        this.gameStatus = GAME_STATUS.PLACE_UNITS;
+        Platform.runLater(() -> {
+          mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
+          mainPageController.updateGameStatus(this.gameStatus);
+        });
+        this.playerId = setting.getPlayerId();
 
-      System.out.println((String) socketHandler.recvObject());
-      setting = socketHandler.recvGameBasicSetting();
-      this.startingGameMap = setting.getGameMap();
-      this.gameStatus = GAME_STATUS.PLACE_UNITS;
-      Platform.runLater(() -> {
-        mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
-        mainPageController.updateGameStatus(this.gameStatus);
-      });
+        // this.startingGameMap = setting.getGameMap();
+        // this.gameStatus = GAME_STATUS.PLACE_UNITS;
+        // Platform.runLater(() -> {
+        // mainPageController.setUsername(username + " (PlayerId " +
+        // setting.getPlayerId() + ")");
+        // mainPageController.updateGameStatus(this.gameStatus);
+        // });
 
-      // territoryToNumUnitMapping = new HashMap<>();
+        Set<Territory> territories = setting.getAssignedTerritories();
 
-      Set<Territory> territories = setting.getAssignedTerritories();
+        // Platform.runLater(() -> updateMap(mainPageController.getMapPane(),
+        // setting.getGameMap().getTerritorySet()));
+        renderingMap(setting.getGameMap());
 
-      Platform.runLater(() -> updateMap(mainPageController.getMapPane(), setting.getGameMap().getTerritorySet()));
-      territoryIterator = territories.iterator();
+        territoryIterator = territories.iterator();
 
-      while (gameStatus == GAME_STATUS.PLACE_UNITS) {
-        nextUnitPlacementPrompt();
+        while (gameStatus == GAME_STATUS.PLACE_UNITS) {
+          nextUnitPlacementPrompt();
+        }
+      } else {
+        // reconnect to issue_order phase
+        gameStatus = GAME_STATUS.ISSUE_ORDER;
+        Platform.runLater(() -> {
+          mainPageController.updateGameStatus(gameStatus);
+        });
+
       }
     }
     refreshMap();
   }
+
+  /* ------------------------------------------------------------ */
+  /* -------- Receive Game Result from server -------- */
+  /* ------------------------------------------------------------ */
 
   /**
    * This method receives the game result from the server and handles it. It
@@ -383,6 +412,10 @@ public class UIGame extends Game {
     return null;
   }
 
+  /* ------------------------------------------------------------ */
+  /* --------- Send Commit (Orders) to server --------- */
+  /* ------------------------------------------------------------ */
+
   /**
    * This method submits the current commit to the server after showing a
    * confirmation dialog to the user. It updates the game status and disables the
@@ -394,10 +427,10 @@ public class UIGame extends Game {
    * @throws ClassNotFoundException If the class of a serialized object could not
    *                                be found.
    */
-  public void submitCommit() {
+  public void submitCommit() throws ExecutionException, InterruptedException {
     /* -------- Show a confirmation dialog with the orders-------- */
     String ordersString = this.currentCommit.toString();
-    AtomicBoolean buttonOK = new AtomicBoolean(false);
+    CompletableFuture<Boolean> future = new CompletableFuture<>();
     Platform.runLater(() -> {
       Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
 
@@ -420,242 +453,41 @@ public class UIGame extends Game {
       Optional<ButtonType> confirmOrder = confirmationDialog.showAndWait();
 
       if (confirmOrder.isPresent() && confirmOrder.get() == ButtonType.OK) {
-        buttonOK.set(true);
+        future.complete(true);
+      } else {
+        future.complete(false);
       }
     });
-    class MyTask extends Task<Void> {
-
-      final UIGame game;
-
-      MyTask(UIGame game) {
-        this.game = game;
-      }
-
-      @Override
-      protected Void call() throws Exception {
-        while (!buttonOK.get()) {
-          Thread.sleep(100);
-        }
-        try {
-          game.socketHandler.sendCommit(game.currentCommit);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        System.out.println("Successfully sent a commit to the server");
-        game.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
-        Platform.runLater(() -> {
-          game.mainPageController.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
-          game.mainPageController.setPlayTurnsButtonsDisabled(true);
-        });
-        try {
-          // socketHandler.recvGameResult();
-          String status = game.receiveGameResult();
-          Platform.runLater(() -> {
-            game.mainPageController.updateGameStatus(game.gameStatus);
-          });
-          System.out.println("Successfully received game result");
-
-          if (Constants.GAME_OVER.equals(status)) {
-            return null;
-          }
-          game.refreshMap();
-          System.out.println("Successfully refreshed map");
-        } catch (IOException | ClassNotFoundException e) {
-          e.printStackTrace();
-          game.mainPageController.showError(e.getMessage());
-        }
-        return null;
-      }
+    if (future.get().equals(false)) {
+      return;
     }
-    new Thread(new MyTask(this)).start();
-  }
-
-  /**
-   * Sets the fill color of a given polygon to the color associated with a given
-   * owner ID.
-   *
-   * @param polygon The polygon whose fill color is to be set.
-   * @param ownerID The ID of the owner associated with the color to be used for
-   *                the polygon.
-   */
-  protected void setPolygonColor(Polygon polygon, int ownerID) {
-    polygon.setFill(this.playerColor.get(ownerID));
-  }
-
-  /**
-   * Performs a simple animation on a given polygon by briefly changing its fill
-   * color to light gray and then changing it back to its original color.
-   *
-   * @param polygon The polygon to be animated.
-   */
-  protected void performPolygonAnimation(Polygon polygon) {
-    Color color = (Color) polygon.getFill();
-    polygon.setFill(Color.LIGHTGRAY);
-
-    new Thread(() -> {
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      polygon.setFill(color);
-    }).start();
-  }
-
-  protected void dispalyTerritoryInfo(Text territoryInfoText1, Text territoryInfoText2, Text territoryInfoText3,
-      Territory territory) {
-    String info1 = "Territory: " + territory.getName() + "\nOwnerID: " + territory.getOwnerId() + " \n" + "Food prod: "
-        + territory.getFood() + "\nTech prod: " + territory.getTechnology();
-    String info2 = getNeighborDistance(territory);
-    String info3 = getUnitsNumberByLevel(territory);
-    territoryInfoText1.setText(info1);
-    territoryInfoText2.setText(info2);
-    territoryInfoText3.setText(info3);
-  }
-
-  /**
-   * Sets a mouse click event on a given polygon that performs a polygon animation
-   * when the polygon is clicked.
-   *
-   * @param polygon The polygon to set the mouse click event on.
-   */
-  protected void setPolygonMouseClick(Polygon polygon, Territory territory) {
-    polygon.setOnMouseClicked((MouseEvent click_event) -> {
-      performPolygonAnimation(polygon);
-      dispalyTerritoryInfo(this.mainPageController.getTerritoryInfoText1(),
-          this.mainPageController.getTerritoryInfoText2(), this.mainPageController.getTerritoryInfoText3(), territory);
+    try {
+      socketHandler.sendCommit(currentCommit);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    System.out.println("Successfully sent a commit to the server");
+    updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+    Platform.runLater(() -> {
+      mainPageController.updateGameStatus(GAME_STATUS.WAITING_FOR_RESULT);
+      mainPageController.setPlayTurnsButtonsDisabled(true);
     });
-  }
+    try {
+      // socketHandler.recvGameResult();
+      String status = receiveGameResult();
+      Platform.runLater(() -> {
+        mainPageController.updateGameStatus(gameStatus);
+      });
+      System.out.println("Successfully received game result");
 
-  /**
-   * Sets the text of a given polygon to a given string, or creates a new Text
-   * object for the polygon if one does not exist.
-   *
-   * @param mapPane The map pane containing the polygon.
-   * @param polygon The polygon to set the text on.
-   * @param text    The text to set on the polygon.
-   * @return The Text object that was created or modified.
-   */
-  protected Text setPolygonText(Pane mapPane, Polygon polygon, String text) {
-    for (Node node : mapPane.getChildren()) {
-      if (node.getId().equals(polygon.getId() + "Text")) {
-        Text territoryInfo = (Text) node;
-        territoryInfo.setText(text);
-        return territoryInfo;
+      if (Constants.GAME_OVER.equals(status)) {
+        return;
       }
-    }
-    Text territoryInfo = new Text(text);
-    territoryInfo.setId(polygon.getId() + "Text");
-    territoryInfo.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-    territoryInfo.setFill(Color.BLACK);
-    double centerX = polygon.getBoundsInLocal().getWidth() / 2;
-    double centerY = polygon.getBoundsInLocal().getHeight() / 2;
-    territoryInfo.setLayoutX(polygon.getLayoutX() + polygon.getBoundsInLocal().getMinX() + centerX
-        - territoryInfo.getBoundsInLocal().getWidth() / 2);
-    territoryInfo.setLayoutY(polygon.getLayoutY() + polygon.getBoundsInLocal().getMinY() + centerY
-        + territoryInfo.getBoundsInLocal().getHeight() / 2);
-    mapPane.getChildren().add(territoryInfo);
-    return territoryInfo;
-  }
-
-  /**
-   *
-   * This method sets the tooltip of a given Polygon with the specified text.
-   *
-   * @param polygon The Polygon to set the tooltip for.
-   * @param text    The text to set as the tooltip for the Polygon.
-   */
-  protected void setPolygonTooltip(Polygon polygon, String text) {
-    Tooltip tooltip = new Tooltip(text);
-    Font font = Font.font("Arial", 18);
-    tooltip.setFont(font);
-    Tooltip.install(polygon, tooltip);
-  }
-
-  protected String getNeighborDistance(Territory territory) {
-    Map<Territory, Integer> distanceMap = this.startingGameMap.getNeighborDist(territory);
-    String info = "Neighbor distance: \n";
-    for (Territory currTerritory : distanceMap.keySet()) {
-      info = info + currTerritory.getName() + " : " + distanceMap.get(currTerritory) + " \n";
-    }
-    return info;
-  }
-
-  protected String getUnitsNumberByLevel(Territory territory) {
-    String info = "Units number by level: \n";
-    for (int i = 0; i < territory.getNumLevels(); i++) {
-      info = info + "Level " + i + ": " + territory.getUnitsNumByLevel(i) + " \n";
-    }
-    return info;
-  }
-
-  /**
-   *
-   * Sets the polygons representing the territories on the game map. For each
-   * territory in the set, a polygon is created using the PolygonGetter object,
-   * and the color, tooltip, mouse click event, and text of the polygon are set.
-   * The polygon is then added to the mapPane along with its text representation.
-   *
-   * @param mapPane:     The pane representing the game map.
-   * @param territories: A set of Territory objects representing the territories
-   *                     on the game map.
-   */
-  protected void setMap(Pane mapPane, Set<Territory> territories) {
-    for (Territory currTerritory : territories) {
-      int ownerID = currTerritory.getOwnerId();
-      if (!playerColor.containsKey(ownerID)) {
-        this.playerColor.put(ownerID, this.colors.remove(0));
-      }
-      String name = currTerritory.getName();
-      Polygon currPolygon = this.polygonGetter.getPolygon(currTerritory);
-      currPolygon.setId(name);
-      setPolygonColor(currPolygon, ownerID);
-      setPolygonTooltip(currPolygon,
-          "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
-              + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
-              + currTerritory.getTechnology());
-      setPolygonMouseClick(currPolygon, currTerritory);
-      Text polygonInfo = setPolygonText(mapPane, currPolygon, name + " - " + ownerID);
-      mapPane.getChildren().add(currPolygon);
-      polygonInfo.toFront();
-    }
-
-  }
-
-  /**
-   *
-   * This method updates the game map UI by modifying the colors, text, and
-   * tooltips of the polygons in the
-   *
-   * mapPane to reflect the current state of the game.
-   *
-   * @param mapPane     the Pane object representing the game map UI.
-   *
-   * @param territories a Set of Territory objects representing the territories in
-   *                    the game.
-   */
-  protected void updateMap(Pane mapPane, Set<Territory> territories) {
-
-    if (mapPane.getChildren().isEmpty()) {
-      setMap(mapPane, territories);
-    } else {
-      for (Territory currTerritory : territories) {
-        int ownerID = currTerritory.getOwnerId();
-        String name = currTerritory.getName();
-        for (Node node : mapPane.getChildren()) {
-          if (node.getId() != null && node.getId().equals(name)) {
-            Polygon polygon = (Polygon) node;
-            setPolygonColor(polygon, ownerID);
-            setPolygonMouseClick(polygon, currTerritory);
-            setPolygonText(mapPane, polygon, name + " - " + ownerID);
-            Tooltip.uninstall(polygon, null);
-            setPolygonTooltip(polygon,
-                "Territory: " + name + "\nOwnerID: " + ownerID + "\n" + getNeighborDistance(currTerritory)
-                    + getUnitsNumberByLevel(currTerritory) + "Food prod: " + currTerritory.getFood() + "\nTech prod: "
-                    + currTerritory.getTechnology());
-          }
-        }
-      }
+      refreshMap();
+      System.out.println("Successfully refreshed map");
+    } catch (IOException | ClassNotFoundException e) {
+      e.printStackTrace();
+      mainPageController.showError(e.getMessage());
     }
   }
 
@@ -664,17 +496,22 @@ public class UIGame extends Game {
    * scene to the user
    */
   public void refreshMap() throws IOException, ClassNotFoundException {
-
-    Platform.runLater(() -> {
-      mainPageController.setUsername(username + " (PlayerId " + setting.getPlayerId() + ")");
-    });
-
+    System.out.println("Wait for GlobalMapInfo");
     GlobalMapInfo mapInfo = socketHandler.recvGlobalMapInfo();
     System.out.println("Mapinfo got");
     if (mapInfo.playerId != -1) {
       this.playerId = mapInfo.playerId;
     }
-    this.thisView = new UIGameView(mapInfo);
+    Platform.runLater(() -> {
+      mainPageController.setUsername(username + " (PlayerId " + this.playerId + ")");
+    });
+
+    // TODO not sure if the commit will be null if reconnecting?
+    renderingMap(mapInfo.getGameMap());
+
+    // TODO Platform.runLater(() -> updateMap(mainPageController.getMapPane(),
+    // mapInfo.getGameMap().getTerritorySet()));
+    // this.thisView = new UIGameView(mapInfo);
     // this.gameMap = mapInfo.getGameMap();
     this.startingGameMap = mapInfo.getGameMap();
 
@@ -682,8 +519,10 @@ public class UIGame extends Game {
 
     System.out.println("GameMap - UIGame.java" + this.currentCommit.getCurrentGameMap().toString());
 
-    Platform.runLater(
-        () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
+    // Platform.runLater(
+    // () -> updateMap(mainPageController.getMapPane(),
+    // this.currentCommit.getCurrentGameMap().getTerritorySet()));
+    renderingMap(this.currentCommit.getCurrentGameMap());
 
     this.resource.put(Constants.RESOURCE_FOOD,
         this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_FOOD));
@@ -698,6 +537,7 @@ public class UIGame extends Game {
           this.currentCommit.getCurrentGameMap().getResourceByPlayerId(this.playerId).get(Constants.RESOURCE_TECH));
 
       mainPageController.setPlayTurnsButtonsDisabled(false);
+
     });
 
     if (this.hasLost) {
@@ -708,365 +548,103 @@ public class UIGame extends Game {
       receiveGameResult();
       return;
     }
-
-    // initiateCommit();
-
-    // TODO Update Map!
-
-    // thisView.updateScene();
-    // TODO Map<String, Territory> territoriesMap;
-    // populate the map with Territory objects
-
-    // TODO SelectableTerritories selectableTerritories = new
-    // SelectableTerritories(territoriesMap);
-
-    // TODO display the globalMap on UI
   }
 
-  public MoveOrder constructMoveOrder() throws IOException, InterruptedException, ExecutionException {
+  /* ------------------------------------------------------------ */
+  /* -------------- Order Constructions ------------------- */
+  /* ------------------------------------------------------------ */
+
+  private void prepWorkBeforeNewOrder() {
     this.gameStatus = GAME_STATUS.ISSUE_ORDER;
 
     if (currentCommit == null) {
       initiateCommit();
     }
-
-    Territory src = showTerritorySelectionDialog(null, true, "Move Order",
-        "Which territory do you want to move units from?").get();
-
-    if (src == null) {
-      mainPageController.showError("Must specify a territory to move units from");
-      return null; // User cancelled the dialog
-    }
-
-    Territory dest = showTerritorySelectionDialog(src, true, "Move Order",
-        "Which territory do you want to move units to?").get();
-
-    if (dest == null) {
-      mainPageController.showError("Must specify a territory to move units to");
-      return null; // User cancelled the dialog
-    }
-
-    int[] numUnitsByLevel = new int[Constants.MAX_LEVEL + 1];
-    Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "Move Order",
-        "Which level of units do you want to move?").get();
-    if (selectedLevel == null) {
-      mainPageController.showError("Must specify a level to move");
-      return null; // User cancelled the dialog
-    }
-    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them do you want to move?")
-        .get();
-
-    if (numUnits == null) {
-      mainPageController.showError("Must specify the number of units to move");
-      return null; // User cancelled the dialog
-    }
-
-    numUnitsByLevel[selectedLevel] = numUnits;
-    // MoveOrder move = null;
-    MoveOrder move = new MoveOrder(src, dest, numUnitsByLevel);
-
-    /* -------- Try adding the order -------- */
-    try {
-      this.currentCommit.addMove(move);
-    } catch (IllegalArgumentException e) {
-      mainPageController.showError(e.getMessage());
-      return null;
-    }
-
-    return move;
   }
 
-  /**
-   *
-   * Constructs an attack order by prompting the player to select a territory to
-   * attack from, a territory to attack, a unit level to use in the attack, and
-   * the number of units to use in the attack. If the user cancels any of the
-   * selection dialogs, this method returns null. Otherwise, it creates and
-   * returns an AttackOrder object with the selected parameters and adds it to the
-   * current commit.
-   *
-   * @return an AttackOrder object representing the player's attack order, or null
-   *         if the user cancels the selection dialogs
-   * @throws IOException          if there is an error in the socket connection
-   * @throws InterruptedException if the thread is interrupted while waiting for
-   *                              the user's input
-   * @throws ExecutionException   if the future task fails to execute
-   */
-  public AttackOrder constructAttackOrder() throws IOException, InterruptedException, ExecutionException {
-    this.gameStatus = GAME_STATUS.ISSUE_ORDER;
+  public void constructMoveOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
 
-    // TODO Auto-generated method stub
-    if (currentCommit == null) {
-      initiateCommit();
-    }
-
-    Territory src = showTerritorySelectionDialog(null, true, "Attack Order",
-        "Which territory do you want to attack units from").get();
-
-    if (src == null) {
-      mainPageController.showError("Must specify a territory to attack from");
-      return null; // User cancelled the dialog
-    }
-
-    Territory dest = showTerritorySelectionDialog(src, false, "Attack Order",
-        "Which territory do you want to attack units to").get();
-
-    if (dest == null) {
-      mainPageController.showError("Must specify a territory to attack units to");
-      return null; // User cancelled the dialog
-    }
-
-    int[] numUnitsByLevel = new int[Constants.MAX_LEVEL + 1];
-
-    Integer selectedLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL, src, "Attack Order",
-        "Which level of units do you want to attack?").get();
-    if (selectedLevel == null) {
-      mainPageController.showError("Must specify a level to attack");
-      return null; // User cancelled the dialog
-    }
-    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedLevel, src, "How many of them are used to attack")
-        .get();
-
-    if (numUnits == null) {
-      mainPageController.showError("Must specify the number of units to attack");
-      return null; // User cancelled the dialog
-    }
-
-    numUnitsByLevel[selectedLevel] = numUnits;
-
-    // AttackOrder attack = null;
-    AttackOrder attack = new AttackOrder(src, dest, numUnitsByLevel);
-    try {
-      this.currentCommit.addAttack(attack);
-    } catch (IllegalArgumentException e) {
-
-      // Platform.runLater(() -> {
-      mainPageController.showError(e.getMessage());
-      // });
-
-      return null;
-    }
-
-    return attack;
+    this.ordersHandler.handleMoveOrder(currentCommit, playerId);
   }
 
-  /**
-   *
-   * Constructs a research order and adds it to the current commit. If the current
-   * commit is null, this method first initiates the commit phase. If the research
-   * order is successfully added, this method displays a success message to the
-   * player. Otherwise, it displays an error message.
-   *
-   * @return a ResearchOrder object representing the player's research order, or
-   *         null if the order cannot be added to sql Copy code the current commit
-   */
-  public ResearchOrder constructResearchOrder() {
-    this.gameStatus = GAME_STATUS.ISSUE_ORDER;
+  public void constructAttackOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
 
-    if (currentCommit == null) {
-      initiateCommit();
-    }
+    this.ordersHandler.handleAttackOrder(currentCommit, playerId);
 
-    ResearchOrder research = new ResearchOrder(playerId);
-    try {
-      currentCommit.addResearch(research);
-      mainPageController.showSuccess("Successfully added a research order");
-    } catch (IllegalArgumentException e) {
-
-      // Platform.runLater(() -> {
-      mainPageController.showError(e.getMessage());
-      // });
-
-      return null;
-    }
-
-    return research;
   }
 
-  /**
-   **
-   *
-   * Constructs an UpgradeOrder object by getting input from the user via several
-   * dialog boxes. The method shows a dialog to get the source territory from the
-   * user. If the user cancels the dialog, the method returns null. The method
-   * then shows a dialog to get the current unit level from the user, followed by
-   * a dialog to get the target unit level, and finally a dialog to get the number
-   * of units to upgrade. If the user cancels any of these dialogs, the method
-   * returns null. If all inputs are obtained, the method creates an UpgradeOrder
-   * object and adds it to the current commit phase. If an illegal argument is
-   * thrown, an error message is displayed to the user and the method returns
-   * null.
-   *
-   * @return the constructed UpgradeOrder object, or null if the user cancels any
-   *         of the dialog boxes or if an illegal argument is thrown
-   *
-   * @throws IOException          if there is an error in the socket connection
-   * @throws InterruptedException if the thread is interrupted while waiting for
-   *                              user input
-   * @throws ExecutionException   if an error occurs while waiting for user input
-   */
-  public UpgradeOrder constructUpgradeOrder() throws IOException, InterruptedException, ExecutionException {
-    this.gameStatus = GAME_STATUS.ISSUE_ORDER;
+  public void constructResearchOrder() {
+    prepWorkBeforeNewOrder();
 
-    if (currentCommit == null) {
-      initiateCommit();
-    }
-
-    // Show a dialog to get the source territory from the user
-    Territory src = showTerritorySelectionDialog(null, true, "On which territory do you want to upgrade units?",
-        "Choose a territory").get(); // true/false
-    // both okay if
-    // src is null
-    if (src == null) {
-      mainPageController.showError("Must specify a territory to upgrade units");
-      return null; // User cancelled the dialog
-    }
-
-    // Show a dialog to get the current unit level from the user
-    Integer selectedNowLevel = showUnitLevelSelectionDialog(0, Constants.MAX_LEVEL - 1, src, "Upgrade Order",
-        "From which level do you want to upgrade units?").get();
-    if (selectedNowLevel == null) {
-      mainPageController.showError("Must specify a level to upgrade");
-      return null; // User cancelled the dialog
-    }
-
-    // Show a dialog to get the target unit level from the user
-    Integer selectedTargetLevel = showUnitLevelSelectionDialog(selectedNowLevel + 1, Constants.MAX_LEVEL, src,
-        "Upgrade Order", "To which level do you want to upgrade units?").get();
-    if (selectedTargetLevel == null) {
-      mainPageController.showError("Must specify a target level");
-      return null;
-    }
-
-    // Show a dialog to get the number of units to upgrade from the user
-    Integer numUnits = showNumberOfUnitsSelectionDialog(selectedNowLevel, src,
-        "How many of them do you want to upgrade?").get();
-    if (numUnits == null) {
-      mainPageController.showError("Must specify the number of units to upgrade");
-      return null;
-    }
-
-    // Create and execute the upgrade order
-    UpgradeOrder upgrade = new UpgradeOrder(src, selectedNowLevel, selectedTargetLevel, numUnits);
-
-    try {
-      this.currentCommit.addUpgrade(upgrade);
-    } catch (IllegalArgumentException e) {
-      mainPageController.showError(e.getMessage());
-      return null;
-    }
-
-    return upgrade;
+    this.ordersHandler.handleResearchOrder(currentCommit, playerId);
   }
 
-  /**
-   *
-   * Shows a dialog for the user to select a territory from a set of available
-   * territories. The available territories are determined based on whether the
-   * user is selecting a source territory for a move or an attack order. If the
-   * user is selecting a source territory for a move order, only territories owned
-   * by the player and with at least two units are available. If the user is
-   * selecting a source territory for an attack order, only territories owned by
-   * the player and with at least one unit are available. If the user is selecting
-   * a destination territory for either order, only adjacent territories that are
-   * not owned by the player are available.
-   *
-   * @param src     the source territory, or null if the user is selecting a
-   *                destination territory
-   * @param isMove  a boolean indicating whether the user is selecting a territory
-   *                for a move order
-   * @param title   the title of the selection dialog
-   * @param context the context message displayed in the selection dialog
-   * @return a CompletableFuture that completes with the selected territory or
-   *         null if the user cancelled the dialog
-   */
-  private CompletableFuture<Territory> showTerritorySelectionDialog(Territory src, boolean isMove, String title,
-      String content) {
-    CompletableFuture<Territory> future = new CompletableFuture<>();
+  public void constructUpgradeOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
 
-    // Platform.runLater(() -> {
-    Set<Territory> territories = getTerritories(src, isMove);
-    List<String> territoryNames = territories.stream().map(Territory::getName).collect(Collectors.toList());
-
-    if (territories.isEmpty()) {
-      mainPageController.showError("There aren't enough territories");
-      future.complete(null);
-    } else {
-      ChoiceDialog<String> dialog = new ChoiceDialog<>(territoryNames.get(0), territoryNames);
-      dialog.setTitle(title);
-      dialog.setHeaderText(null);
-      dialog.setContentText(content);
-
-      Optional<String> result = dialog.showAndWait();
-
-      if (result.isPresent()) {
-        String selectedTerritoryName = result.get();
-        Territory selectedTerritory = territories.stream().filter(t -> t.getName().equals(selectedTerritoryName))
-            .findFirst().orElse(null);
-        future.complete(selectedTerritory);
-      } else {
-        future.complete(null);
-      }
-    }
-
-    return future;
+    this.ordersHandler.handleUpgradeOrder(currentCommit, playerId);
   }
 
-  /**
-   *
-   * Displays a dialog box that allows the user to select the level of units to be
-   * used in a certain order. The dialog box displays a list of levels that are
-   * available for selection, based on the inclusive lower and upper limits of
-   * levels that can be selected. If the list is empty, an error message is
-   * displayed to the user and the future is completed with a null value.
-   * Otherwise, a ChoiceDialog is displayed to the user with the available levels
-   * and the user's selection is returned via a CompletableFuture. If the user
-   * cancels the dialog, the future is completed with a null value.
-   *
-   * @param inclusiveLowerLevel the lowest level of units that can be selected
-   *                            (inclusive)
-   * @param inclusiveUpperLevel the highest level of units that can be selected
-   *                            (inclusive)
-   * @param src                 the source territory from which the units will be
-   *                            selected
-   * @param title               the title of the dialog box
-   * @param content             the content displayed in the dialog box
-   * @return a CompletableFuture that is completed with the user's selected unit
-   *         level or a null value if the user cancels or if the list of available
-   *         levels is empty
-   */
-  private CompletableFuture<Integer> showUnitLevelSelectionDialog(int inclusiveLowerLevel, int inclusiveUpperLevel,
-      Territory src, String title, String content) {
-    CompletableFuture<Integer> future = new CompletableFuture<>();
+    public void constructResearchCloakTerritoryOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
 
-    // Platform.runLater(() -> {
-    List<Integer> levels = new ArrayList<>();
-    // TODO <=
-    for (int i = inclusiveLowerLevel; i <= inclusiveUpperLevel; i++) {
-      levels.add(i);
-    }
+    this.ordersHandler.handleResearchCloakOrder(currentCommit, playerId);
+  }
 
-    if (levels.isEmpty()) {
-      mainPageController.showError("Cannot upgrade unit level from " + inclusiveLowerLevel + " to "
-          + inclusiveUpperLevel + " on " + src.getName());
-      future.complete(null);
-    } else {
-      ChoiceDialog<Integer> dialog = new ChoiceDialog<>(levels.get(0), levels);
-      dialog.setTitle(title);
-      dialog.setHeaderText(null);
-      dialog.setContentText(content);
+  public void constructCloakTerritoryOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
 
-      Optional<Integer> result = dialog.showAndWait();
+    this.ordersHandler.handleCloakOrder(currentCommit, playerId);
+  }
 
-      if (result.isPresent()) {
-        future.complete(result.get());
-      } else {
-        future.complete(null);
-      }
-    }
-    // });
+  public void constructGenerateSpyOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
 
-    return future;
+    this.ordersHandler.handleGenerateSpyOrder(currentCommit, playerId);
+  }
+
+  public void constructMoveSpyOrder() throws IOException, InterruptedException, ExecutionException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleMoveSpyOrder(currentCommit, playerId);
+  }
+
+  public void constructSanBingOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleSanBingOrder(currentCommit, playerId);
+  }
+
+  public void constructSuperShieldOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleSuperShieldOrder(currentCommit, playerId);
+  }
+
+  public void constructDefenseInfrasOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleDefenseInfrasOrder(currentCommit, playerId);
+  }
+
+  public void constructEiminateFogOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleEliminateFogOrder(currentCommit, playerId);
+  }
+
+  public void constructGapGeneratorOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleGapGeneratorOrder(currentCommit, playerId);
+  }
+
+  public void constructNuclearHitOrder() throws ExecutionException, InterruptedException {
+    prepWorkBeforeNewOrder();
+
+    this.ordersHandler.handleNuclearHitOrder(currentCommit, playerId);
   }
 
   /**
@@ -1111,102 +689,6 @@ public class UIGame extends Game {
     return future;
   }
 
-  /**
-   *
-   * Shows a dialog to select the number of units to move or upgrade from a
-   * specified territory. The dialog presents the user with a list of integers
-   * from 1 up to the maximum number of units available to move or upgrade. If
-   * there are no units available at the specified level to upgrade, an error
-   * message is displayed and the method returns null. Otherwise, a
-   * CompletableFuture is returned that completes with the selected number of
-   * units.
-   *
-   * @param currentLevel the current level of units to move or upgrade
-   * @param src          the source territory to move or upgrade units from
-   * @param title        the title of the dialog
-   * @return a CompletableFuture that completes with the selected number of units,
-   *         or null if there are no units available to upgrade
-   */
-  private CompletableFuture<Integer> showNumberOfUnitsSelectionDialog(Integer currentLevel, Territory src,
-      String title) {
-    CompletableFuture<Integer> future = new CompletableFuture<>();
-
-    // Platform.runLater(() -> {
-    List<Integer> nums = new ArrayList<>();
-    int num = src.getUnitsNumByLevel(currentLevel);
-    // TODO <=
-    for (int i = 1; i <= num; i++) {
-      nums.add(i);
-    }
-
-    if (nums.isEmpty()) {
-      mainPageController
-          .showError("Number of units not enough for level " + currentLevel + " on territory " + src.getName());
-      future.complete(null);
-    } else {
-      ChoiceDialog<Integer> dialog = new ChoiceDialog<>(nums.get(0), nums);
-      dialog.setTitle(title);
-      dialog.setHeaderText(null);
-      dialog.setContentText("Choose unit number:");
-
-      Optional<Integer> result = dialog.showAndWait();
-
-      if (result.isPresent()) {
-        future.complete(result.get());
-      } else {
-        future.complete(null);
-      }
-    }
-    // });
-
-    return future;
-  }
-
-  /**
-   * Construct, display and return self-owned territories with serial numbers
-   * 
-   * @return a Map<Integer, Territory> mapping from serial number to the territory
-   */
-  private Set<Territory> getSelfOwnedTerritories() {
-    // PlayerMapInfo playerMapInfo =
-    // this.thisView.globalMapInfo.getPlayerMapInfo(this.playerId);
-    return this.currentCommit.getCurrentGameMap().getTerritorySetByPlayerId(this.playerId);
-  }
-
-  /**
-   *
-   * Returns a set of territories that can be selected for issuing a move or
-   * attack order, based on the given source territory and whether the order is a
-   * move or attack. If the source territory is null, the method returns all
-   * territories owned by the current player that have at least one unit on them.
-   * If the source territory is not null and the order is a move, the method
-   * returns all territories that are owned by the current player and have a path
-   * to the source territory. If the order is an attack, the method returns all
-   * enemy territories that are adjacent to the source territory.
-   * 
-   * It is worth mentioning that the territories are gotten from the
-   * currentCommit's gameMap
-   *
-   * @param src  the source territory for the order
-   * @param move true if the order is a move, false if it is an attack
-   * @return a set of territories that can be selected for issuing the order
-   */
-  private Set<Territory> getTerritories(Territory src, boolean move) {
-    GameMap newestGameMap = this.currentCommit.getCurrentGameMap();
-    if (src == null) {
-      return newestGameMap.getTerritorySetByPlayerId(this.playerId).stream()
-          .filter(territory -> territory.getNumUnits() > 0).collect(Collectors.toSet()); // to ensure only display src
-                                                                                         // territory that has more than
-                                                                                         // 0 units
-    } else {
-      if (move) {
-        return newestGameMap.getHasPathSelfTerritories(src);
-      } else {
-        return newestGameMap.getEnemyNeighbors(src);
-      }
-    }
-  }
-
   private Commit currentCommit = null;
   private GameMap startingGameMap = null;
 
@@ -1222,8 +704,18 @@ public class UIGame extends Game {
     copiedResource.putAll(this.resource);
     System.out.println("Initiating Commit");
     currentCommit = new Commit(this.playerId, (GameMap) this.startingGameMap.clone(), copiedResource);
-    Platform.runLater(
-        () -> updateMap(mainPageController.getMapPane(), this.currentCommit.getCurrentGameMap().getTerritorySet()));
 
+    // Platform.runLater(
+    // () -> updateMap(mainPageController.getMapPane(),
+    // this.currentCommit.getCurrentGameMap().getTerritorySet()));
+    renderingMap(this.currentCommit.getCurrentGameMap());
+  }
+
+  private void renderingMap(GameMap gameMap) {
+    MapView mapView = new MapView(mainPageController, gameMap, this.playerId, this.polygonGetter, this.playerColor,
+        this.colors, this.previouslySeenTerritories);
+    Platform.runLater(() -> {
+      mapView.refresh();
+    });
   }
 }

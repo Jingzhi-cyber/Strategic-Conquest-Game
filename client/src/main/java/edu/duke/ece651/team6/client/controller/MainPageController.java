@@ -20,8 +20,10 @@ import edu.duke.ece651.team6.client.UIGame;
 import edu.duke.ece651.team6.client.model.GameLounge;
 import edu.duke.ece651.team6.shared.Constants.GAME_STATUS;
 import edu.duke.ece651.team6.shared.GameMap;
+import edu.duke.ece651.team6.shared.Card;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -29,9 +31,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.scene.input.MouseEvent;
 
 /**
  * 
@@ -76,11 +84,28 @@ public class MainPageController extends Controller implements Initializable {
   @FXML
   Text territoryInfoText3;
 
+  @FXML
+  ProgressBar cardDrawProgressBar;
+
+  @FXML
+  Button cardDrawButton;
+
+  @FXML
+  TextField cardNameTextField;
+
+  @FXML
+  TextArea cardDescriptionTextArea;
+
+  @FXML
+  Button cardUseButton;
+
   private GameLounge gameLounge;
 
   private UIGame uiGame;
 
   private Scene mainPageScene;
+
+  private Card drawedCard;
 
   @FXML
   Button resetCommitButton;
@@ -209,6 +234,70 @@ public class MainPageController extends Controller implements Initializable {
           e.printStackTrace();
         }
         break;
+      case "Research Cloak":
+        uiGame.constructResearchCloakTerritoryOrder();
+        break;
+      case "Cloak":
+        uiGame.constructCloakTerritoryOrder();
+        break;
+      case "Generate Spies":
+        try {
+          uiGame.constructGenerateSpyOrder();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Move Spies":
+        try {
+          uiGame.constructMoveSpyOrder();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+
+      // TODO: remove
+      case "Paratroopers":
+        try {
+          uiGame.constructSanBingOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Super Shield":
+        try {
+          uiGame.constructSuperShieldOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Defense Infrastructure":
+        try {
+          uiGame.constructDefenseInfrasOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Eiminate Fog":
+        try {
+          uiGame.constructEiminateFogOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Gap Generator":
+        try {
+          uiGame.constructGapGeneratorOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Nuclear Weapon":
+        try {
+          uiGame.constructNuclearHitOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
       default:
         // Handle null / unexpected input - impossible
     }
@@ -222,7 +311,13 @@ public class MainPageController extends Controller implements Initializable {
    */
   @FXML
   public void submitOrders() {
-    uiGame.submitCommit();
+    new Thread(new Task<Void>() {
+      @Override
+      protected Void call() throws Exception {
+        uiGame.submitCommit();
+        return null;
+      }
+    }).start();
   }
 
   /**
@@ -272,6 +367,25 @@ public class MainPageController extends Controller implements Initializable {
     this.placeOrderButton.setDisable(disable);
     this.submitOrdersButton.setDisable(disable);
     this.orderMenu.setDisable(disable);
+    if (disable) {
+      this.cardDrawButton.setDisable(true);
+      this.cardUseButton.setDisable(true);
+    } else {
+      prepareToDrawOneCard();
+    }
+  }
+
+  /**
+   * set a tooltip to a button with the given text
+   * 
+   * @param button is the button to combined the tooptip with
+   * @param text   is the text shown in the tooptip
+   */
+  protected void setButtonToolTip(Button button, String text) {
+    Tooltip tooltip = new Tooltip(text);
+    Font font = Font.font("Arial", 18);
+    tooltip.setFont(font);
+    Tooltip.install(button, tooltip);
   }
 
   /**
@@ -289,17 +403,28 @@ public class MainPageController extends Controller implements Initializable {
 
     // this.mainPageScene = resetCommitButton.getScene();
 
-    ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade");
+    ObservableList<String> items = FXCollections.observableArrayList("Move", "Attack", "Research", "Upgrade",
+        "Research Cloak", "Cloak", "Generate Spies", "Move Spies",
+        // TODO remove
+        "Paratroopers", "Super Shield", "Defense Infrastructure", "Eiminate Fog", "Gap Generator", "Nuclear Weapon");
     orderMenu.setItems(items);
     orderMenu.setValue("Move");
 
     if (uiGame.getStatus() != GAME_STATUS.ISSUE_ORDER) {
       setPlayTurnsButtonsDisabled(true);
+      this.cardDrawButton.setDisable(true);
+
     }
 
     techResourcesLabel.setText("Tech resources: 0 (units)");
     foodResourcesLabel.setText("Food resources: 0 (units)");
     techLevelLabel.setText("Maximum tech level: 0");
+
+    String text = "Every round you have ONE chance to draw a card\n";
+    text += "There are 6 types of cards: \n";
+    text += "  Paratroopers, Super Shield, Defense Infrastructure, Eiminate Fog, and Nuclear Weapon\n";
+    text += "or you may have bad luck the get no card (　◜◡‾)";
+    setButtonToolTip(this.cardDrawButton, text);
   }
 
   /**
@@ -452,4 +577,150 @@ public class MainPageController extends Controller implements Initializable {
   public void setUsername(String username) {
     this.usernameLabel.setText(username);
   }
+
+  /**
+   * Set the value in the TextField of the card name to a string
+   * 
+   * @param cardName is the value to be set
+   */
+  public void setCardName(String cardName) {
+    this.cardNameTextField.setText(cardName);
+  }
+
+  /**
+   * Set the value in the TextField of the card description to a string
+   * 
+   * @param cardDiscription is the value to be set
+   */
+  public void setCardDescription(String cardDiscription) {
+    this.cardDescriptionTextArea.setText(cardDiscription);
+  }
+
+  private void startProgressBar(ProgressBar progressBar, String cardName, String cardDescription) {
+
+    // Create a task to update the progress bar
+    Task<Void> task = new Task<Void>() {
+      @Override
+      protected Void call() throws Exception {
+        for (int i = 0; i <= 100; i++) {
+          updateProgress(i, 100);
+          Thread.sleep(10);
+        }
+        return null;
+      }
+    };
+
+    // Bind the progress bar to the task
+    progressBar.progressProperty().bind(task.progressProperty());
+
+    // When the task is complete, set the text fields and unbind the progress bar
+    task.setOnSucceeded(event -> {
+      this.cardNameTextField.setText(cardName);
+      this.cardDescriptionTextArea.setText(cardDescription);
+      if (!cardName.equals("No card here!")) {
+        this.cardUseButton.setDisable(false);
+      }
+      progressBar.progressProperty().unbind();
+    });
+
+    // Start the task
+    Thread thread = new Thread(task);
+    thread.setDaemon(true);
+    thread.start();
+  }
+
+  /**
+   * ActionListener for drawCardButton. When this button is clicked,
+   * Card.chouOneCard() will be called and set the current drawedCard to its
+   * return value. Then display the card info to textfileds and disable the
+   * button, since there is only one change to draw a card for one round.
+   * 
+   * @param event is the {@link MouseEvent}
+   */
+  @FXML
+  protected void clickDrawCardButton(MouseEvent event) {
+    Card drawedCard = Card.chouOneCard();
+    this.drawedCard = drawedCard;
+    String name = drawedCard.getName();
+    String description = drawedCard.getDescription();
+
+    startProgressBar(cardDrawProgressBar, name, description);
+
+    this.cardDrawButton.setDisable(true);
+  }
+
+  /**
+   * get the current drawedCard
+   * 
+   * @return the drawedCard
+   */
+  public Card getDrawedCard() {
+    return this.drawedCard;
+  }
+
+  /**
+   * This function is used to re-open the draw card button and clear the values in
+   * the name and description textfields. This funtion should be called at the
+   * very beginning of each round
+   */
+  public void prepareToDrawOneCard() {
+    this.cardDrawButton.setDisable(false);
+    this.cardNameTextField.clear();
+    this.cardDescriptionTextArea.clear();
+    this.cardDrawProgressBar.setProgress(0.0);
+    this.cardUseButton.setDisable(true);
+  }
+
+  @FXML
+  protected void clickUseCardButton(MouseEvent event) throws IOException, InterruptedException, ExecutionException {
+    String cardName = this.drawedCard.getName();
+    switch (cardName) {
+      case "Paratroopers":
+        try {
+          uiGame.constructSanBingOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Super Shield":
+        try {
+          uiGame.constructSuperShieldOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Defense Infrastructure":
+        try {
+          uiGame.constructDefenseInfrasOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Eliminate Fog":
+        try {
+          uiGame.constructEiminateFogOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Gap Generator":
+        try {
+          uiGame.constructGapGeneratorOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "Nuclear Weapon":
+        try {
+          uiGame.constructNuclearHitOrder();
+        } catch (InterruptedException | ExecutionException e) {
+          e.printStackTrace();
+        }
+        break;
+      default:
+        // Handle null / unexpected input - impossible
+    }
+    this.cardUseButton.setDisable(true);
+  }
+
 }

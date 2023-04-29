@@ -20,6 +20,7 @@ public class ResourceProduceCounter {
             Map<String, Integer> resource = new HashMap<>();
             resource.put(Constants.RESOURCE_FOOD, 0);
             resource.put(Constants.RESOURCE_TECH, 0);
+            resource.put(Constants.RESOURCE_CIVIL, 0);
             resources.put(playerId, resource);
         }
     }
@@ -29,12 +30,14 @@ public class ResourceProduceCounter {
      * @return resources:
      * playerId -> food: total amount of food
      *          -> technology: total amount of technology 
+     *          -> civilization: total amount of civilization
      */
     public Map<Integer, Map<String, Integer>> updateAndGetResult() {
         for (Territory t : territories) {
             Map<String, Integer> resource = resources.getOrDefault(t.getOwnerId(), new HashMap<String, Integer>());
             resource.put(Constants.RESOURCE_FOOD, resource.getOrDefault(Constants.RESOURCE_FOOD, 0) + t.getFood());
             resource.put(Constants.RESOURCE_TECH, resource.getOrDefault(Constants.RESOURCE_TECH, 0) + t.getTechnology());
+            resource.put(Constants.RESOURCE_CIVIL, resource.getOrDefault(Constants.RESOURCE_CIVIL, 0) + t.getCivilization());
         }
         return resources;
     } 

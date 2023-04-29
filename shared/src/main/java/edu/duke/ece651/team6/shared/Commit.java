@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.beans.binding.StringBinding;
-
 /* A structure contains all orders from one player, which will be sent back to server for */
 public class Commit implements java.io.Serializable {
   int playerId;
@@ -18,11 +16,31 @@ public class Commit implements java.io.Serializable {
   List<AttackOrder> attacks;
   ResearchOrder research;
   List<UpgradeOrder> upgrades;
+  List<CloakTerritoryOrder> cloakTerritorys;
+  List<GenerateSpyOrder> generateSpys;
+  List<MoveSpyOrder> moveSpys;
+  SanBingOrder sanBings;
+  SuperShieldOrder superShield;
+  CloakResearchOrder cloakResearchOrder;
+  NuclearHitOrder nuclearHitOrder;
+  DefenseInfrasOrder defenseInfrasOrder;
+  EliminateFogOrder eliminateFogOrder;
+  GapGeneratorOrder gapGeneratorOrder;
 
   OrderRuleChecker moveChecker;
   OrderRuleChecker attackChecker;
   OrderRuleChecker researchChecker;
   OrderRuleChecker upgradeChecker;
+  OrderRuleChecker cloakTerritoryRuleChecker;
+  OrderRuleChecker generateSpyRuleChecker;
+  OrderRuleChecker moveSpyRuleChecker;
+  OrderRuleChecker sanBingRuleChecker;
+  OrderRuleChecker superShieldRuleChecker;
+  OrderRuleChecker cloakResearchRuleChecker;
+  OrderRuleChecker nuclearHitRuleChecker;
+  OrderRuleChecker defenseInfrasRuleChecker;
+  OrderRuleChecker eliminateFogRuleChecker;
+  OrderRuleChecker gapGeneratOrderRuleChecker;
 
   /**
    * Construct a Commit object with 4 params
@@ -42,6 +60,18 @@ public class Commit implements java.io.Serializable {
     this.attacks = new ArrayList<>();
     this.research = null;
     this.upgrades = new ArrayList<>();
+
+    this.cloakTerritorys = new ArrayList<>();
+    this.generateSpys = new ArrayList<>();
+    this.moveSpys = new ArrayList<>();
+    this.sanBings = null;
+    this.superShield = null;
+    this.cloakResearchOrder = null;
+    this.nuclearHitOrder = null;
+    this.defenseInfrasOrder = null;
+    this.eliminateFogOrder = null;
+    this.gapGeneratorOrder = null;
+
     this.moveChecker = new SrcOwerIdRuleChecker(
         new SamePlayerPathRuleChecker(new MoveCostRuleChecker(new MoveUnitsRuleChecker(null), resource)), playerId);
     this.attackChecker = new SrcOwerIdRuleChecker(
@@ -49,6 +79,17 @@ public class Commit implements java.io.Serializable {
     this.researchChecker = new ResearchCostRuleChecker(null, resource);
     this.upgradeChecker = new UpgradeLevelRuleChecker(
         new UpgradeUnitRuleChecker(new UpgradeCostRuleChecker(null, resource)));
+    this.cloakTerritoryRuleChecker = new CloakTerritoryRuleChecker(null, resource);
+    this.generateSpyRuleChecker = new GenerateSpyRuleChecker(null, resource);
+    this.moveSpyRuleChecker = new MoveSpyRuleChecker(null, resource);
+    this.sanBingRuleChecker =
+            new SrcOwerIdRuleChecker(new SanBingCostRuleChecker(new AttackUnitsRuleChecker(null), resource), playerId);
+    this.superShieldRuleChecker = new SuperShieldRuleChecker(null, resource);
+    this.cloakResearchRuleChecker = new CloakResearchRuleChecker(null, resource);
+    this.nuclearHitRuleChecker = new NuclearHitRuleChecker(null, resource);
+    this.defenseInfrasRuleChecker = new DefenseInfrasRuleChecker(null, resource);
+    this.eliminateFogRuleChecker = new EliminateFogRuleChecker(null, resource);
+    this.gapGeneratOrderRuleChecker = new GapGeneratorRuleChecker(null, resource);
   }
 
   /* -------------- For client side usage --------------- */
@@ -123,53 +164,76 @@ public class Commit implements java.io.Serializable {
     upgrades.add(upgrade);
   }
 
-  // private String constructPrompt(String orderName, SimpleMove move, int
-  // remainingUnits) {
-  // return orderName + move.toString() + " cannot be performed, with " +
-  // remainingUnits + " remaining units";
-  // }
+  public void addCloakTerritoryOrder(CloakTerritoryOrder cloakTerritoryOrder) {
+    checkRules(cloakTerritoryRuleChecker, cloakTerritoryOrder, this.gameMap);
+    cloakTerritorys.add(cloakTerritoryOrder);
+  }
 
-  /*
-   * Deprecated check method Now all the rule checks are based on the cloned
-   * GameMap, the results of moves and attacks will be reflected immediately after
-   * it is added
-   */
-  // public void checkUsableUnitsAfterAllOrdersAreCollected() {
-  // // only check remaining units (not check > 0 here, check it with rule
-  // checker)
-  // Map<Territory, Integer> remainingUnits = new HashMap<Territory, Integer>();
-  // for (MoveOrder move : moves) {
-  // if (!remainingUnits.containsKey(move.src)) {
-  // remainingUnits.put(move.src, move.src.getNumUnits());
-  // }
+  public void addGenerateSpyOrder(GenerateSpyOrder generateSpyOrder) {
+    checkRules(generateSpyRuleChecker, generateSpyOrder, this.gameMap);
+    generateSpys.add(generateSpyOrder);
+  }
 
-  // if (remainingUnits.get(move.src) < move.numUnits) {
-  // throw new IllegalArgumentException(constructPrompt("Move", move,
-  // remainingUnits.get(move.src)));
-  // }
-  // remainingUnits.put(move.src, remainingUnits.get(move.src) - move.numUnits);
-  // remainingUnits.put(move.dest, remainingUnits.getOrDefault(move.dest,
-  // move.dest.getNumUnits()) + move.numUnits);
-  // }
+  public void addMoveSpyOrder(MoveSpyOrder moveSpyOrder) {
+    checkRules(moveSpyRuleChecker, moveSpyOrder, this.gameMap);
+    moveSpys.add(moveSpyOrder);
+  }
 
-  // for (AttackOrder attack : attacks) {
-  // if (!remainingUnits.containsKey(attack.src)) {
-  // remainingUnits.put(attack.src, attack.src.getNumUnits());
-  // }
+  public void addSanBingOrder(SanBingOrder sanBingOrder) {
+    if (this.sanBings != null) {
+      throw new IllegalArgumentException("Invalid sanbing: can only have one sanbing order in one turn");
+    }
+    checkRules(sanBingRuleChecker, sanBingOrder, this.gameMap);
+    sanBings = sanBingOrder;
+  }
 
-  // if (remainingUnits.get(attack.src) < attack.numUnits) {
-  // throw new IllegalArgumentException(constructPrompt("Attack", attack,
-  // remainingUnits.get(attack.src)));
-  // }
-  // remainingUnits.put(attack.src, remainingUnits.get(attack.src) -
-  // attack.numUnits);
-  // // fixed a bug here: incorrect: as units attacked out are not reflected on
-  // the
-  // // dest units (are only updated after a war)
-  // // remainingUnits.put(attack.dest,remainingUnits.getOrDefault(attack.dest,
-  // // attack.dest.getNumUnits()) + attack.numUnits);
-  // }
-  // }
+  public void addSuperShieldOrder(SuperShieldOrder superShieldOrder) {
+    if (this.superShield != null) {
+      throw new IllegalArgumentException("Invalid superSheild: can only have one superSheild order in one turn");
+    }
+    checkRules(superShieldRuleChecker, superShieldOrder, gameMap);
+    superShield = superShieldOrder;
+  }
+
+  public void addCloackResearchOrder(CloakResearchOrder cloakResearchOrder) {
+    if (this.cloakResearchOrder != null) {
+      throw new IllegalArgumentException("Invalid cloakResearch: can only have one cloak research order in one turn");
+    }
+    checkRules(cloakResearchRuleChecker, cloakResearchOrder, this.gameMap);
+    this.cloakResearchOrder = cloakResearchOrder;
+  }
+
+  public void addNuclearHitOrder(NuclearHitOrder nuclearHitOrder) {
+    if (this.nuclearHitOrder != null) {
+      throw new IllegalArgumentException("Invalid nuclearHit: can only have one nuclearHit order in one turn");
+    }
+    checkRules(nuclearHitRuleChecker, nuclearHitOrder, this.gameMap);
+    this.nuclearHitOrder = nuclearHitOrder;
+  }
+
+  public void addDefenseInfrasOrder(DefenseInfrasOrder defenseInfrasOrder) {
+    if (this.defenseInfrasOrder != null) {
+      throw new IllegalArgumentException("Invalid defenseInfras: can only have one defenseInfras order in one turn");
+    }
+    checkRules(defenseInfrasRuleChecker, defenseInfrasOrder, this.gameMap);
+    this.defenseInfrasOrder = defenseInfrasOrder;
+  }
+
+  public void addEliminateFogOrder(EliminateFogOrder eliminateFogOrder) {
+    if (this.eliminateFogOrder != null) {
+      throw new IllegalArgumentException("Invalid eliminateFog: can only have one eliminateFog order in one turn");
+    }
+    checkRules(eliminateFogRuleChecker, eliminateFogOrder, this.gameMap);
+    this.eliminateFogOrder = eliminateFogOrder;
+  }
+
+  public void addGapGeneratorOrder(GapGeneratorOrder gapGeneratorOrder) {
+    if (this.gapGeneratorOrder != null) {
+      throw new IllegalArgumentException("Invalid gapGenerator: can only have one gapGenerator order in one turn");
+    }
+    checkRules(gapGeneratOrderRuleChecker, gapGeneratorOrder, this.gameMap);
+    this.gapGeneratorOrder = gapGeneratorOrder;
+  }
 
   /* ---------------- For server side usage ----------------- */
 
@@ -196,8 +260,6 @@ public class Commit implements java.io.Serializable {
     for (UpgradeOrder upgrade : upgrades) {
       checkRules(upgradeChecker, upgrade, gameMap);
     }
-
-    // checkUsableUnitsAfterAllOrdersAreCollected();
   }
 
   /**
@@ -246,6 +308,79 @@ public class Commit implements java.io.Serializable {
     }
   }
 
+  /**
+   * Perform cloak order
+   * 
+   * @param gameMap
+   */
+  public void performCloakTerritory(GameMap gameMap) {
+    for (CloakTerritoryOrder cloakTerritory : cloakTerritorys) {
+      cloakTerritory.takeAction(gameMap);
+    }
+  }
+
+  /**
+   * Perform generate spy order
+   * 
+   * @param gameMap
+   */
+  public void performGenerateSpyOrder(GameMap gameMap) {
+    for (GenerateSpyOrder generateSpy : generateSpys) {
+      generateSpy.takeAction(gameMap);
+    }
+  }
+
+  /**
+   * Perform move spy order
+   */
+  public void performMoveSpyOrder(GameMap gameMap) {
+    for (MoveSpyOrder moveSpy : moveSpys) {
+      moveSpy.takeAction(gameMap);
+    }
+  }
+
+  public void performSanBingOrder(GameMap gameMap) {
+    if (this.sanBings != null) {
+      this.sanBings.takeAction(gameMap);
+    }
+  }
+
+  public void performSuperShieldOrder(GameMap gameMap) {
+    if (this.superShield != null) {
+      this.superShield.takeAction(gameMap);
+    }
+  }
+
+  public void performCloakResearchOrder(GameMap gameMap) {
+    if (cloakResearchOrder != null) {
+      cloakResearchOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performNuclearHitOrder(GameMap gameMap) {
+    if (nuclearHitOrder != null) {
+      nuclearHitOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performDefenseInfrasOrder(GameMap gameMap) {
+    if (defenseInfrasOrder != null) {
+      defenseInfrasOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performEliminateFogOrder(GameMap gameMap) {
+    if (eliminateFogOrder != null) {
+      eliminateFogOrder.takeAction(gameMap);
+    }
+  }
+
+  public void performGapGeneratorOrder(GameMap gameMap) {
+    if (gapGeneratorOrder != null) {
+      gapGeneratorOrder.takeAction(gameMap);
+    }
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -254,7 +389,11 @@ public class Commit implements java.io.Serializable {
     }
 
     for (AttackOrder o : attacks) {
-      builder.append(o.toString() + " (Cost: " + CostCalculator.calculateAttackCost(o, gameMap) + ")" + "\n");
+      int cost = CostCalculator.calculateAttackCost(o, gameMap);
+      if (o.dest.getDefenseInfras()) {
+        cost += 100;
+      }
+      builder.append(o.toString() + " (Cost: " + cost + ")" + "\n");
     }
 
     if (research != null) {
@@ -266,6 +405,46 @@ public class Commit implements java.io.Serializable {
       builder.append(o.toString() + " (Cost: "
           + UnitManager.costToUpgrade(o.getNowLevel(), o.getTargetLevel()) * o.getNumUnits() + ")" + "\n");
     }
+
+    for (CloakTerritoryOrder o : cloakTerritorys) {
+      builder.append(o.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    for (GenerateSpyOrder o : generateSpys) {
+      builder.append(o.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    for (MoveSpyOrder o : moveSpys) {
+      builder.append(o.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (this.sanBings != null) {
+      builder.append(sanBings.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (this.superShield != null) {
+      builder.append(superShield.toString() + " (Cost: " + 1 + ")\n");
+    }
+    if (cloakResearchOrder != null) {
+      builder.append(cloakResearchOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (nuclearHitOrder != null) {
+      builder.append(nuclearHitOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (defenseInfrasOrder != null) {
+      builder.append(defenseInfrasOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (eliminateFogOrder != null) {
+      builder.append(eliminateFogOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
+    if (gapGeneratorOrder != null) {
+      builder.append(gapGeneratorOrder.toString() + " (Cost: " + 1 + ")\n");
+    }
+
     return builder.toString();
   }
 

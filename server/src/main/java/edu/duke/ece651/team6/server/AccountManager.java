@@ -1,15 +1,7 @@
 package edu.duke.ece651.team6.server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import edu.duke.ece651.team6.shared.SocketKey;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * This class is a singelton. This class can manage all the user with their sockets. 
@@ -17,91 +9,19 @@ import edu.duke.ece651.team6.shared.SocketKey;
  * When adding a new socket into this class, a SocketKey will be returned, which can be 
  * used to get Socket from this class.
  */
-public class AccountManager {
+public class AccountManager implements Serializable {
 
-    private static volatile AccountManager instance;
-
-    private final Map<SocketKey, Socket> sockets;
-    private final Map<SocketKey, String> keyToUser;
-    private final Map<String, Set<SocketKey>> userList;
-
+    // key = gameUUID, value = names of users in a game
+    protected final Map<String, Set<String>> games;
+    // key = username, value = password
     private final Map<String, String> password;
+    // key = username, value = gameUUIDs belong to the user
+    protected final Map<String, Set<String>> userGames;
 
-    private AccountManager() {
-        sockets = new HashMap<>();
-        keyToUser = new HashMap<>();
-        userList = new HashMap<>();
+    public AccountManager() {
         password = new HashMap<>();
-    }
-
-    public static AccountManager getInstance() {
-        if (instance == null) {
-            synchronized (AccountManager.class) {
-                if (instance == null) {
-                    instance = new AccountManager();
-                }
-            }
-        }
-        return instance;
-    }
-
-    public Socket getSocket(SocketKey key) {
-        return sockets.get(key);
-    }
-
-    /**
-     * Add a new Socket, bind it to a specific user.
-     * @param username
-     * @param socket
-     * @return  A SocketKey, which can be used to identify the socket.
-     */
-    public SocketKey add(String username, Socket socket) {
-        SocketKey key = new SocketKey();
-        if (!userList.containsKey(username)) {
-            userList.put(username, new HashSet<>());
-        }
-        userList.get(username).add(key);
-        sockets.put(key, socket);
-        keyToUser.put(key, username);
-        return key;
-    }
-
-    /**
-     * Remove a socket.
-     * @param key
-     */
-    public void remove(SocketKey key) {
-        if (!sockets.containsKey(key)) {
-            return;
-        }
-        sockets.remove(key);
-        String username = keyToUser.get(key);
-        userList.get(username).remove(key);
-        keyToUser.remove(key);
-    }
-
-    /**
-     * Update a socket, can only succeed if an existing socket is closed.
-     * @param username
-     * @param socket
-     * @return true if succeed.
-     */
-    public boolean update(String username, Socket socket) throws IOException {
-        SocketKey keyToChange = null;
-        if (!userList.containsKey(username)) {
-            return false;
-        }
-        for (SocketKey key : userList.get(username)) {
-            if (isClosed(sockets.get(key))) {
-                keyToChange = key;
-                break;
-            }
-        }
-        if (keyToChange == null) {
-            return false;
-        }
-        sockets.put(keyToChange, socket);
-        return true;
+        games = new HashMap<>();
+        userGames = new HashMap<>();
     }
 
     public boolean register(String username, String password) {
@@ -120,23 +40,20 @@ public class AccountManager {
         return actualPassword.equals(password);
     }
 
-    private boolean isClosed(Socket socket) {
-        if (socket.isClosed()) {
-            return true;
-        }
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            reader.mark(1);
-            int ch = reader.read();
-            if (ch == -1) {
-                return true;
-            } else {
-                reader.reset();
-                return false;
-            }
-        } catch (IOException e) {
-            return true;
-        }
+    public void gameOver(String gameUUID) {
+        games.get(gameUUID).forEach(username -> userGames.get(username).remove(gameUUID));
+        games.remove(gameUUID);
+    }
+
+    public boolean gameExists(String gameUUID) {
+        return games.containsKey(gameUUID);
+    }
+
+    public void addToGame(String gameUUID, String username) {
+        games.putIfAbsent(gameUUID, new HashSet<>());
+        games.get(gameUUID).add(username);
+        userGames.putIfAbsent(username, new HashSet<>());
+        userGames.get(username).add(gameUUID);
     }
     
 }

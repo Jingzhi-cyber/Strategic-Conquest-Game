@@ -78,8 +78,8 @@ public class ServerTest {
     connect.start();
     List<SocketKey> clientSockets = new ArrayList<>();
     Socket socket = ss.accept();
-    AccountManager m = AccountManager.getInstance();
-    SocketKey key = m.add("hi", socket);
+    SocketManager sm = SocketManager.getInstance();
+    SocketKey key = sm.add(socket, "hi");
     clientSockets.add(key);
     Server server = new Server(clientSockets);
     server.recvObjectFromALL();

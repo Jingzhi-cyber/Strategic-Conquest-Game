@@ -13,6 +13,9 @@ public class AttackCostRuleChecker extends AttackOrderRuleChecker {
     @Override
     protected String checkMyRule(Order move, GameMap theMap) {
         int cost = CostCalculator.calculateAttackCost((SimpleMove) move, theMap);
+        if (((SimpleMove)move).dest.getDefenseInfras()) {
+            cost += 100;
+        }
         int currFood = resource.getOrDefault(Constants.RESOURCE_FOOD, 0);
         if (cost > currFood) {
             return "Invalid move: the expected cost of this move is: " + cost + " but you have " + currFood + " food left";

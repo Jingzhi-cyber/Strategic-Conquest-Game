@@ -74,4 +74,56 @@ public class MinCostPathCalculator {
         currPath.removeLast();
     }
 
+    /**
+     * Calculate the minimum cost path from src to dest that does not care about the Territories' owner
+     * @param src
+     * @param dest
+     * @return the minimum cost
+     */
+    public int calculateUltimateMinCostPath(Territory src, Territory dest) {
+        if (src.equals(dest)) {
+            return 0;
+        }
+        ultimateBtFunc(src, dest, 0, new LinkedList<>());
+        StringBuilder sb = new StringBuilder();
+        for (Territory t : path) {
+            sb.append(t.getName() + " ");
+        }
+        System.out.println("Path: " + sb.toString());
+        return minCost;
+    }
+
+    /**
+     * Helper function using backtracking to search for the path with minimum cost that does not care about the Territories' owner
+     * @param src
+     * @param dest
+     * @param cost
+     * @param currPath
+     */
+    private void ultimateBtFunc(Territory src, Territory dest, int cost, LinkedList<Territory> currPath) {
+        visited.add(src);
+        currPath.addLast(src);
+        if (src.equals(dest)) {
+            if (minCost > cost) {
+                minCost = cost;
+                path.clear();
+                for (Territory t : currPath) {
+                    path.add(t);
+                }
+            }
+            visited.remove(src);
+            currPath.removeLast();
+            return;
+        }
+        Map<Territory, Integer> distToNeighbors = weightedAdjList.get(src);
+        for (Territory neighbor : distToNeighbors.keySet()) {
+            if (visited.contains(neighbor)) {
+                continue;
+            }
+            ultimateBtFunc(neighbor, dest, cost + distToNeighbors.get(neighbor), currPath);
+        }
+        visited.remove(src);
+        currPath.removeLast();
+    }
+
 }

@@ -10,7 +10,9 @@ import edu.duke.ece651.team6.shared.Territory;
 /**
  * Display the map in the text format
  */
-public class MapTextView extends MapView {
+public class MapTextView {
+
+  final GlobalMapInfo globalMapInfo;
 
   /**
    * Constructs {@link MapTextView} with 1 param
@@ -19,7 +21,7 @@ public class MapTextView extends MapView {
    *                      know on the client side
    */
   public MapTextView(GlobalMapInfo globalMapInfo) {
-    super(globalMapInfo);
+    this.globalMapInfo = globalMapInfo;
   }
 
   /**

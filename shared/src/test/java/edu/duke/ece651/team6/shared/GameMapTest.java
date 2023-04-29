@@ -88,6 +88,7 @@ public class GameMapTest {
     resources.put(0, new HashMap<String, Integer>());
     resources.get(0).put(Constants.RESOURCE_FOOD, 1);
     resources.get(0).put(Constants.RESOURCE_TECH, 1);
+    resources.get(0).put(Constants.RESOURCE_CIVIL, 1);
     gameMap.updateResource(resources);
     assertEquals(1, gameMap.getResourceByPlayerId(0).get(Constants.RESOURCE_FOOD));
     assertEquals(1, gameMap.getResourceByPlayerId(0).get(Constants.RESOURCE_TECH));

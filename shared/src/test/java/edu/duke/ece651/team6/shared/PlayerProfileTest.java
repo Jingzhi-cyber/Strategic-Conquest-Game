@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PlayerProfileTest {
     @Test
     public void testBasicFunc() {
-        PlayerProfile pp = new PlayerProfile(0);
+        PlayerProfile pp = new PlayerProfile(0, "test");
         pp.setName("test");
         pp.setSocket(new SocketKey());
         pp.getSocket();
